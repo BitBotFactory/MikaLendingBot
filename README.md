@@ -9,12 +9,11 @@ It uses an advanced lending strategy which will spread offers across the lend bo
 ```
 git clone https://github.com/Mikadily/poloniexlendingbot
 cd poloniexlendingbot/
-python marginbot.py
+python lendingbot.py
 ```
+When you first run the script a default.cnf will be generated. Edit it with your apikey and secret values.
 
 ##Configuration
-
-When you first run the script a default.cnf will be generated. Edit it with your apikey and secret values.
 
 ```
 [API]
