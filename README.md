@@ -46,7 +46,7 @@ gaptop = 200
 sixtydaythreshold = 0.2
 ```
 
-If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible value.
+If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
 
 ##Donations
 
