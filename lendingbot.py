@@ -148,6 +148,7 @@ def cancelAndLoanAll():
 while True:
 	try:
 		cancelAndLoanAll()
-	except urllib2.HTTPError, error:
+	except (urllib2.HTTPError, urllib2.URLError) as error:
         	print "ERROR: ", error.read()
+		pass
 	time.sleep(sleepTime)
