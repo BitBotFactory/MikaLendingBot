@@ -47,8 +47,8 @@ gapTop = float(config.get("BOT","gaptop"))
 sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 
 #sanity checks
-if sleepTime < 1 or sleepTime > 60:
-	print "sleeptime value must be 1-60"
+if sleepTime < 1 or sleepTime > 3600:
+	print "sleeptime value must be 1-3600"
 	exit(1)
 if minDailyRate < 0.00003 or minDailyRate > 0.05: # 0.003% daily is 1% yearly
 	print "mindaily rate is set too low or too high, must be 0.003-5%"
