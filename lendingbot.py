@@ -53,7 +53,7 @@ if sleepTime < 1 or sleepTime > 3600:
 if minDailyRate < 0.00003 or minDailyRate > 0.05: # 0.003% daily is 1% yearly
 	print "mindaily rate is set too low or too high, must be 0.003-5%"
 	exit(1)
-if maxDailyRate < 0.003 or maxDailyRate > 5:
+if maxDailyRate < 0.00003 or maxDailyRate > 0.05:
 	print "maxdaily rate is set too low or too high, must be 0.003-5%"
 	exit(1)
 if spreadLend < 1 or spreadLend > 20:
@@ -150,7 +150,7 @@ def cancelAndLoanAll():
 				break
 			i += 1
 			if i == len(loans['offers']): #end of the offers lend at max
-				createLoanOffer(activeCur,float(activeBal)/spreadLend*(spreadLend-j),maxDailyRate)
+				createLoanOffer(activeCur,float(activeBal)-lent,maxDailyRate)
 
 while True:
 	try:
