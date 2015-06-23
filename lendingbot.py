@@ -86,6 +86,10 @@ def createLoanOffer(cur,amt,rate):
 				sys.stdout.write(msg['message'])
 			except KeyError:
 				pass
+			try:
+				sys.stdout.write(msg['error'])
+			except KeyError:
+				pass
 		print 
 
 def cancelAndLoanAll():
