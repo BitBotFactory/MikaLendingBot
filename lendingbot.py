@@ -53,7 +53,7 @@ if sleepTime < 1 or sleepTime > 3600:
 if minDailyRate < 0.00003 or minDailyRate > 0.05: # 0.003% daily is 1% yearly
 	print "mindaily rate is set too low or too high, must be 0.003-5%"
 	exit(1)
-if maxDailyRate < 0.003 or maxDailyRate > 5:
+if maxDailyRate < 0.00003 or maxDailyRate > 0.05:
 	print "maxdaily rate is set too low or too high, must be 0.003-5%"
 	exit(1)
 if spreadLend < 1 or spreadLend > 20:
@@ -128,6 +128,7 @@ def cancelAndLoanAll():
 		s = float(0) #sum
 		i = int(0) #offer book iterator
 		j = int(0) #spread step count
+		lent = float(0)
 		step = (gapTop - gapBottom)/spreadLend
 		#TODO check for minimum lendable amount, and try to decrease the spread. e.g. at the moment balances lower than 0.001 won't be lent
 		for offer in loans['offers']:
@@ -136,18 +137,20 @@ def cancelAndLoanAll():
 			while True:
 				if s2 > float(activeBal)*(gapBottom/100+(step/100*j)) and float(offer['rate']) > minDailyRate:
 					j += 1
-					s2 = s2 + float(activeBal)/spreadLend
+					#ran into a problem were 14235.82451057 couldn't be lent because of rounding
+					s2 = s2 + float(activeBal)/spreadLend - 0.00000001
 				else:
 					createLoanOffer(activeCur,s2-s,offer['rate'])
+					lent = lent + (s2-s)
 					break
 				if j == spreadLend:
-					createLoanOffer(activeCur,s2-s,offer['rate'])
+					createLoanOffer(activeCur,float(activeBal)-lent,offer['rate'])
 	                                break
 			if j == spreadLend:
 				break
 			i += 1
 			if i == len(loans['offers']): #end of the offers lend at max
-				createLoanOffer(activeCur,float(activeBal)/spreadLend*(spreadLend-j),maxDailyRate)
+				createLoanOffer(activeCur,float(activeBal)-lent,maxDailyRate)
 
 while True:
 	try:
