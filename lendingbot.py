@@ -128,6 +128,7 @@ def cancelAndLoanAll():
 		s = float(0) #sum
 		i = int(0) #offer book iterator
 		j = int(0) #spread step count
+		lent = float(0)
 		step = (gapTop - gapBottom)/spreadLend
 		#TODO check for minimum lendable amount, and try to decrease the spread. e.g. at the moment balances lower than 0.001 won't be lent
 		for offer in loans['offers']:
@@ -140,9 +141,10 @@ def cancelAndLoanAll():
 					s2 = s2 + float(activeBal)/spreadLend - 0.00000001
 				else:
 					createLoanOffer(activeCur,s2-s,offer['rate'])
+					lent = lent + (s2-s)
 					break
 				if j == spreadLend:
-					createLoanOffer(activeCur,s2-s,offer['rate'])
+					createLoanOffer(activeCur,float(activeBal)-lent,offer['rate'])
 	                                break
 			if j == spreadLend:
 				break
