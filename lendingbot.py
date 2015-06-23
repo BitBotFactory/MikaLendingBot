@@ -77,6 +77,7 @@ def createLoanOffer(cur,amt,rate):
 	days = '2'
 	if (minDailyRate - 0.000001) < rate and float(amt) > 0.001:
 		rate = float(rate) - 0.000001 #lend offer just bellow the competing one
+		amt = "%.8f" % float(amt)
 		if rate > sixtyDayThreshold:
 			days = '60'
 		sys.stdout.write(timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(float(rate)*100) + '% for ' + days + ' days... ')
