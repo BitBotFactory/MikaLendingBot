@@ -92,8 +92,8 @@ def totalLended():
 			allPairs[item["currency"]] = cryptoLendedSum
 	result = ''
 	for key in sorted(allPairs):
-		result += key + ':'
-		result += "%.2f" % float(allPairs[key]) + ' '
+		result += '[' + "%.2f" % float(allPairs[key]) + ' '
+		result += key + '] '
 	return result
 
 def createLoanOffer(cur,amt,rate):
@@ -162,13 +162,15 @@ def cancelAndLoanAll():
 			if i == len(loans['offers']): #end of the offers lend at max
 				createLoanOffer(activeCur,float(activeBal)-lent,maxDailyRate)
 
+log.log('Welcome to Poloniex Lending Bot')
+
 while True:
 	try:
-		cancelAndLoanAll()
 		log.refreshStatus(totalLended())
+		cancelAndLoanAll()
 		time.sleep(sleepTime)
 	except (urllib2.HTTPError, urllib2.URLError) as error:
-        	print "ERROR: ", error.read()
+        	print "ERROR: " + error
 		pass
 	except KeyboardInterrupt:
 		print '\nbye'

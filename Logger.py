@@ -36,6 +36,10 @@ class Logger(object):
         ts = time.time()
         return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+    def log(self, msg):
+        self.console.printline(self.timestamp() + ' ' + msg)
+        self.refreshStatus()
+
     def offer(self, amt, cur, rate, days, msg):
 	line = self.timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(float(rate)*100) + '% for ' + days + ' days... ' + self.digestApiMsg(msg)
 	self.console.printline(line)
@@ -49,7 +53,7 @@ class Logger(object):
     def refreshStatus(self, lended=''):
 	now = time.time()
 	if lended != '':
-		self._lended = str(lended)
+		self._lended = 'Lended:' + ' ' + str(lended) 
 	self.console.status(self._lended)
 
     def digestApiMsg(self, msg):
