@@ -1,11 +1,12 @@
 import sys
 import time
+import datetime
 import atexit
 
 class ConsoleOutput(object):
     def __init__(self):
         self._status = ''
-        atexit.register(self._exit)
+	atexit.register(self._exit)
 
     def _exit(self):
         self._status += '  ' # In case the shell added a ^C
@@ -26,16 +27,38 @@ class ConsoleOutput(object):
         sys.stderr.write(update)
 
 class Logger(object):
-    def __init__(self, core):
+    def __init__(self):
         self.console = ConsoleOutput()
+        self._lended = ''
+	self.refreshStatus()
 
-    def timestamp():
+    def timestamp(self):
         ts = time.time()
         return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
-    def logOffer(self, amt, cur, rate, days):
-	line = timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(float(rate)*100) + '% for ' + days + ' days... '
+    def offer(self, amt, cur, rate, days, msg):
+	line = self.timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(float(rate)*100) + '% for ' + days + ' days... ' + self.digestApiMsg(msg)
 	self.console.printline(line)
+	self.refreshStatus()
 
-    def refreshStatus(self):
+    def cancelOrders(self, cur, msg):
+	line = self.timestamp() + ' Canceling all ' + str(cur) + ' orders... ' + self.digestApiMsg(msg)
+	self.console.printline(line)
+	self.refreshStatus()
+
+    def refreshStatus(self, lended=''):
 	now = time.time()
+	if lended != '':
+		self._lended = str(lended)
+	self.console.status(self._lended)
+
+    def digestApiMsg(self, msg):
+	try:
+	    m = (msg['message'])
+	except KeyError:
+	    pass
+	try:
+	    m = (msg['error'])
+	except KeyError:
+	    pass
+	return m

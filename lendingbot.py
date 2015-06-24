@@ -1,6 +1,7 @@
 import io, sys, time, datetime, urllib2
 from poloniex import Poloniex
 from ConfigParser import SafeConfigParser
+from Logger import Logger
 
 config = SafeConfigParser()
 config_location = 'default.cfg'
@@ -72,6 +73,28 @@ def timestamp():
 	return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 bot = Poloniex(config.get("API","apikey"), config.get("API","secret"))
+log = Logger()
+
+def totalLended():
+	cryptoLended = bot.returnActiveLoans()
+
+	allPairs = {}
+	cryptoLendedSum = float(0)
+
+	for item in cryptoLended["provided"]:
+		itemStr = item["amount"].encode("utf-8")
+		itemFloat = float(itemStr)
+		if item["currency"] in allPairs:
+			cryptoLendedSum = allPairs[item["currency"]] + itemFloat
+			allPairs[item["currency"]] = cryptoLendedSum
+		else:
+			cryptoLendedSum = itemFloat
+			allPairs[item["currency"]] = cryptoLendedSum
+	result = ''
+	for key in sorted(allPairs):
+		result += key + ':'
+		result += "%.2f" % float(allPairs[key]) + ' '
+	return result
 
 def createLoanOffer(cur,amt,rate):
 	days = '2'
@@ -80,18 +103,9 @@ def createLoanOffer(cur,amt,rate):
 		amt = "%.8f" % float(amt)
 		if rate > sixtyDayThreshold:
 			days = '60'
-		sys.stdout.write(timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(float(rate)*100) + '% for ' + days + ' days... ')
 		if dryRun == False:
 			msg = bot.createLoanOffer(cur,amt,days,0,rate)
-			try:
-				sys.stdout.write(msg['message'])
-			except KeyError:
-				pass
-			try:
-				sys.stdout.write(msg['error'])
-			except KeyError:
-				pass
-		print 
+			log.offer(amt, cur, rate, days, msg)
 
 def cancelAndLoanAll():
 	loanOffers = bot.returnOpenLoanOffers('BTC') #some bug with api wrapper? no idea why I have to provide a currency, and then receive every other
@@ -106,14 +120,9 @@ def cancelAndLoanAll():
 	for cur in loanOffers:
 		for offer in loanOffers[cur]:
 			onOrderBalances[cur] = onOrderBalances.get(cur, 0) + float(offer['amount'])
-			sys.stdout.write(timestamp() + ' Canceling all ' + str(cur) + ' orders... ')
 			if dryRun == False:
 				msg = bot.cancelLoanOffer(cur,offer['id'])
-				try:
-                                	sys.stdout.write(msg['message'])
-                        	except KeyError:
-                                	pass
-			print 
+				log.cancelOrders(cur, msg)
 
 	lendingBalances = bot.returnAvailableAccountBalances("lending")['lending']
 	if dryRun == True: #just fake some numbers, if dryrun (testing)
@@ -156,6 +165,7 @@ def cancelAndLoanAll():
 while True:
 	try:
 		cancelAndLoanAll()
+		log.refreshStatus(totalLended())
 		time.sleep(sleepTime)
 	except (urllib2.HTTPError, urllib2.URLError) as error:
         	print "ERROR: ", error.read()
