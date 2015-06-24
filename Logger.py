@@ -24,3 +24,18 @@ class ConsoleOutput(object):
         update += line + ' ' * (len(self._status) - len(line)) + '\n'
         update += self._status
         sys.stderr.write(update)
+
+class Logger(object):
+    def __init__(self, core):
+        self.console = ConsoleOutput()
+
+    def timestamp():
+        ts = time.time()
+        return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+    def logOffer(self, amt, cur, rate, days):
+	line = timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(float(rate)*100) + '% for ' + days + ' days... '
+	self.console.printline(line)
+
+    def refreshStatus(self):
+	now = time.time()
