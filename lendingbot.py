@@ -170,7 +170,7 @@ while True:
 		cancelAndLoanAll()
 		time.sleep(sleepTime)
 	except (urllib2.HTTPError, urllib2.URLError) as error:
-        	print "ERROR: " + error
+        	print "ERROR: " + str(error)
 		pass
 	except KeyboardInterrupt:
 		print '\nbye'
