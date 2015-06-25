@@ -171,6 +171,7 @@ while True:
 		time.sleep(sleepTime)
 	except (urllib2.HTTPError, urllib2.URLError) as error:
         	print "ERROR: " + str(error)
+		time.sleep(5)
 		pass
 	except KeyboardInterrupt:
 		print '\nbye'
