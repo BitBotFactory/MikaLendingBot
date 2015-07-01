@@ -177,7 +177,7 @@ def profit():
 			if item["id"] == itemOld["id"]:	
         	        	itemFloat = float(item["fees"].encode("utf-8"))
                                 itemFloatOld = float(itemOld["fees"].encode("utf-8"))
-				log.log('Matching Loans: ' + str(item["id"]) + ' ' + str(itemOld["id"]) + ' ' + str(itemFloat) + ' ' + str(itemFloatOld))
+#				log.log('Matching Loans: ' + str(item["id"]) + ' ' + str(itemOld["id"]) + ' ' + str(itemFloat) + ' ' + str(itemFloatOld))
                 		if item["currency"] in cryptoLendedAll:
                         		cryptoLendedSum = cryptoLendedAll[item["currency"]] + itemFloat - itemFloatOld 
                         		cryptoLendedAll[item["currency"]] = cryptoLendedSum
