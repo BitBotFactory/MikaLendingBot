@@ -182,7 +182,7 @@ def profit():
                         		cryptoLendedSum = cryptoLendedAll[item["currency"]] + itemFloat - itemFloatOld 
                         		cryptoLendedAll[item["currency"]] = cryptoLendedSum
                 		else:
-                        		cryptoLendedSum = itemFloat
+                        		cryptoLendedSum = itemFloat - itemFloatOld
                         		cryptoLendedAll[item["currency"]] = cryptoLendedSum
 				break
 	cryptoLendedOld = cryptoLended
