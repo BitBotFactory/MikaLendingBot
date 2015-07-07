@@ -186,7 +186,7 @@ def profit():
                         		cryptoLendedAll[item["currency"]] = cryptoLendedSum
 				break
 	cryptoLendedOld = cryptoLended
-        result = 'Generated: '
+        result = 'Run-time: '
         for key in sorted(cryptoLendedAll):
                 result += '[' + "%.8f" % float(cryptoLendedAll[key]) + ' '
                 result += key + '] '
