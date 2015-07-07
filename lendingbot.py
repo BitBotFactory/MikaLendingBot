@@ -169,8 +169,8 @@ while True:
 		log.refreshStatus(totalLended())
 		cancelAndLoanAll()
 		time.sleep(sleepTime)
-	except (urllib2.HTTPError, urllib2.URLError) as error:
-        	print "ERROR: " + str(error)
+	except (urllib2.HTTPError, urllib2.URLError, socket.error) as error:
+        	log.log("ERROR: " + str(error))
 		time.sleep(5)
 		pass
 	except KeyboardInterrupt:
