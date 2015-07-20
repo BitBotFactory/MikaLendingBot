@@ -198,11 +198,10 @@ while True:
 	try:
 		log.refreshStatus(totalLended() + profit())
 		cancelAndLoanAll()
-		time.sleep(sleepTime)
-	except (urllib2.HTTPError, urllib2.URLError, socket.error) as error:
-        	log.log("ERROR: " + str(error))
-		time.sleep(5)
+        except Exception as e:
+                log.log("ERROR: " + str(e))
 		pass
 	except KeyboardInterrupt:
 		print '\nbye'
 		exit(0)
+	time.sleep(sleepTime)
