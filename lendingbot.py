@@ -90,7 +90,7 @@ def totalLended():
 		else:
 			cryptoLendedSum = itemFloat
 			allPairs[item["currency"]] = cryptoLendedSum
-	result = ''
+	result = 'Lended: '
 	for key in sorted(allPairs):
 		result += '[' + "%.3f" % float(allPairs[key]) + ' '
 		result += key + '] '
