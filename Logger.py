@@ -53,7 +53,11 @@ class Logger(object):
     def refreshStatus(self, lended=''):
 	now = time.time()
 	if lended != '':
-		self._lended = str(lended) 
+		if len(lended) > 79:
+			#truncate status, try preventing console bloating
+			self._lended = str(lended)[:76] + '...' 
+		else:
+			self._lended = str(lended)
 	self.console.status(self._lended)
 
     def digestApiMsg(self, msg):
