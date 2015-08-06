@@ -53,9 +53,9 @@ class Logger(object):
     def refreshStatus(self, lended=''):
 	now = time.time()
 	if lended != '':
-		if len(lended) > 79:
+		if len(lended) > 99:
 			#truncate status, try preventing console bloating
-			self._lended = str(lended)[:76] + '...' 
+			self._lended = str(lended)[:96] + '...' 
 		else:
 			self._lended = str(lended)
 	self.console.status(self._lended)
