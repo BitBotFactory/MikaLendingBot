@@ -141,6 +141,9 @@ def cancelAndLoanAll():
 		lent = float(0)
 		step = (gapTop - gapBottom)/spreadLend
 		#TODO check for minimum lendable amount, and try to decrease the spread. e.g. at the moment balances lower than 0.001 won't be lent
+		#in case of empty lendbook, lend at max
+		if len(loans['offers']) == 0:
+			createLoanOffer(activeCur,float(activeBal)-lent,maxDailyRate)
 		for offer in loans['offers']:
 			s = s + float(offer['amount'])
 			s2 = s
