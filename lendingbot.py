@@ -103,6 +103,8 @@ def createLoanOffer(cur,amt,rate):
 		amt = "%.8f" % float(amt)
 		if rate > sixtyDayThreshold:
 			days = '60'
+		if sixtyDayThreshold == 0:
+			days = '2'
 		if dryRun == False:
 			msg = bot.createLoanOffer(cur,amt,days,0,rate)
 			log.offer(amt, cur, rate, days, msg)
