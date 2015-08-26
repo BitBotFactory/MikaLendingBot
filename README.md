@@ -17,10 +17,7 @@ When you first run the script a default.cnf will be generated. Edit it with your
 ###Windows
 1. Install poloniexlendingbot - go to https://github.com/Mikadily/poloniexlendingbot and click the "Download Zip" button on the right. Unzip it into any location you choose.
 2. Install Python from https://www.python.org/ftp/python/2.7.10/python-2.7.10.msi . Run the executable. Choose to install the feature Add python.exe to Path on local hard drive during installation; Python should then be installed in C:\Python27
-3. Check that Python runs. Open a new command prompt as administrator by typing cmd.exe into the Start menu and pressing Ctrl+Shift+Enter. Type python and you should see something like:
-```
-Python 2.7.10 (default.... ....
-```
+3. Check that Python runs. Open a new command prompt as administrator by typing cmd.exe into the Start menu and pressing Ctrl+Shift+Enter. Type python and you should see something like: `Python 2.7.10 (default....`
 4. Go to location where you unzipped the bot and double click (run) lendingbot.py. It will run briefly and generate default.cfg. Open it with your favorite editor, replace YourAPIKey and YourSecret with one's you generated on Poloniex.
 
 5. Double click (run) lendingbot.py again. Off you go!
