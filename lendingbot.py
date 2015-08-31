@@ -1,4 +1,4 @@
-import io, sys, time, datetime, urllib2
+import io, sys, time, datetime, urllib2, json
 from poloniex import Poloniex
 from ConfigParser import SafeConfigParser
 from Logger import Logger
@@ -27,6 +27,10 @@ gapbottom = 10
 gaptop = 200
 #Daily lend rate threshold after which we offer lends for 60 days as opposed to 2. If set to 0 all offers will be placed for a 2 day period
 sixtydaythreshold = 0.2
+#custom config per coin, useful when closing positions etc.
+#syntax: [COIN:mindailyrate:maxactiveamount, ... COIN:mindailyrate:maxactiveamount]
+#if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
+#coinconfig = ["BTC:0.18:1","CLAM:0.6:1"]
 """
 
 loadedFiles = config.read([config_location])
@@ -47,6 +51,16 @@ gapBottom = float(config.get("BOT","gapbottom"))
 gapTop = float(config.get("BOT","gaptop"))
 sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 
+try:
+	coincfg = {} #parsed
+	coinconfig = (json.loads(config.get("BOT","coinconfig")))
+	#coinconfig parser
+	for cur in coinconfig:
+		cur = cur.split(':')
+		coincfg[cur[0]] = dict(minrate=(float(cur[1]))/100, maxactive=float(cur[2]))
+except Exception as e:
+	pass
+	
 #sanity checks
 if sleepTime < 1 or sleepTime > 3600:
 	print "sleeptime value must be 1-3600"
@@ -98,7 +112,8 @@ def totalLended():
 
 def createLoanOffer(cur,amt,rate):
 	days = '2'
-	if (minDailyRate - 0.000001) < rate and float(amt) > 0.001:
+	#if (minDailyRate - 0.000001) < rate and float(amt) > 0.001:
+	if float(amt) > 0.001:
 		rate = float(rate) - 0.000001 #lend offer just bellow the competing one
 		amt = "%.8f" % float(amt)
 		if rate > sixtyDayThreshold:
@@ -136,6 +151,15 @@ def cancelAndLoanAll():
 
 		activeBal = lendingBalances[activeCur]
 
+		#min daily rate can be changed per currency
+		curMinDailyRate = minDailyRate
+		if activeCur in coincfg:
+			if coincfg[activeCur]['maxactive'] == 0:
+				log.log('maxactive amount for ' + activeCur + ' set to 0, won\'t lend.')
+				continue
+			curMinDailyRate = coincfg[activeCur]['minrate']
+			log.log('Using custom mindailyrate ' + str(coincfg[activeCur]['minrate']*100) + '% for ' + activeCur)
+
 		loans = bot.returnLoanOrders(activeCur)
 		s = float(0) #sum
 		i = int(0) #offer book iterator
@@ -150,7 +174,7 @@ def cancelAndLoanAll():
 			s = s + float(offer['amount'])
 			s2 = s
 			while True:
-				if s2 > float(activeBal)*(gapBottom/100+(step/100*j)) and float(offer['rate']) > minDailyRate:
+				if s2 > float(activeBal)*(gapBottom/100+(step/100*j)) and float(offer['rate']) > curMinDailyRate:
 					j += 1
 					#ran into a problem were 14235.82451057 couldn't be lent because of rounding
 					s2 = s2 + float(activeBal)/spreadLend - 0.00000001
