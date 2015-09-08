@@ -53,6 +53,11 @@ gaptop = 200
 #Daily lend rate threshold after which we offer lends for 60 days as opposed to 2.
 #If set to 0 all offers will be placed for a 2 day period
 sixtydaythreshold = 0.2
+
+#custom config per coin, useful when closing positions etc.
+#syntax: ["COIN:mindailyrate:maxactiveamount",...]
+#if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
+#coinconfig = ["BTC:0.18:1","CLAM:0.6:1"]
 ```
 
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
