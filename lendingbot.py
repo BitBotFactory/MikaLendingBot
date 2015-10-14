@@ -2,6 +2,9 @@ import io, sys, time, datetime, urllib2, json
 from poloniex import Poloniex
 from ConfigParser import SafeConfigParser
 from Logger import Logger
+from decimal import *
+
+SATOSHI = Decimal(10) ** -8
 
 config = SafeConfigParser()
 config_location = 'default.cfg'
@@ -16,15 +19,15 @@ secret = YourSecret
 #sleep between iterations, time in seconds
 sleeptime = 60
 #minimum daily lend rate in percent
-mindailyrate = 0.04
+mindailyrate = 0.01
 #max rate. 2% is good choice because it's default at margin trader interface. 5% is max to be accepted by the exchange
 maxdailyrate = 2
 #The number of offers to split the available balance uniformly across the [gaptop, gapbottom] range.
 spreadlend = 3
 #The depth of lendbook (in percent of lendable balance) to move through before placing the first (gapbottom) and last (gaptop) offer.
 #if gapbottom is set to 0, the first offer will be at the lowest possible rate. However some low value is recommended (say 10%) to skip dust offers
-gapbottom = 10
-gaptop = 200
+gapbottom = 1
+gaptop = 100
 #Daily lend rate threshold after which we offer lends for 60 days as opposed to 2. If set to 0 all offers will be placed for a 2 day period
 sixtydaythreshold = 0.2
 #custom config per coin, useful when closing positions etc.
@@ -44,11 +47,11 @@ if len(loadedFiles) != 1:
 
 
 sleepTime = float(config.get("BOT","sleeptime"))
-minDailyRate = float(config.get("BOT","mindailyrate"))/100
-maxDailyRate = float(config.get("BOT","maxdailyrate"))/100
+minDailyRate = Decimal(config.get("BOT","mindailyrate"))/100
+maxDailyRate = Decimal(config.get("BOT","maxdailyrate"))/100
 spreadLend = int(config.get("BOT","spreadlend"))
-gapBottom = float(config.get("BOT","gapbottom"))
-gapTop = float(config.get("BOT","gaptop"))
+gapBottom = Decimal(config.get("BOT","gapbottom"))
+gapTop = Decimal(config.get("BOT","gaptop"))
 sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 
 try:
@@ -57,7 +60,7 @@ try:
 	#coinconfig parser
 	for cur in coinconfig:
 		cur = cur.split(':')
-		coincfg[cur[0]] = dict(minrate=(float(cur[1]))/100, maxactive=float(cur[2]))
+		coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
 except Exception as e:
 	pass
 	
@@ -89,33 +92,39 @@ def timestamp():
 bot = Poloniex(config.get("API","apikey"), config.get("API","secret"))
 log = Logger()
 
-def totalLended():
+#total lended global variable
+totalLended = {}
+
+def refreshTotalLended():
+        global totalLended
 	cryptoLended = bot.returnActiveLoans()
 
-	allPairs = {}
-	cryptoLendedSum = float(0)
+	totalLended = {}
+	cryptoLendedSum = Decimal(0)
 
 	for item in cryptoLended["provided"]:
 		itemStr = item["amount"].encode("utf-8")
-		itemFloat = float(itemStr)
-		if item["currency"] in allPairs:
-			cryptoLendedSum = allPairs[item["currency"]] + itemFloat
-			allPairs[item["currency"]] = cryptoLendedSum
+		itemFloat = Decimal(itemStr)
+		if item["currency"] in totalLended:
+			cryptoLendedSum = totalLended[item["currency"]] + itemFloat
+			totalLended[item["currency"]] = cryptoLendedSum
 		else:
 			cryptoLendedSum = itemFloat
-			allPairs[item["currency"]] = cryptoLendedSum
+			totalLended[item["currency"]] = cryptoLendedSum
+
+def stringifyTotalLended():
 	result = 'Lended: '
-	for key in sorted(allPairs):
-		result += '[' + "%.3f" % float(allPairs[key]) + ' '
+	for key in sorted(totalLended):
+		result += '[' + "%.3f" % Decimal(totalLended[key]) + ' '
 		result += key + '] '
 	return result
 
 def createLoanOffer(cur,amt,rate):
 	days = '2'
-	#if (minDailyRate - 0.000001) < rate and float(amt) > 0.001:
+	#if (minDailyRate - 0.000001) < rate and Decimal(amt) > 0.001:
 	if float(amt) > 0.001:
 		rate = float(rate) - 0.000001 #lend offer just bellow the competing one
-		amt = "%.8f" % float(amt)
+		amt = "%.8f" % Decimal(amt)
 		if rate > sixtyDayThreshold:
 			days = '60'
 		if sixtyDayThreshold == 0:
@@ -136,7 +145,7 @@ def cancelAndLoanAll():
 	onOrderBalances = {}
 	for cur in loanOffers:
 		for offer in loanOffers[cur]:
-			onOrderBalances[cur] = onOrderBalances.get(cur, 0) + float(offer['amount'])
+			onOrderBalances[cur] = onOrderBalances.get(cur, 0) + Decimal(offer['amount'])
 			if dryRun == False:
 				msg = bot.cancelLoanOffer(cur,offer['id'])
 				log.cancelOrders(cur, msg)
@@ -161,71 +170,44 @@ def cancelAndLoanAll():
 			log.log('Using custom mindailyrate ' + str(coincfg[activeCur]['minrate']*100) + '% for ' + activeCur)
 
 		loans = bot.returnLoanOrders(activeCur)
-		s = float(0) #sum
+		s = Decimal(0) #sum
 		i = int(0) #offer book iterator
 		j = int(0) #spread step count
-		lent = float(0)
+		lent = Decimal(0)
 		step = (gapTop - gapBottom)/spreadLend
 		#TODO check for minimum lendable amount, and try to decrease the spread. e.g. at the moment balances lower than 0.001 won't be lent
 		#in case of empty lendbook, lend at max
+                activePlusLended = Decimal(activeBal)
+                if activeCur in totalLended:
+                        activePlusLended += Decimal(totalLended[activeCur])
 		if len(loans['offers']) == 0:
-			createLoanOffer(activeCur,float(activeBal)-lent,maxDailyRate)
+			createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 		for offer in loans['offers']:
-			s = s + float(offer['amount'])
+			s = s + Decimal(offer['amount'])
 			s2 = s
 			while True:
-				if s2 > float(activeBal)*(gapBottom/100+(step/100*j)) and float(offer['rate']) > curMinDailyRate:
+				if s2 > activePlusLended*(gapBottom/100+(step/100*j)) and Decimal(offer['rate']) > curMinDailyRate:
 					j += 1
-					#ran into a problem were 14235.82451057 couldn't be lent because of rounding
-					s2 = s2 + float(activeBal)/spreadLend - 0.00000001
+					s2 = s2 + Decimal(activeBal)/spreadLend
 				else:
 					createLoanOffer(activeCur,s2-s,offer['rate'])
-					lent = lent + (s2-s)
+					lent = lent + (s2-s).quantize(SATOSHI)
 					break
 				if j == spreadLend:
-					createLoanOffer(activeCur,float(activeBal)-lent,offer['rate'])
+					createLoanOffer(activeCur,Decimal(activeBal)-lent,offer['rate'])
 	                                break
 			if j == spreadLend:
 				break
 			i += 1
 			if i == len(loans['offers']): #end of the offers lend at max
-				createLoanOffer(activeCur,float(activeBal)-lent,maxDailyRate)
-
-cryptoLendedOld = {u'provided': []}
-cryptoLendedAll = {}
-
-def profit():
-	global cryptoLendedOld
-	global cryptoLendedAll
-	cryptoLended = bot.returnActiveLoans()
-
-        cryptoLendedSum = float(0)
-
-        for item in cryptoLended["provided"]:
-		for itemOld in cryptoLendedOld["provided"]:
-			if item["id"] == itemOld["id"]:	
-        	        	itemFloat = float(item["fees"].encode("utf-8"))
-                                itemFloatOld = float(itemOld["fees"].encode("utf-8"))
-#				log.log('Matching Loans: ' + str(item["id"]) + ' ' + str(itemOld["id"]) + ' ' + str(itemFloat) + ' ' + str(itemFloatOld))
-                		if item["currency"] in cryptoLendedAll:
-                        		cryptoLendedSum = cryptoLendedAll[item["currency"]] + itemFloat - itemFloatOld 
-                        		cryptoLendedAll[item["currency"]] = cryptoLendedSum
-                		else:
-                        		cryptoLendedSum = itemFloat - itemFloatOld
-                        		cryptoLendedAll[item["currency"]] = cryptoLendedSum
-				break
-	cryptoLendedOld = cryptoLended
-        result = 'Run-time: '
-        for key in sorted(cryptoLendedAll):
-                result += '[' + "%.8f" % float(cryptoLendedAll[key]) + ' '
-                result += key + '] '
-        return result
+				createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 
 log.log('Welcome to Poloniex Lending Bot')
 
 while True:
 	try:
-		log.refreshStatus(totalLended() + profit())
+                refreshTotalLended()
+		log.refreshStatus(stringifyTotalLended())
 		cancelAndLoanAll()
         except Exception as e:
                 log.log("ERROR: " + str(e))
@@ -233,4 +215,4 @@ while True:
 	except KeyboardInterrupt:
 		print '\nbye'
 		exit(0)
-	time.sleep(sleepTime)
+        time.sleep(sleepTime)
