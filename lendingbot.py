@@ -42,7 +42,7 @@ if len(loadedFiles) != 1:
 	config.readfp(io.BytesIO(defaultconfig))
 	with open(config_location, "w") as configfile:
 		configfile.write(defaultconfig)
-		print 'Edit default.cnf file with your api key and secret values'
+		print 'Edit default.cfg file with your api key and secret values'
 		exit(0)
 
 
@@ -139,7 +139,7 @@ def cancelAndLoanAll():
 		loanOffers = {}
 	if loanOffers.get('error'):
 		print loanOffers.get('error')
-		print 'You might want to edit config file (default.cnf) and put correct apisecret and key values'
+		print 'You might want to edit config file (default.cfg) and put correct apisecret and key values'
 		exit(1)
 
 	onOrderBalances = {}
