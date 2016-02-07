@@ -30,6 +30,8 @@ gapbottom = 1
 gaptop = 100
 #Daily lend rate threshold after which we offer lends for 60 days as opposed to 2. If set to 0 all offers will be placed for a 2 day period
 sixtydaythreshold = 0.2
+# AutoRenew - if set to 1 the bot will toggle the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when started
+autorenew = 0
 #custom config per coin, useful when closing positions etc.
 #syntax: [COIN:mindailyrate:maxactiveamount, ... COIN:mindailyrate:maxactiveamount]
 #if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
@@ -53,6 +55,7 @@ spreadLend = int(config.get("BOT","spreadlend"))
 gapBottom = Decimal(config.get("BOT","gapbottom"))
 gapTop = Decimal(config.get("BOT","gaptop"))
 sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
+autorenew = int(config.get("BOT","autorenew"))
 
 try:
 	coincfg = {} #parsed
@@ -202,17 +205,46 @@ def cancelAndLoanAll():
 			if i == len(loans['offers']): #end of the offers lend at max
 				createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 
+def setAutoRenew(auto):
+	cryptoLended = bot.returnActiveLoans()
+	i = int(0) #counter
+
+	for item in cryptoLended["provided"]:
+		if int(item["autoRenew"]) != auto:
+			bot.toggleAutoRenew(int(item["id"]))
+			i += 1
+	return i
+        	
+
 log.log('Welcome to Poloniex Lending Bot')
+try:
+        if sys.argv.index('--clearAutoRenew') > 0:
+                log.log('Clearing AutoRenew...(Please Wait)')
+                i = setAutoRenew(0);
+                log.log('Cleared AutoRenew for ' +  str(i) + ' items')
+                exit(0)
+except:
+        pass
+
+
+if autorenew == 1:
+        log.log('Clearing AutoRenew...(Please Wait)')
+        i = setAutoRenew(0);
+        log.log('Cleared AutoRenew for ' +  str(i) + ' items')
 
 while True:
 	try:
                 refreshTotalLended()
 		log.refreshStatus(stringifyTotalLended())
 		cancelAndLoanAll()
+		time.sleep(sleepTime)
         except Exception as e:
                 log.log("ERROR: " + str(e))
 		pass
 	except KeyboardInterrupt:
-		print '\nbye'
+                if autorenew == 1:
+                        log.log('AutoRenew loans... (Please Wait)')
+                        i = setAutoRenew(1);
+                        log.log(str(i) + ' loans set to AutoRenew')
+		log.log('bye')
 		exit(0)
-        time.sleep(sleepTime)

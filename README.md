@@ -54,6 +54,9 @@ gaptop = 200
 #If set to 0 all offers will be placed for a 2 day period
 sixtydaythreshold = 0.2
 
+# AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
+autorenew = 0
+
 #custom config per coin, useful when closing positions etc.
 #syntax: ["COIN:mindailyrate:maxactiveamount",...]
 #if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
@@ -61,6 +64,9 @@ sixtydaythreshold = 0.2
 ```
 
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
+
+## Command Line Parameters
+--clearAutoRenew - will clear the AutoRenew flag on all exising loans
 
 ##Donations
 
