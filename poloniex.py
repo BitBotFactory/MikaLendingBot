@@ -154,3 +154,7 @@ class Poloniex:
 
     def returnLoanOrders(self,currency):
         return self.api_query('returnLoanOrders',{"currency":currency})
+
+    # Toggles the auto renew setting for the specified orderNumber
+    def toggleAutoRenew(self, orderNumber):
+        return self.api_query('toggleAutoRenew',{"orderNumber":orderNumber})
