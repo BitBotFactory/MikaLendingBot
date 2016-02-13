@@ -233,19 +233,19 @@ if autorenew == 1:
         log.log('Cleared AutoRenew for ' +  str(i) + ' items')
 
 while True:
-		try:
-				refreshTotalLended()
-				log.refreshStatus(stringifyTotalLended())
-				cancelAndLoanAll()
-				time.sleep(sleepTime)
-		except Exception as e:
-				log.log("ERROR: " + str(e))
-				time.sleep(sleepTime)
-				pass
-		except KeyboardInterrupt:
-				if autorenew == 1:
-						log.log('AutoRenew loans... (Please Wait)')
-						i = setAutoRenew(1);
-						log.log(str(i) + ' loans set to AutoRenew')
-				log.log('bye')
-				exit(0)
+        try:
+                refreshTotalLended()
+                log.refreshStatus(stringifyTotalLended())
+                cancelAndLoanAll()
+                time.sleep(sleepTime)
+        except Exception as e:
+                log.log("ERROR: " + str(e))
+                time.sleep(sleepTime)
+                pass
+        except KeyboardInterrupt:
+                if autorenew == 1:
+                        log.log('AutoRenew loans... (Please Wait)')
+                        i = setAutoRenew(1);
+                        log.log(str(i) + ' loans set to AutoRenew')
+                log.log('bye')
+                exit(0)
