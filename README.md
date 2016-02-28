@@ -67,6 +67,7 @@ If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot le
 
 ## Command Line Parameters
 --clearAutoRenew - will clear the AutoRenew flag on all exising loans
+--setAutoRenew - will set the AutoRenew flag on all exising loans
 
 ##Donations
 
