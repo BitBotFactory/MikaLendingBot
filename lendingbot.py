@@ -99,7 +99,7 @@ log = Logger()
 totalLended = {}
 
 def refreshTotalLended():
-        global totalLended
+	global totalLended
 	cryptoLended = bot.returnActiveLoans()
 
 	totalLended = {}
@@ -180,9 +180,9 @@ def cancelAndLoanAll():
 		step = (gapTop - gapBottom)/spreadLend
 		#TODO check for minimum lendable amount, and try to decrease the spread. e.g. at the moment balances lower than 0.001 won't be lent
 		#in case of empty lendbook, lend at max
-                activePlusLended = Decimal(activeBal)
-                if activeCur in totalLended:
-                        activePlusLended += Decimal(totalLended[activeCur])
+		activePlusLended = Decimal(activeBal)
+		if activeCur in totalLended:
+			activePlusLended += Decimal(totalLended[activeCur])
 		if len(loans['offers']) == 0:
 			createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 		for offer in loans['offers']:
@@ -198,7 +198,7 @@ def cancelAndLoanAll():
 					break
 				if j == spreadLend:
 					createLoanOffer(activeCur,Decimal(activeBal)-lent,offer['rate'])
-	                                break
+					break
 			if j == spreadLend:
 				break
 			i += 1
@@ -206,46 +206,50 @@ def cancelAndLoanAll():
 				createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 
 def setAutoRenew(auto):
-	cryptoLended = bot.returnActiveLoans()
 	i = int(0) #counter
-
-	for item in cryptoLended["provided"]:
-		if int(item["autoRenew"]) != auto:
-			bot.toggleAutoRenew(int(item["id"]))
-			i += 1
-	return i
-        	
+	try:
+		action = 'Clear'
+		if(auto == 1):
+			action = 'Set'
+		log.log(action + 'ing AutoRenew...(Please Wait)')
+		cryptoLended = bot.returnActiveLoans()
+		loansCount = len(cryptoLended["provided"])
+		for item in cryptoLended["provided"]:
+			if int(item["autoRenew"]) != auto:
+				log.refreshStatus('Processing AutoRenew - ' + str(i) + ' of ' + str(loansCount) + ' loans')
+				bot.toggleAutoRenew(int(item["id"]))
+				i += 1
+	except KeyboardInterrupt:
+		log.log('Toggled AutoRenew for ' +  str(i) + ' loans')
+		raise SystemExit
+	log.log('Toggled AutoRenew for ' +  str(i) + ' loans')
 
 log.log('Welcome to Poloniex Lending Bot')
-try:
-        if sys.argv.index('--clearAutoRenew') > 0:
-                log.log('Clearing AutoRenew...(Please Wait)')
-                i = setAutoRenew(0);
-                log.log('Cleared AutoRenew for ' +  str(i) + ' items')
-                exit(0)
-except:
-        pass
 
+if '--clearAutoRenew' in sys.argv:
+	setAutoRenew(0);
+	raise SystemExit
 
+if '--setAutoRenew' in sys.argv:
+	setAutoRenew(1);
+	raise SystemExit
+
+#if config includes autorenew - start by clearing the current loans
 if autorenew == 1:
-        log.log('Clearing AutoRenew...(Please Wait)')
-        i = setAutoRenew(0);
-        log.log('Cleared AutoRenew for ' +  str(i) + ' items')
+	setAutoRenew(0);
 
 while True:
-        try:
-                refreshTotalLended()
-                log.refreshStatus(stringifyTotalLended())
-                cancelAndLoanAll()
-                time.sleep(sleepTime)
-        except Exception as e:
-                log.log("ERROR: " + str(e))
-                time.sleep(sleepTime)
-                pass
-        except KeyboardInterrupt:
-                if autorenew == 1:
-                        log.log('AutoRenew loans... (Please Wait)')
-                        i = setAutoRenew(1);
-                        log.log(str(i) + ' loans set to AutoRenew')
-                log.log('bye')
-                exit(0)
+	try:
+		refreshTotalLended()
+		log.refreshStatus(stringifyTotalLended())
+		cancelAndLoanAll()
+		time.sleep(sleepTime)
+	except Exception as e:
+		log.log("ERROR: " + str(e))
+		time.sleep(sleepTime)
+		pass
+	except KeyboardInterrupt:
+		if autorenew == 1:
+			setAutoRenew(1);
+		log.log('bye')
+		exit(0)
