@@ -99,27 +99,34 @@ log = Logger()
 totalLended = {}
 
 def refreshTotalLended():
-	global totalLended
+	global totalLended, rateLended
 	cryptoLended = bot.returnActiveLoans()
 
 	totalLended = {}
+	rateLended = {}
 	cryptoLendedSum = Decimal(0)
+	cryptoLendedRate = Decimal(0)
 
 	for item in cryptoLended["provided"]:
 		itemStr = item["amount"].encode("utf-8")
 		itemFloat = Decimal(itemStr)
+		itemRateStr = item["rate"].encode("utf-8")
+		itemRateFloat = Decimal(itemRateStr)
 		if item["currency"] in totalLended:
 			cryptoLendedSum = totalLended[item["currency"]] + itemFloat
+			cryptoLendedRate = rateLended[item["currency"]] + (itemRateFloat * itemFloat)
 			totalLended[item["currency"]] = cryptoLendedSum
+			rateLended[item["currency"]] = cryptoLendedRate
 		else:
 			cryptoLendedSum = itemFloat
+			cryptoLendedRate = itemRateFloat * itemFloat
 			totalLended[item["currency"]] = cryptoLendedSum
+			rateLended[item["currency"]] = cryptoLendedRate
 
 def stringifyTotalLended():
 	result = 'Lended: '
 	for key in sorted(totalLended):
-		result += '[' + "%.3f" % Decimal(totalLended[key]) + ' '
-		result += key + '] '
+		result += '[%.3f %s @ %.4f%%] ' % (Decimal(totalLended[key]), key, Decimal(rateLended[key]*100/totalLended[key]))
 	return result
 
 def createLoanOffer(cur,amt,rate):
@@ -208,10 +215,10 @@ def cancelAndLoanAll():
 def setAutoRenew(auto):
 	i = int(0) #counter
 	try:
-		action = 'Clear'
+		action = 'Clearing'
 		if(auto == 1):
-			action = 'Set'
-		log.log(action + 'ing AutoRenew...(Please Wait)')
+			action = 'Setting'
+		log.log(action + ' AutoRenew...(Please Wait)')
 		cryptoLended = bot.returnActiveLoans()
 		loansCount = len(cryptoLended["provided"])
 		for item in cryptoLended["provided"]:
