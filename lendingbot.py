@@ -36,6 +36,14 @@ autorenew = 0
 #syntax: [COIN:mindailyrate:maxactiveamount, ... COIN:mindailyrate:maxactiveamount]
 #if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
 #coinconfig = ["BTC:0.18:1","CLAM:0.6:1"]
+
+#this option creates a json log file which includes the most recent status
+#uncomment both jsonfile and jsonlogsize to enable
+#jsonfile = www\botlog.json
+#limits the amount of log lines to save
+#jsonlogsize = 200
+#enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
+#startWebServer = true
 """
 
 loadedFiles = config.read([config_location])
@@ -94,6 +102,15 @@ def timestamp():
 
 bot = Poloniex(config.get("API","apikey"), config.get("API","secret"))
 log = Logger()
+
+# check if json output is enabled
+try:
+	jsonFile = config.get("BOT","jsonfile")
+	jsonLogSize = int(config.get("BOT","jsonlogsize"))
+	log = Logger(jsonFile, jsonLogSize)
+except Exception as e:
+	log = Logger()
+	pass
 
 #total lended global variable
 totalLended = {}
@@ -231,32 +248,75 @@ def setAutoRenew(auto):
 		raise SystemExit
 	log.log('Toggled AutoRenew for ' +  str(i) + ' loans')
 
-log.log('Welcome to Poloniex Lending Bot')
+server = None
+def startWebServer():
+	import SimpleHTTPServer
+	import SocketServer
+	import os
+
+	try:
+		PORT = 8000
+		HOST = '127.0.0.1'
+
+		class QuietHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+			# quiet server logs
+			def log_message(self, format, *args):
+				return
+			# serve from www folder under current working dir
+			def translate_path(self, path):
+				return SimpleHTTPServer.SimpleHTTPRequestHandler.translate_path(self, '/www' + path)
+		
+		global server
+		server = SocketServer.TCPServer((HOST, PORT), QuietHandler)
+		print 'Started WebServer, lendingbot status available at http://'+ HOST +':' + str(PORT) + '/lendingbot.html'
+		server.serve_forever()
+	except Exception as e:
+		print 'Failed to start WebServer' + str(e)
+		
+
+def stopWebServer():
+	try:
+		print "Stopping WebServer"
+		server.shutdown();
+	except Exception as e:
+		print 'Failed to stop WebServer' + str(e)
+	
+print 'Welcome to Poloniex Lending Bot'
+
+webServerEnabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
+if webServerEnabled:
+	import threading
+	thread = threading.Thread(target = startWebServer)
+	thread.deamon = True
+	thread.start()
 
 if '--clearAutoRenew' in sys.argv:
-	setAutoRenew(0);
+	setAutoRenew(0)
 	raise SystemExit
 
 if '--setAutoRenew' in sys.argv:
-	setAutoRenew(1);
+	setAutoRenew(1)
 	raise SystemExit
 
 #if config includes autorenew - start by clearing the current loans
 if autorenew == 1:
 	setAutoRenew(0);
 
-while True:
-	try:
-		refreshTotalLended()
-		log.refreshStatus(stringifyTotalLended())
-		cancelAndLoanAll()
-		time.sleep(sleepTime)
-	except Exception as e:
-		log.log("ERROR: " + str(e))
-		time.sleep(sleepTime)
-		pass
-	except KeyboardInterrupt:
-		if autorenew == 1:
-			setAutoRenew(1);
-		log.log('bye')
-		exit(0)
+try:
+	while True:
+		try:
+			refreshTotalLended()
+			log.refreshStatus(stringifyTotalLended())
+			cancelAndLoanAll()
+			time.sleep(sleepTime)
+		except Exception as e:
+			log.log("ERROR: " + str(e))
+			time.sleep(sleepTime)
+			pass
+except KeyboardInterrupt:
+	if autorenew == 1:
+		setAutoRenew(1);
+	if webServerEnabled:
+		stopWebServer()
+	log.log('bye')
+	exit(0)
