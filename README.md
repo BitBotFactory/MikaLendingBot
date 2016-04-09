@@ -61,15 +61,30 @@ autorenew = 0
 #syntax: ["COIN:mindailyrate:maxactiveamount",...]
 #if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
 #coinconfig = ["BTC:0.18:1","CLAM:0.6:1"]
+
+#this option creates a json log file instead of console output which includes the most recent status
+#uncomment both jsonfile and jsonlogsize to enable
+#jsonfile = botlog.json
+#limits the amount of log lines to save
+#jsonlogsize = 200
+#enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
+#startWebServer = true
 ```
 
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
 
-## Command Line Parameters
+### Command Line Parameters
 ```
 --clearAutoRenew - will clear the AutoRenew flag on all exising loans
 --setAutoRenew - will set the AutoRenew flag on all exising loans
 ```
+
+### Bot Status Webpage
+Under www folder you can find lendingbot.html webpage, it can be used to parse the json output file.
+- currently javascript expects 'botlog.json' file to be in the same folder i.e. jsonfile = www\botlog.json (or webserver folder)
+- will refresh every 30sec
+- events log is presented in reverse order - last is on top
+- uncomment startWebServer = true if you need a webserver for viewing, this will start a simple webserver.
 
 ##Donations
 

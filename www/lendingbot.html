@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Poloniex Lending Bot</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- jQuery Version 1.12.2 -->
+    <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    
+    <script language="javascript">        
+        var localFile, reader;
+        
+        
+        function updateJson(data) {
+            $('#status').text(data.last_status);
+            $('#updated').text(data.last_update);
+            var rowCount = data.log.length;
+            var table = $('#logtable');
+            table.empty();
+            for (var i = rowCount - 1; i >=0; i--) {
+                table.append('<tr><td class="col-xs-12" colspan="2">' + data.log[i] + '</td></tr>');
+            } 
+        }
+        
+        function handleLocalFile(file) {
+            localFile = file;
+            reader = new FileReader();
+            reader.onload = function(e) {
+                updateJson(JSON.parse(reader.result));
+            };
+            reader.readAsText(localFile, 'utf-8');
+        }
+        
+        function loadData() {
+            if(localFile) {
+                reader.readAsText(localFile, 'utf-8');
+                setTimeout('loadData()',30000)
+            } else {            
+                // expect the botlog.json to be in the same folder on the webserver
+                var file = 'botlog.json';            
+                $.getJSON(file, function (data) {               
+                    updateJson(data);
+                    // reload every 30sec
+                    setTimeout('loadData()',30000)
+                }).fail( function(d, textStatus, error) {
+                   $('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
+                   // retry after 60sec
+                   setTimeout('loadData()',60000)
+                });;
+            }
+            
+        }
+        
+        $(document).ready(function () {
+            loadData();
+            if(window.location.protocol == "file:") {
+                $('#file').show();
+            }
+        });
+    </script>
+
+</head>
+
+<body>
+
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4>
+                Poloniex Lending Bot
+              </h4>
+              <input type="file" id="file" name="file" style="display:none"  onchange="handleLocalFile(this.files[0])" />
+            </div>
+            <table class="table table-fixed">
+                <thead>
+                    <tr>
+                        <th class="col-xs-2">Updated</th><th class="col-xs-10" id="updated">Not updated</th>
+                    </tr>
+                    <tr>
+                        <th class="col-xs-2">Status</th><th class="col-xs-10" id="status">N/A</th>
+                    </tr>
+                </thead>
+                <tbody id="logtable">                   
+                </tbody>
+            </table>
+          </div>
+      </div>
+    </div>
+    <!-- /.container -->
+    
+
+</body>
+
+</html>
