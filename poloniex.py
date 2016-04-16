@@ -37,7 +37,10 @@ class Poloniex:
             ret = urllib2.urlopen(urllib2.Request('http://poloniex.com/public?command=' + "returnTradeHistory" + '&currencyPair=' + str(req['currencyPair'])))
             return json.loads(ret.read())
         elif(command == "returnLoanOrders"):
-            ret = urllib2.urlopen(urllib2.Request('http://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])))
+            reqUrl = 'http://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])
+            if(req['limit'] != ''):
+                reqUrl += '&limit=' + str(req['limit'])
+            ret = urllib2.urlopen(urllib2.Request(reqUrl))
             return json.loads(ret.read())
         else:
             req['command'] = command
@@ -152,8 +155,8 @@ class Poloniex:
     def withdraw(self, currency, amount, address):
         return self.api_query('withdraw',{"currency":currency, "amount":amount, "address":address})
 
-    def returnLoanOrders(self,currency):
-        return self.api_query('returnLoanOrders',{"currency":currency})
+    def returnLoanOrders(self,currency, limit=''):
+        return self.api_query('returnLoanOrders',{"currency":currency, "limit":limit})
 
     # Toggles the auto renew setting for the specified orderNumber
     def toggleAutoRenew(self, orderNumber):

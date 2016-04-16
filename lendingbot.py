@@ -171,6 +171,10 @@ def createLoanOffer(cur,amt,rate):
 			msg = bot.createLoanOffer(cur,amt,days,0,rate)
 			log.offer(amt, cur, rate, days, msg)
 
+#limit of orders to request
+loanOrdersRequestLimit = {}
+defaultLoanOrdersRequestLimit = 200
+
 def cancelAndLoanAll():
 	loanOffers = bot.returnOpenLoanOffers()
 	if type(loanOffers) is list: #silly api wrapper, empty dict returns a list, which brakes the code later.
@@ -193,11 +197,13 @@ def cancelAndLoanAll():
 		if type(lendingBalances) is list: #silly api wrapper, empty dict returns a list, which brakes the code later.
 			lendingBalances = {}
 		lendingBalances.update(onOrderBalances)
-
-	for activeCur in lendingBalances:
-
+	
+	activeCurIndex = 0
+	while activeCurIndex < len(lendingBalances):
+		activeCur = lendingBalances.keys()[activeCurIndex]
+		activeCurIndex += 1
 		activeBal = lendingBalances[activeCur]
-
+		
 		#min daily rate can be changed per currency
 		curMinDailyRate = minDailyRate
 		if activeCur in coincfg:
@@ -207,7 +213,13 @@ def cancelAndLoanAll():
 			curMinDailyRate = coincfg[activeCur]['minrate']
 			log.log('Using custom mindailyrate ' + str(coincfg[activeCur]['minrate']*100) + '% for ' + activeCur)
 
-		loans = bot.returnLoanOrders(activeCur)
+		# make sure we have a request limit for this currency
+		if(activeCur not in loanOrdersRequestLimit):
+			loanOrdersRequestLimit[activeCur] = defaultLoanOrdersRequestLimit
+			
+		loans = bot.returnLoanOrders(activeCur, loanOrdersRequestLimit[activeCur] )
+		loansLength = len(loans['offers'])
+
 		s = Decimal(0) #sum
 		i = int(0) #offer book iterator
 		j = int(0) #spread step count
@@ -218,7 +230,7 @@ def cancelAndLoanAll():
 		activePlusLended = Decimal(activeBal)
 		if activeCur in totalLended:
 			activePlusLended += Decimal(totalLended[activeCur])
-		if len(loans['offers']) == 0:
+		if loansLength == 0:
 			createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 		for offer in loans['offers']:
 			s = s + Decimal(offer['amount'])
@@ -237,8 +249,16 @@ def cancelAndLoanAll():
 			if j == spreadLend:
 				break
 			i += 1
-			if i == len(loans['offers']): #end of the offers lend at max
-				createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
+			if (i == loansLength): #end of the offers
+				if(loansLength < loanOrdersRequestLimit[activeCur]):
+					#lend at max
+					createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
+				else:
+					# increase limit for currency to get a more accurate response
+					loanOrdersRequestLimit[activeCur] += defaultLoanOrdersRequestLimit
+					log.log( activeCur + ': Not enough offers in response, adjusting request limit to ' + str(loanOrdersRequestLimit[activeCur]))
+					# repeat currency
+					activeCurIndex -= 1
 
 def setAutoRenew(auto):
 	i = int(0) #counter
