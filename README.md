@@ -56,7 +56,7 @@ gaptop = 200
 #If set to 0 all offers will be placed for a 2 day period
 sixtydaythreshold = 0.2
 
-# AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
+#AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
 autorenew = 0
 
 #custom config per coin, useful when closing positions etc.
@@ -66,7 +66,7 @@ autorenew = 0
 
 #this option creates a json log file instead of console output which includes the most recent status
 #uncomment both jsonfile and jsonlogsize to enable
-#jsonfile = botlog.json
+#jsonfile = www/botlog.json
 #limits the amount of log lines to save
 #jsonlogsize = 200
 #enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
