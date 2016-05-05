@@ -162,7 +162,7 @@ def createLoanOffer(cur,amt,rate):
 			log.offer(amt, cur, rate, days, msg)
 
 def cancelAndLoanAll():
-	loanOffers = bot.returnOpenLoanOffers('BTC') #some bug with api wrapper? no idea why I have to provide a currency, and then receive every other
+	loanOffers = bot.returnOpenLoanOffers()
 	if type(loanOffers) is list: #silly api wrapper, empty dict returns a list, which brakes the code later.
 		loanOffers = {}
 	if loanOffers.get('error'):
