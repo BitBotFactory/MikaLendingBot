@@ -89,8 +89,8 @@ class Poloniex:
     def returnOpenOrders(self,currencyPair):
         return self.api_query('returnOpenOrders',{"currencyPair":currencyPair})
 
-    def returnOpenLoanOffers(self,currency):
-        return self.api_query('returnOpenLoanOffers',{"currency":currency})
+    def returnOpenLoanOffers(self):
+        return self.api_query('returnOpenLoanOffers')
 
     def returnActiveLoans(self):
         return self.api_query('returnActiveLoans')
