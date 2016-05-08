@@ -27,6 +27,9 @@
         function updateJson(data) {
             $('#status').text(data.last_status);
             $('#updated').text(data.last_update);
+			
+            updateRates(data.last_status);
+			
             var rowCount = data.log.length;
             var table = $('#logtable');
             table.empty();
@@ -34,7 +37,26 @@
                 table.append('<tr><td class="col-xs-12" colspan="2">' + data.log[i] + '</td></tr>');
             } 
         }
-        
+		
+        function updateRates(data){
+            var btc = /(\d+\.\d+) BTC/i.exec(data)[1];
+            btc = btc * 0.85; // 15% goes to Poloniex fees
+            var percent = /BTC @ (\d+.\d+)\%/i.exec(data)[1];
+            var rate = +percent / 100;
+
+            var btchourly = (+btc * +rate) / 24;
+            var btcdaily = (+btc * +rate);
+            var btcweekly = (+btc * +rate) * 7;
+            var btcmonthly = (+btc * +rate) * 30;
+
+            var text = (Math.round(btcmonthly * 100000000) / 100000000) + " BTC per Month<br/>"
+                    + (Math.round(btcweekly * 100000000) / 100000000) + " BTC per Week<br/>"
+                    + (Math.round(btcdaily * 100000000) / 100000000) + " BTC per Day<br/>"
+                    + Math.round(btchourly * 100000000) + " Satoshi per Hour<br/>";
+
+            $("#rate").html(text);
+        }
+
         function handleLocalFile(file) {
             localFile = file;
             reader = new FileReader();
@@ -93,6 +115,9 @@
                     </tr>
                     <tr>
                         <th class="col-xs-2">Status</th><th class="col-xs-10" id="status">N/A</th>
+                    </tr>
+                    <tr>
+                        <th class="col-xs-2" style="vertical-align: text-top;">BTC Rate</th><th class="col-xs-10" id="rate">N/A</th>
                     </tr>
                 </thead>
                 <tbody id="logtable">                   
