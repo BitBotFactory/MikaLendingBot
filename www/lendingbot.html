@@ -39,22 +39,48 @@
         }
 		
         function updateRates(data){
-            var btc = /(\d+\.\d+) BTC/i.exec(data)[1];
-            btc = btc * 0.85; // 15% goes to Poloniex fees
-            var percent = /BTC @ (\d+.\d+)\%/i.exec(data)[1];
-            var rate = +percent / 100;
+            var currencies = ["BTC","BTS","CLAM","DOGE","DASH","LTC","MAID","STR","XMR","XRP","ETH","FCT"];
+            for (var currency of currencies)
+            {
+                var re = new RegExp("(\\d+\.\\d+) "+currency,"i");
+                if(re.exec(data)!==null)
+                {
+                    var btc = re.exec(data)[1];
+                    btc = btc * 0.85; // 15% goes to Poloniex fees 
 
-            var btchourly = (+btc * +rate) / 24;
-            var btcdaily = (+btc * +rate);
-            var btcweekly = (+btc * +rate) * 7;
-            var btcmonthly = (+btc * +rate) * 30;
+                    var reg = new RegExp(currency+" @ (\\d+.\\d+)\%","i");
+                    var percent = reg.exec(data)[1];
+                    var rate = +percent / 100;
 
-            var text = (Math.round(btcmonthly * 100000000) / 100000000) + " BTC per Month<br/>"
-                    + (Math.round(btcweekly * 100000000) / 100000000) + " BTC per Week<br/>"
-                    + (Math.round(btcdaily * 100000000) / 100000000) + " BTC per Day<br/>"
-                    + Math.round(btchourly * 100000000) + " Satoshi per Hour<br/>";
+                    var btchourly = (+btc * +rate) / 24;
+                    var btcdaily = (+btc * +rate);
+                    var btcweekly = (+btc * +rate) * 7;
+                    var btcmonthly = (+btc * +rate) * 30;
 
-            $("#rate").html(text);
+                    var text = (Math.round(btcmonthly * 100000000) / 100000000) + " "+currency+" per Month<br/>"
+                            + (Math.round(btcweekly * 100000000) / 100000000) + " "+currency+" per Week<br/>"
+                            + (Math.round(btcdaily * 100000000) / 100000000) + " "+currency+" per Day<br/>"
+                            + Math.round(btchourly * 100000000) + " Satoshi per Hour<br/>";
+
+                    var divCurrency = document.getElementById(currency+"rate");
+                    if(divCurrency==null)
+                    {
+                        var thead = document.getElementById("statusTable");
+                        var row = thead.insertRow(-1);
+
+                        var cell1 = row.appendChild(document.createElement("th"));
+                        cell1.setAttribute("class","col-xs-2");
+                        cell1.setAttribute("style","vertical-align: text-top;");
+                        cell1.innerHTML = currency+" Rate";
+
+                        var cell2 = row.appendChild(document.createElement("th"));
+                        cell2.id=currency+"rate";
+                        cell2.setAttribute("class","col-xs-10");
+                        cell2.innerHTML = "N/A";
+                    }
+                    $("#"+currency+"rate").html(text);
+                }
+            }
         }
 
         function handleLocalFile(file) {
@@ -109,15 +135,12 @@
               <input type="file" id="file" name="file" style="display:none"  onchange="handleLocalFile(this.files[0])" />
             </div>
             <table class="table table-fixed">
-                <thead>
+                <thead id="statusTable">
                     <tr>
                         <th class="col-xs-2">Updated</th><th class="col-xs-10" id="updated">Not updated</th>
                     </tr>
                     <tr>
                         <th class="col-xs-2">Status</th><th class="col-xs-10" id="status">N/A</th>
-                    </tr>
-                    <tr>
-                        <th class="col-xs-2" style="vertical-align: text-top;">BTC Rate</th><th class="col-xs-10" id="rate">N/A</th>
                     </tr>
                 </thead>
                 <tbody id="logtable">                   
