@@ -154,7 +154,7 @@ def refreshTotalLended():
 def stringifyTotalLended():
 	result = 'Lended: '
 	for key in sorted(totalLended):
-		result += '[%.3f %s @ %.4f%%] ' % (Decimal(totalLended[key]), key, Decimal(rateLended[key]*100/totalLended[key]))
+		result += '[%.4f %s @ %.4f%%] ' % (Decimal(totalLended[key]), key, Decimal(rateLended[key]*100/totalLended[key]))
 	return result
 
 def createLoanOffer(cur,amt,rate):
