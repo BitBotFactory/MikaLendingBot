@@ -19,6 +19,8 @@ secret = YourSecret
 #sleep between active iterations, time in seconds (1-3600)
 sleeptimeactive = 60
 
+#sleep between inactive iterations, time in seconds (1-3600)
+sleeptimeinactive = 300
 
 #minimum daily lend rate in percent (0.00003-0.05)
 mindailyrate = 0.04
@@ -69,6 +71,7 @@ if len(loadedFiles) != 1:
 
 
 sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
+sleepTimeInactive = float(config.get("BOT","sleeptimeidle"))
 sleepTime = sleepTimeActive #Start off with the active sleepTime.
 minDailyRate = Decimal(config.get("BOT","mindailyrate"))/100
 maxDailyRate = Decimal(config.get("BOT","maxdailyrate"))/100
