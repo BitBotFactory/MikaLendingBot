@@ -16,17 +16,18 @@ apikey = YourAPIKey
 secret = YourSecret
 
 [BOT]
-#sleep between iterations, time in seconds
-sleeptime = 60
+#sleep between active iterations, time in seconds (1-3600)
+sleeptimeactive = 60
 
-#minimum daily lend rate in percent
+
+#minimum daily lend rate in percent (0.00003-0.05)
 mindailyrate = 0.04
 
 #max rate. 2% is good choice because it's default at margin trader interface.
-#5% is max to be accepted by the exchange
+#5% is max to be accepted by the exchange (0.00003-0.05)
 maxdailyrate = 2
 
-#The number of offers to split the available balance across the [gaptop, gapbottom] range.
+#The number of offers to split the available balance across the [gaptop, gapbottom] range. (1-20)
 spreadlend = 3
 
 #The depth of lendbook (in percent of lendable balance) to move through
@@ -37,7 +38,7 @@ gapbottom = 10
 gaptop = 200
 
 #Daily lend rate threshold after which we offer lends for 60 days as opposed to 2.
-#If set to 0 all offers will be placed for a 2 day period
+#If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
 sixtydaythreshold = 0.2
 
 #AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
@@ -67,7 +68,8 @@ if len(loadedFiles) != 1:
 		exit(0)
 
 
-sleepTime = float(config.get("BOT","sleeptime"))
+sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
+sleepTime = sleepTimeActive #Start off with the active sleepTime.
 minDailyRate = Decimal(config.get("BOT","mindailyrate"))/100
 maxDailyRate = Decimal(config.get("BOT","maxdailyrate"))/100
 spreadLend = int(config.get("BOT","spreadlend"))
@@ -87,7 +89,7 @@ except Exception as e:
 	pass
 	
 #sanity checks
-if sleepTime < 1 or sleepTime > 3600:
+if sleepTime < 1 or sleepTime > 3600 or sleepTimeIdle < 1 or sleepTimeIdle > 3600:
 	print "sleeptime value must be 1-3600"
 	exit(1)
 if minDailyRate < 0.00003 or minDailyRate > 0.05: # 0.003% daily is 1% yearly
