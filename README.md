@@ -36,7 +36,11 @@ secret = YourSecret
 
 [BOT]
 #sleep between iterations, time in seconds
-sleeptime = 60
+sleeptimeactive = 60
+
+#sleep between inactive iterations, time in seconds (1-3600)
+#set to same as sleeptimeactive to disable
+#sleeptimeinactive = 300
 
 #minimum daily lend rate in percent
 mindailyrate = 0.04
@@ -94,4 +98,3 @@ Under www folder you can find lendingbot.html webpage, it can be used to parse t
 ##Donations
 
 If you find it useful, please consider donating some bitcoins: 1MikadW4iKTJ54GVrj7xS1SrZAhLUyZk38
-

@@ -20,6 +20,7 @@ secret = YourSecret
 sleeptimeactive = 60
 
 #sleep between inactive iterations, time in seconds (1-3600)
+#set to same as sleeptimeactive to disable
 sleeptimeinactive = 300
 
 #minimum daily lend rate in percent (0.00003-0.05)
@@ -69,10 +70,15 @@ if len(loadedFiles) != 1:
 		print 'Edit default.cfg file with your api key and secret values'
 		exit(0)
 
-
-sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
-sleepTimeInactive = float(config.get("BOT","sleeptimeidle"))
-sleepTime = sleepTimeActive #Start off with the active sleepTime.
+try:
+	sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
+	sleepTimeInactive = float(config.get("BOT","sleeptimeinactive"))
+	sleepTime = sleepTimeActive #Start off with active mode.
+except:
+	sleepTime = float(config.get("BOT","sleeptime")) #If it can't find a setting, run with the old cfg.
+	sleepTimeActive = sleepTime
+	sleepTimeInactive = sleepTime
+	print "!!! Please update to new config that includes Inactive Mode. !!!" #Update alert.
 minDailyRate = Decimal(config.get("BOT","mindailyrate"))/100
 maxDailyRate = Decimal(config.get("BOT","maxdailyrate"))/100
 spreadLend = int(config.get("BOT","spreadlend"))
@@ -92,7 +98,7 @@ except Exception as e:
 	pass
 	
 #sanity checks
-if sleepTime < 1 or sleepTime > 3600 or sleepTimeIdle < 1 or sleepTimeIdle > 3600:
+if sleepTime < 1 or sleepTime > 3600 or sleepTimeInactive < 1 or sleepTimeInactive > 3600:
 	print "sleeptime value must be 1-3600"
 	exit(1)
 if minDailyRate < 0.00003 or minDailyRate > 0.05: # 0.003% daily is 1% yearly
@@ -204,10 +210,14 @@ def cancelAndLoanAll():
 		lendingBalances.update(onOrderBalances)
 	
 	activeCurIndex = 0
+	usableCurrencies = 0
+	global sleepTime #We need global var to edit sleeptime
 	while activeCurIndex < len(lendingBalances):
 		activeCur = lendingBalances.keys()[activeCurIndex]
 		activeCurIndex += 1
 		activeBal = lendingBalances[activeCur]
+		if float(activeBal) > 0.001: #Check if any currencies have enough to lend, if so, make sure sleeptimer is set to active.
+			usableCurrencies = 1
 		
 		#min daily rate can be changed per currency
 		curMinDailyRate = minDailyRate
@@ -264,7 +274,10 @@ def cancelAndLoanAll():
 					log.log( activeCur + ': Not enough offers in response, adjusting request limit to ' + str(loanOrdersRequestLimit[activeCur]))
 					# repeat currency
 					activeCurIndex -= 1
-
+	if usableCurrencies == 0: #After loop, if no currencies had enough to lend, use inactive sleep time.
+		sleepTime = sleepTimeInactive
+	else: #Else, use active sleep time.
+		sleepTime = sleepTimeActive
 def setAutoRenew(auto):
 	i = int(0) #counter
 	try:
