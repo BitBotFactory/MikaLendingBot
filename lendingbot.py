@@ -1,4 +1,4 @@
-import io, sys, time, datetime, urllib2, json
+import io, sys, time, datetime, urllib2, json, argparse 
 from poloniex import Poloniex
 from ConfigParser import SafeConfigParser
 from Logger import Logger
@@ -61,45 +61,109 @@ autorenew = 0
 #startWebServer = true
 """
 
-loadedFiles = config.read([config_location])
-#Create default config file if not found
-if len(loadedFiles) != 1:
-	config.readfp(io.BytesIO(defaultconfig))
-	with open(config_location, "w") as configfile:
-		configfile.write(defaultconfig)
-		print 'Edit default.cfg file with your api key and secret values'
-		exit(0)
+parser = argparse.ArgumentParser() #Start args.
+parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
+parser.add_argument("-dry", "--dryrun", help="Make pretend orders", action="store_true")
+parser.add_argument("-clrrenew", "--clearautorenew", help="Stops all autorenew orders", action="store_true")
+parser.add_argument("-setrenew", "--setautorenew", help="Sets all orders to autorenew", action="store_true")
+parser.add_argument("-key", "--apikey", help="Account API key, should be unique to this script.")
+parser.add_argument("-secret", "--apisecret", help="Account API secret, should be unique to this script.")
+parser.add_argument("-sleepactive", "--sleeptimeactive", help="Time between active iterations, seconds")
+parser.add_argument("-sleepinactive", "--sleeptimeinactive", help="Time between inactive iterations, seconds")
+parser.add_argument("-minrate", "--mindailyrate", help="Minimum rate you will lend at")
+parser.add_argument("-maxrate", "--maxdailyrate", help="Maximum rate you will lend at")
+parser.add_argument("-spread", "--spreadlend", help="How many orders to split your lending into")
+parser.add_argument("-gapbot", "--gapbottom", help="Percentage of your order's volume into the ledger you start lending")
+parser.add_argument("-gaptop", "--gaptop", help="Percentage of your order's volume into the ledger you stop lending")
+parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot will request to lend for 60 days")
+parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start", action="store_true")
+parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
+parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
+parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html")
+args = parser.parse_args() #End args.
+#Start handling args.
+if args.apikey:
+	apiKey = args.apikey
+if args.apisecret:
+	apiSecret = args.apisecret
+if args.sleeptimeactive:
+	sleepTimeActive = int(args.sleeptimeactive)
+if args.sleeptimeinactive:
+	sleepTimeInactive = int(args.sleeptimeinactive)
+if args.mindailyrate:
+	minDailyRate = Decimal(args.mindailyrate)
+if args.maxdailyrate:
+	maxDailyRate = Decimal(args.maxdailyrate)
+if args.spreadlend:
+	spreadLend = int(args.spreadlend)
+if args.gapbottom:
+	gapBottom = Decimal(args.gapbottom)
+if args.gaptop:
+	gapTop = Decimal(args.gapbottom)
+if args.sixtydaythreshold:
+	sixtyDayThreshold = Decimal(args.sixtydaythreshold)
+if args.dryrun:
+	dryRun = True
+else:
+	dryRun = False
+if args.config:
+	config_location = args.config
+if args.autorenew:
+	autoRenew = 1
+else:
+	autoRenew = 0
+#End handling args.
 
-try:
-	sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
-	sleepTimeInactive = float(config.get("BOT","sleeptimeinactive"))
-	sleepTime = sleepTimeActive #Start off with active mode.
-except:
-	sleepTime = float(config.get("BOT","sleeptime")) #If it can't find a setting, run with the old cfg.
-	sleepTimeActive = sleepTime
-	sleepTimeInactive = sleepTime
-	print "!!! Please update to new config that includes Inactive Mode. !!!" #Update alert.
-minDailyRate = Decimal(config.get("BOT","mindailyrate"))/100
-maxDailyRate = Decimal(config.get("BOT","maxdailyrate"))/100
-spreadLend = int(config.get("BOT","spreadlend"))
-gapBottom = Decimal(config.get("BOT","gapbottom"))
-gapTop = Decimal(config.get("BOT","gaptop"))
-sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
-autorenew = int(config.get("BOT","autorenew"))
+#Check if we need a config file at all (If all settings are passed by args, we won't)
+if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and args.sixtydaythreshold:
+	#If all that was true, we don't need a config file...
+	config_needed = False
+	print "Settings met from arguments."
+else:
+	config_needed = True
+	print "Settings met from config file."
 
+#When true, will overwrite anything passed by args with the found cfg
+if config_needed: 
+	loadedFiles = config.read([config_location])
+	# Create default config file if not found
+	if len(loadedFiles) != 1:
+		config.readfp(io.BytesIO(defaultconfig))
+		with open(config_location, "w") as configfile:
+			configfile.write(defaultconfig)
+			print 'Edit default.cfg file with your api key and secret values'
+			exit(0)
+
+	try:
+		sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
+		sleepTimeInactive = float(config.get("BOT","sleeptimeinactive"))
+	except:
+		sleepTime = float(config.get("BOT","sleeptime")) #If it can't find a setting, run with the old cfg.
+		sleepTimeActive = sleepTime
+		sleepTimeInactive = sleepTime
+		print "!!! Please update to new config that includes Inactive Mode. !!!" #Update alert.
+	apiKey = config.get("API","apikey")
+	apiSecret = config.get("API","secret")
+	minDailyRate = Decimal(config.get("BOT","mindailyrate"))/100
+	maxDailyRate = Decimal(config.get("BOT","maxdailyrate"))/100
+	spreadLend = int(config.get("BOT","spreadlend"))
+	gapBottom = Decimal(config.get("BOT","gapbottom"))
+	gapTop = Decimal(config.get("BOT","gaptop"))
+	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
+	autorenew = int(config.get("BOT","autorenew"))
+sleepTime = sleepTimeActive #Start with active mode
 try:
 	coincfg = {} #parsed
-	coinconfig = (json.loads(config.get("BOT","coinconfig")))
+	coinconfig = (json.loads(config.get("BOT","coinconfig"))) #TODO: Overwrite this with "dontlend" arg. ex: -dontlend BTC,CLAM 
 	#coinconfig parser
 	for cur in coinconfig:
 		cur = cur.split(':')
 		coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
 except Exception as e:
 	pass
-	
 #sanity checks
 if sleepTime < 1 or sleepTime > 3600 or sleepTimeInactive < 1 or sleepTimeInactive > 3600:
-	print "sleeptime value must be 1-3600"
+	print "sleeptime values must be 1-3600"
 	exit(1)
 if minDailyRate < 0.00003 or minDailyRate > 0.05: # 0.003% daily is 1% yearly
 	print "mindaily rate is set too low or too high, must be 0.003-5%"
@@ -111,18 +175,12 @@ if spreadLend < 1 or spreadLend > 20:
 	print "spreadlend value must be 1-20 range"
 	exit(1)
 
-dryRun = False
-try:
-	if sys.argv.index('--dryrun') > 0:
-		dryRun = True
-except ValueError:
-	pass
 
 def timestamp():
 	ts = time.time()
 	return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
-bot = Poloniex(config.get("API","apikey"), config.get("API","secret"))
+bot = Poloniex(apiKey, apiSecret)
 log = Logger()
 
 # check if json output is enabled
@@ -322,6 +380,13 @@ def startWebServer():
 	except Exception as e:
 		print 'Failed to start WebServer' + str(e)
 		
+#Parse these down here...
+if args.clearautorenew:
+	setAutoRenew(0)
+	raise SystemExit
+if args.setautorenew:
+	setAutoRenew(1)
+	raise SystemExit
 
 def stopWebServer():
 	try:
@@ -339,16 +404,8 @@ if webServerEnabled:
 	thread.deamon = True
 	thread.start()
 
-if '--clearAutoRenew' in sys.argv:
-	setAutoRenew(0)
-	raise SystemExit
-
-if '--setAutoRenew' in sys.argv:
-	setAutoRenew(1)
-	raise SystemExit
-
 #if config includes autorenew - start by clearing the current loans
-if autorenew == 1:
+if autoRenew == 1:
 	setAutoRenew(0);
 
 try:
@@ -363,7 +420,7 @@ try:
 			time.sleep(sleepTime)
 			pass
 except KeyboardInterrupt:
-	if autorenew == 1:
+	if autoRenew == 1:
 		setAutoRenew(1);
 	if webServerEnabled:
 		stopWebServer()
