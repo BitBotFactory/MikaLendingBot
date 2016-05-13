@@ -4,6 +4,7 @@ import datetime
 import atexit
 import json
 import io
+import ConsoleUtils
 from RingBuffer import RingBuffer
 
 class ConsoleOutput(object):
@@ -17,9 +18,10 @@ class ConsoleOutput(object):
 
 	def status(self, msg, time=''):
 		status = str(msg)
-		if msg != '' and len(status) > 99:
+		cols = ConsoleUtils.get_terminal_size()[0]
+		if msg != '' and len(status) > cols:
 			#truncate status, try preventing console bloating
-			status = str(msg)[:96] + '...' 
+			status = str(msg)[:cols-4] + '...'
 		update = '\r'
 		update += status
 		update += ' ' * (len(self._status) - len(status))
@@ -32,7 +34,7 @@ class ConsoleOutput(object):
 		update += line + ' ' * (len(self._status) - len(line)) + '\n'
 		update += self._status
 		sys.stderr.write(update)
-		
+
 class JsonOutput(object):
 	def __init__(self, file, logLimit):
 		self.jsonOutputFile = file
@@ -46,7 +48,7 @@ class JsonOutput(object):
 
 	def printline(self, line):
 		self.jsonOutputLog.append(line)
-		
+
 	def writeJsonFile(self):
 		with io.open(self.jsonOutputFile, 'w', encoding='utf-8') as f:
 			self.jsonOutput["log"] = self.jsonOutputLog.get()
@@ -82,9 +84,9 @@ class Logger(object):
 
 	def refreshStatus(self, lended=''):
 		if lended != '':
-			self._lended = lended;		
+			self._lended = lended;
 		self.console.status(self._lended, self.timestamp())
-		
+
 	def digestApiMsg(self, msg):
 		try:
 			m = (msg['message'])
