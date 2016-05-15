@@ -83,10 +83,8 @@ autorenew = 0
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
 
 ### Command Line Parameters
-```
---clearAutoRenew - will clear the AutoRenew flag on all exising loans
---setAutoRenew - will set the AutoRenew flag on all exising loans
-```
+[View Arguments Documentation in the Wiki](https://github.com/Mikadily/poloniexlendingbot/wiki/Arguments)
+
 
 ### Bot Status Webpage
 Under www folder you can find lendingbot.html webpage, it can be used to parse the json output file.
