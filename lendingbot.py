@@ -80,6 +80,7 @@ parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot sto
 parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
 parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
 parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html")
+parser.add_argument("-coincfg", "--coinconfig", help='Custom config per coin, useful when closing positions etc. Syntax: COIN:mindailyrate:maxactiveamount,COIN2:min2:maxactive2,...')
 args = parser.parse_args() #End args.
 #Start handling args.
 if args.apikey:
@@ -112,6 +113,12 @@ if args.autorenew:
 	autoRenew = 1
 else:
 	autoRenew = 0
+coincfg = {}
+if args.coinconfig:
+	coinconfig = args.coinconfig.split(',')
+	for cur in coinconfig:
+		cur = cur.split(':')
+		coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
 #End handling args.
 
 #Check if we need a config file at all (If all settings are passed by args, we won't)
@@ -121,7 +128,7 @@ if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeina
 	print "Settings met from arguments."
 else:
 	config_needed = True
-	print "Settings met from config file."
+	print "Obtaining settings from config file."
 
 #When true, will overwrite anything passed by args with the found cfg
 if config_needed: 
@@ -151,16 +158,16 @@ if config_needed:
 	gapTop = Decimal(config.get("BOT","gaptop"))
 	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 	autorenew = int(config.get("BOT","autorenew"))
+	
+	try:
+		#parsed
+		coinconfig = (json.loads(config.get("BOT","coinconfig")))
+		for cur in coinconfig:
+			cur = cur.split(':')
+			coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
+	except Exception as e:
+		pass
 sleepTime = sleepTimeActive #Start with active mode
-try:
-	coincfg = {} #parsed
-	coinconfig = (json.loads(config.get("BOT","coinconfig"))) #TODO: Overwrite this with "dontlend" arg. ex: -dontlend BTC,CLAM 
-	#coinconfig parser
-	for cur in coinconfig:
-		cur = cur.split(':')
-		coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
-except Exception as e:
-	pass
 #sanity checks
 if sleepTime < 1 or sleepTime > 3600 or sleepTimeInactive < 1 or sleepTimeInactive > 3600:
 	print "sleeptime values must be 1-3600"
@@ -185,8 +192,12 @@ log = Logger()
 
 # check if json output is enabled
 try:
-	jsonFile = config.get("BOT","jsonfile")
-	jsonLogSize = int(config.get("BOT","jsonlogsize"))
+	if config_needed:
+		jsonFile = config.get("BOT","jsonfile")
+		jsonLogSize = int(config.get("BOT","jsonlogsize"))
+	else:
+		jsonFile = args.jsonfile
+		jsonLogSize = args.jsonLogSize
 	log = Logger(jsonFile, jsonLogSize)
 except Exception as e:
 	log = Logger()
@@ -397,7 +408,10 @@ def stopWebServer():
 	
 print 'Welcome to Poloniex Lending Bot'
 
-webServerEnabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
+if config_needed:
+	webServerEnabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
+else:
+	webServerEnabled = args.startwebserver
 if webServerEnabled:
 	import threading
 	thread = threading.Thread(target = startWebServer)
