@@ -79,7 +79,7 @@ parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot wil
 parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start", action="store_true")
 parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
 parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
-parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html")
+parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html", action="store_true")
 parser.add_argument("-coincfg", "--coinconfig", help='Custom config per coin, useful when closing positions etc. Syntax: COIN:mindailyrate:maxactiveamount,COIN2:min2:maxactive2,...')
 args = parser.parse_args() #End args.
 #Start handling args.
