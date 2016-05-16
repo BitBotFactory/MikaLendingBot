@@ -35,7 +35,7 @@
             var table = $('#logtable');
             table.empty();
             for (var i = rowCount - 1; i >=0; i--) {
-                table.append('<tr><td class="col-xs-12" colspan="2">' + data.log[i] + '</td></tr>');
+                table.append($('<tr/>').append($('<td class="col-xs-12" colspan="2" />').text(data.log[i])));
             } 
         }
 		

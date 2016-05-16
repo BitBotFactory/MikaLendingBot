@@ -3,6 +3,7 @@ import urllib2
 import json
 import time
 import hmac,hashlib
+import socket
 
 def createTimeStamp(datestr, format="%Y-%m-%d %H:%M:%S"):
     return time.mktime(time.strptime(datestr, format))
@@ -11,6 +12,7 @@ class Poloniex:
     def __init__(self, APIKey, Secret):
         self.APIKey = APIKey
         self.Secret = Secret
+        socket.setdefaulttimeout(30)
 
     def post_process(self, before):
         after = before
