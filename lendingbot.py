@@ -169,7 +169,6 @@ if config_needed:
 	autorenew = int(config.get("BOT","autorenew"))
 	if(config.has_option('BOT', 'minloansize')):
 		minLoanSize = Decimal(config.get("BOT",'minloansize'));
-	print minLoanSize	
 	
 	try:
 		#parsed
