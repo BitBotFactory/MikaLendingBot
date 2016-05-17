@@ -44,6 +44,9 @@ gaptop = 200
 #If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
 sixtydaythreshold = 0.2
 
+#Minimum loan size the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loans fragmentation
+minloansize = 0.001
+
 #AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
 autorenew = 0
 
@@ -61,6 +64,9 @@ autorenew = 0
 #startWebServer = true
 """
 
+#Defaults
+minLoanSize = 0.001
+
 parser = argparse.ArgumentParser() #Start args.
 parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
 parser.add_argument("-dry", "--dryrun", help="Make pretend orders", action="store_true")
@@ -77,6 +83,7 @@ parser.add_argument("-gapbot", "--gapbottom", help="Percentage of your order's v
 parser.add_argument("-gaptop", "--gaptop", help="Percentage of your order's volume into the ledger you stop lending")
 parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot will request to lend for 60 days")
 parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start", action="store_true")
+parser.add_argument("-minloan", "--minloansize", help='Minimum size of offers to make')
 parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
 parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
 parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html", action="store_true")
@@ -113,6 +120,8 @@ if args.autorenew:
 	autoRenew = 1
 else:
 	autoRenew = 0
+if args.minloansize:
+	minLoanSize = Decimal(args.minloansize)
 coincfg = {}
 if args.coinconfig:
 	coinconfig = args.coinconfig.split(',')
@@ -158,6 +167,9 @@ if config_needed:
 	gapTop = Decimal(config.get("BOT","gaptop"))
 	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 	autorenew = int(config.get("BOT","autorenew"))
+	if(config.has_option('BOT', 'minloansize')):
+		minLoanSize = Decimal(config.get("BOT",'minloansize'));
+	print minLoanSize	
 	
 	try:
 		#parsed
@@ -239,8 +251,8 @@ def stringifyTotalLended():
 
 def createLoanOffer(cur,amt,rate):
 	days = '2'
-	#if (minDailyRate - 0.000001) < rate and Decimal(amt) > 0.001:
-	if float(amt) > 0.001:
+	#if (minDailyRate - 0.000001) < rate and Decimal(amt) > minLoanSize:
+	if float(amt) > minLoanSize:
 		rate = float(rate) - 0.000001 #lend offer just bellow the competing one
 		amt = "%.8f" % Decimal(amt)
 		if rate > sixtyDayThreshold:
@@ -285,7 +297,7 @@ def cancelAndLoanAll():
 		activeCur = lendingBalances.keys()[activeCurIndex]
 		activeCurIndex += 1
 		activeBal = lendingBalances[activeCur]
-		if float(activeBal) > 0.001: #Check if any currencies have enough to lend, if so, make sure sleeptimer is set to active.
+		if float(activeBal) > minLoanSize: #Check if any currencies have enough to lend, if so, make sure sleeptimer is set to active.
 			usableCurrencies = 1
 		
 		#min daily rate can be changed per currency

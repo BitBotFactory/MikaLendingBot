@@ -35,21 +35,21 @@ apikey = YourAPIKey
 secret = YourSecret
 
 [BOT]
-#sleep between iterations, time in seconds
+#sleep between active iterations, time in seconds (1-3600)
 sleeptimeactive = 60
 
 #sleep between inactive iterations, time in seconds (1-3600)
 #set to same as sleeptimeactive to disable
-#sleeptimeinactive = 300
+sleeptimeinactive = 300
 
-#minimum daily lend rate in percent
+#minimum daily lend rate in percent (0.00003-0.05)
 mindailyrate = 0.04
 
 #max rate. 2% is good choice because it's default at margin trader interface.
-#5% is max to be accepted by the exchange
+#5% is max to be accepted by the exchange (0.00003-0.05)
 maxdailyrate = 2
 
-#The number of offers to split the available balance across the [gaptop, gapbottom] range.
+#The number of offers to split the available balance across the [gaptop, gapbottom] range. (1-20)
 spreadlend = 3
 
 #The depth of lendbook (in percent of lendable balance) to move through
@@ -60,8 +60,11 @@ gapbottom = 10
 gaptop = 200
 
 #Daily lend rate threshold after which we offer lends for 60 days as opposed to 2.
-#If set to 0 all offers will be placed for a 2 day period
+#If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
 sixtydaythreshold = 0.2
+
+#Minimum loan size the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loans fragmentation
+minloansize = 0.001
 
 #AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
 autorenew = 0
