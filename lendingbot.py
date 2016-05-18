@@ -1,4 +1,5 @@
 import io, sys, time, datetime, urllib2, json, argparse 
+import traceback
 from poloniex import Poloniex
 from ConfigParser import SafeConfigParser
 from Logger import Logger
@@ -168,7 +169,7 @@ if config_needed:
 	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 	autorenew = int(config.get("BOT","autorenew"))
 	if(config.has_option('BOT', 'minloansize')):
-		minLoanSize = Decimal(config.get("BOT",'minloansize'));
+		minLoanSize = Decimal(config.get("BOT",'minloansize'))
 	
 	try:
 		#parsed
@@ -199,10 +200,11 @@ def timestamp():
 	return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 bot = Poloniex(apiKey, apiSecret)
-log = Logger()
+log = {}
 
 # check if json output is enabled
-try:
+jsonOutputEnabled = (config.has_option('BOT', 'jsonfile') and config.has_option('BOT', 'jsonlogsize')) or (args.jsonfile and args.jsonLogSize) 
+if jsonOutputEnabled:
 	if config_needed:
 		jsonFile = config.get("BOT","jsonfile")
 		jsonLogSize = int(config.get("BOT","jsonlogsize"))
@@ -210,9 +212,8 @@ try:
 		jsonFile = args.jsonfile
 		jsonLogSize = args.jsonLogSize
 	log = Logger(jsonFile, jsonLogSize)
-except Exception as e:
+else:
 	log = Logger()
-	pass
 
 #total lended global variable
 totalLended = {}
@@ -245,7 +246,10 @@ def refreshTotalLended():
 def stringifyTotalLended():
 	result = 'Lended: '
 	for key in sorted(totalLended):
-		result += '[%.4f %s @ %.4f%%] ' % (Decimal(totalLended[key]), key, Decimal(rateLended[key]*100/totalLended[key]))
+		averageLendingRate = Decimal(rateLended[key]*100/totalLended[key])
+		result += '[%.4f %s @ %.4f%%] ' % (Decimal(totalLended[key]), key, averageLendingRate)
+		log.updateStatusValue(key, "lentSum", totalLended[key])
+		log.updateStatusValue(key, "averageLendingRate", averageLendingRate)
 	return result
 
 def createLoanOffer(cur,amt,rate):
@@ -325,6 +329,8 @@ def cancelAndLoanAll():
 		activePlusLended = Decimal(activeBal)
 		if activeCur in totalLended:
 			activePlusLended += Decimal(totalLended[activeCur])
+		#log total coin
+		log.updateStatusValue(activeCur, "totalCoins", activePlusLended)
 		if loansLength == 0:
 			createLoanOffer(activeCur,Decimal(activeBal)-lent,maxDailyRate)
 		for offer in loans['offers']:
@@ -402,6 +408,18 @@ def startWebServer():
 	except Exception as e:
 		print 'Failed to start WebServer' + str(e)
 		
+def updateConversionRates():
+	global jsonOutputEnabled, totalLended
+	if(jsonOutputEnabled):
+		tickerResponse = bot.returnTicker();
+		for couple in tickerResponse:
+			currencies = couple.split('_')
+			ref = currencies[0]
+			currency = currencies[1]
+			if ref == 'BTC' and currency in totalLended:
+				log.updateStatusValue(currency, 'highestBid', tickerResponse[couple]['highestBid'])
+				log.updateStatusValue(currency, 'couple', couple)
+		
 #Parse these down here...
 if args.clearautorenew:
 	setAutoRenew(0)
@@ -437,11 +455,14 @@ try:
 	while True:
 		try:
 			refreshTotalLended()
-			log.refreshStatus(stringifyTotalLended())
+			updateConversionRates()
 			cancelAndLoanAll()
+			log.refreshStatus(stringifyTotalLended())
+			log.persistStatus()
 			time.sleep(sleepTime)
 		except Exception as e:
 			log.log("ERROR: " + str(e))
+			traceback.print_exc()
 			time.sleep(sleepTime)
 			pass
 except KeyboardInterrupt:

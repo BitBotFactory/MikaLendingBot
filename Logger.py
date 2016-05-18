@@ -35,16 +35,18 @@ class ConsoleOutput(object):
 		update += self._status
 		sys.stderr.write(update)
 
+
 class JsonOutput(object):
 	def __init__(self, file, logLimit):
 		self.jsonOutputFile = file
 		self.jsonOutput = {}
+		self.jsonOutputCoins = {}
+		self.jsonOutput["raw_data"] = self.jsonOutputCoins
 		self.jsonOutputLog = RingBuffer(logLimit);
 
 	def status(self, status, time):
 		self.jsonOutput["last_update"] = time
 		self.jsonOutput["last_status"] = status
-		self.writeJsonFile()
 
 	def printline(self, line):
 		self.jsonOutputLog.append(line)
@@ -54,6 +56,14 @@ class JsonOutput(object):
 			self.jsonOutput["log"] = self.jsonOutputLog.get()
 			f.write(unicode(json.dumps(self.jsonOutput, ensure_ascii=False, sort_keys=True)))
 			f.close()
+	
+	def statusValue(self, coin, key, value):
+		if(coin not in self.jsonOutputCoins):
+			self.jsonOutputCoins[coin] = {}
+		self.jsonOutputCoins[coin][key] = str(value)
+	
+	def clearStatusValues(self):
+		self.jsonOutputCoins = {}
 
 class Logger(object):
 	def __init__(self, jsonFile = '', jsonLogSize = -1):
@@ -86,6 +96,16 @@ class Logger(object):
 		if lended != '':
 			self._lended = lended;
 		self.console.status(self._lended, self.timestamp())
+
+	def updateStatusValue(self, coin, key, value):
+		if(hasattr(self.console , 'statusValue')):
+			self.console.statusValue(coin, key, value)
+	
+	def persistStatus(self):
+		if(hasattr(self.console , 'writeJsonFile')):
+			self.console.writeJsonFile()
+		if(hasattr(self.console , 'clearStatusValues')):
+			self.console.clearStatusValues()
 
 	def digestApiMsg(self, msg):
 		try:

@@ -28,58 +28,98 @@
         function updateJson(data) {
             $('#status').text(data.last_status);
             $('#updated').text(data.last_update);
-			
-            updateRates(data.last_status);
-			
+
             var rowCount = data.log.length;
             var table = $('#logtable');
             table.empty();
             for (var i = rowCount - 1; i >=0; i--) {
-                table.append($('<tr/>').append($('<td class="col-xs-12" colspan="2" />').text(data.log[i])));
+                table.append($('<tr/>').append($('<td colspan="2" />').text(data.log[i])));
             } 
+            
+            updateRawValues(data.raw_data);
         }
 		
-        function updateRates(data){
-            var currencies = ["BTC","BTS","CLAM","DOGE","DASH","LTC","MAID","STR","XMR","XRP","ETH","FCT"];
-            for (var currency of currencies)
+        function updateRawValues(rawData){
+            var table = document.getElementById("detailsTable");
+            table.innerHTML = "";
+            var currencies = Object.keys(rawData);
+            for (var keyIndex = 0; keyIndex < currencies.length; ++keyIndex)
             {
-                var re = new RegExp("(\\d+\.\\d+) "+currency,"i");
-                if(re.exec(data)!==null)
+                var currency = currencies[keyIndex];
+                var averageLendingRate = parseFloat(rawData[currency]['averageLendingRate']);
+                var lentSum = parseFloat(rawData[currency]['lentSum']);
+                var totalCoins = parseFloat(rawData[currency]['totalCoins']);
+                var highestBidBTC = parseFloat(rawData[currency]['highestBid']);
+                var couple = rawData[currency]['couple'];
+
+                if(!isNaN(averageLendingRate) && !isNaN(lentSum) || !isNaN(totalCoins))
                 {
-                    var btc = re.exec(data)[1];
-                    btc = btc * 0.85; // 15% goes to Poloniex fees 
-
-                    var reg = new RegExp(currency+" @ (\\d+.\\d+)\%","i");
-                    var percent = reg.exec(data)[1];
-                    var rate = +percent / 100;
-
-                    var btchourly = (+btc * +rate) / 24;
-                    var btcdaily = (+btc * +rate);
-                    var btcweekly = (+btc * +rate) * 7;
-                    var btcmonthly = (+btc * +rate) * 30;
-
-                    var text = (Math.round(btcmonthly * 100000000) / 100000000) + " "+currency+" per Month<br/>"
-                            + (Math.round(btcweekly * 100000000) / 100000000) + " "+currency+" per Week<br/>"
-                            + (Math.round(btcdaily * 100000000) / 100000000) + " "+currency+" per Day<br/>"
-                            + Math.round(btchourly * 100000000) + " Satoshi per Hour<br/>";
-
-                    var divCurrency = document.getElementById(currency+"rate");
-                    if(divCurrency==null)
-                    {
-                        var thead = document.getElementById("statusTable");
-                        var row = thead.insertRow(-1);
-
-                        var cell1 = row.appendChild(document.createElement("th"));
-                        cell1.setAttribute("class","col-xs-2");
-                        cell1.setAttribute("style","vertical-align: text-top;");
-                        cell1.innerHTML = currency+" Rate";
-
-                        var cell2 = row.appendChild(document.createElement("th"));
-                        cell2.id=currency+"rate";
-                        cell2.setAttribute("class","col-xs-10");
-                        cell2.innerHTML = "N/A";
+                
+                    // cover cases where totalCoins isn't updated because all coins are lent
+                    if(isNaN(totalCoins) && !isNaN(lentSum)) {
+                        totalCoins = lentSum;
                     }
-                    $("#"+currency+"rate").html(text);
+                    var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to Poloniex fees
+
+                    var earnHourly = (+lentSum * +rate) / 24;
+                    earnHourly = isNaN(earnHourly) ? 0 : earnHourly;
+                    var earnDaily = (+lentSum * +rate);
+                    var earnWeekly = (+lentSum * +rate) * 7;               
+                    var earnMonthly = (+lentSum * +rate) * 30;
+                    
+                    var earnings = roundFloat(earnMonthly, 100000000) + " "+currency+" / Month<br/>"
+                            + roundFloat(earnWeekly, 100000000) + " "+currency+" / Week<br/>"
+                            + roundFloat(earnDaily, 100000000) + " "+currency+" / Day<br/>";
+                    if(currency == 'BTC') {
+                        earnings += Math.round(earnHourly * 100000000) + " Satoshi / Hour<br/>";                        
+                    } else {
+                        earnings += roundFloat(earnHourly, 100000000) + " "+currency+" / Hour<br/>";
+                    }
+                            
+                            
+                    var effectiveRate = lentSum * rate * 100 / totalCoins;
+                    
+                    var rowValues = [currency,
+                        roundFloat(lentSum, 10000) + ' ' + currency,
+                        roundFloat(averageLendingRate, 100000)  + '%',
+                        roundFloat(totalCoins, 10000)  + ' ' + currency,
+                        roundFloat(effectiveRate, 100000) + '%' ]
+
+                    var row = table.insertRow();
+                    
+                    for (var i = 0; i < rowValues.length; ++i) {
+                        var cell = row.appendChild(document.createElement("td"));
+                        cell.innerHTML = rowValues[i];
+                    }
+                    
+                    // add earnings
+                    var row = table.insertRow();
+                    
+                    var earningsColspan = rowValues.length - 1;
+                    var earningsBTC;
+                    if(!isNaN(highestBidBTC)) {
+                        earningsBTC = roundFloat(earnMonthly * highestBidBTC, 100000000) + " BTC / Month<br/>"
+                            + roundFloat(earnWeekly * highestBidBTC, 100000000) + " BTC / Week<br/>"
+                            + roundFloat(earnDaily * highestBidBTC, 100000000) + " BTC / Day<br/>"
+                            + Math.round(earnHourly * highestBidBTC * 100000000) + " Satoshi / Hour<br/>";
+                            
+                        earningsColspan = Math.round(earningsColspan / 2);                                                
+                    }
+                    
+                    var cell = row.appendChild(document.createElement("td"));
+                    cell.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
+                    cell = row.appendChild(document.createElement("td"));
+                    cell.setAttribute("colspan", earningsColspan);
+                    cell.innerHTML = earnings;
+                    
+                    if(earningsBTC) {
+                        var cell = row.appendChild(document.createElement("td"));
+                            cell.innerHTML = "<b>"+ couple +"<br/>highest bid:<br/>"+ highestBidBTC +"<b>";
+                        var cell = row.appendChild(document.createElement("td"));
+                            cell.setAttribute("colspan", rowValues.length - earningsColspan - 1);
+                            cell.innerHTML = earningsBTC;
+                    }
+
                 }
             }
         }
@@ -109,8 +149,12 @@
                    // retry after 60sec
                    setTimeout('loadData()',60000)
                 });;
-            }
-            
+            }            
+        }
+        
+        function roundFloat(value, roundFigure) {
+            var result = Math.round(value * roundFigure) / roundFigure;
+            return result = isNaN(result) ? 0 : result;
         }
         
         $(document).ready(function () {
@@ -128,26 +172,46 @@
     <!-- Page Content -->
     <div class="container">
       <div class="row">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h4>
-                Poloniex Lending Bot
-              </h4>
-              <input type="file" id="file" name="file" style="display:none"  onchange="handleLocalFile(this.files[0])" />
-            </div>
-            <table class="table table-fixed">
-                <thead id="statusTable">
-                    <tr>
-                        <th class="col-xs-2">Updated</th><th class="col-xs-10" id="updated">Not updated</th>
-                    </tr>
-                    <tr>
-                        <th class="col-xs-2">Status</th><th class="col-xs-10" id="status">N/A</th>
-                    </tr>
-                </thead>
-                <tbody id="logtable">                   
-                </tbody>
-            </table>
-          </div>
+        <div class="panel-heading" style="background-color:#f2f2f2" >
+          <h4>
+            Poloniex Lending Bot
+          </h4>
+          <input type="file" id="file" name="file" style="display:none"  onchange="handleLocalFile(this.files[0])" />
+        </div>
+      </div>
+      <div class="row" style="overflow-x:auto">
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Updated</th><th id="updated">Not updated</th>
+                </tr>
+                <tr>
+                    <th style="vertical-align: text-top;">Status</th><th style="vertical-align: text-top;" id="status">N/A</th>
+                </tr>
+                <tr>
+                    <td style="vertical-align: text-top;padding:0px;" colspan="2" >
+                        <table class="table table-striped table-responsive" style="margin:0px">
+                            <thead>
+                                <tr>
+                                    <th>Coin</th>
+                                    <th>Active Loans</th>
+                                    <th>Average Loan<br/>Interest Rate</th>
+                                    <th>Total</th>
+                                    <th>Effective<br/>Interest Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailsTable">                   
+                            </tbody>
+                        </table>                        
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan="2">Log (Reversed ordered):</th>
+                </tr>
+            </thead>
+            <tbody id="logtable">                   
+            </tbody>
+        </table>
       </div>
     </div>
     <!-- /.container -->
