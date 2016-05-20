@@ -40,8 +40,7 @@ class JsonOutput(object):
 	def __init__(self, file, logLimit):
 		self.jsonOutputFile = file
 		self.jsonOutput = {}
-		self.jsonOutputCoins = {}
-		self.jsonOutput["raw_data"] = self.jsonOutputCoins
+		self.clearStatusValues()
 		self.jsonOutputLog = RingBuffer(logLimit);
 
 	def status(self, status, time):
@@ -64,6 +63,8 @@ class JsonOutput(object):
 	
 	def clearStatusValues(self):
 		self.jsonOutputCoins = {}
+		self.jsonOutput["raw_data"] = self.jsonOutputCoins
+
 
 class Logger(object):
 	def __init__(self, jsonFile = '', jsonLogSize = -1):
