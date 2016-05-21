@@ -100,9 +100,9 @@ if args.sleeptimeactive:
 if args.sleeptimeinactive:
 	sleepTimeInactive = int(args.sleeptimeinactive)
 if args.mindailyrate:
-	minDailyRate = Decimal(args.mindailyrate)
+	minDailyRate = Decimal(args.mindailyrate)/100
 if args.maxdailyrate:
-	maxDailyRate = Decimal(args.maxdailyrate)
+	maxDailyRate = Decimal(args.maxdailyrate)/100
 if args.spreadlend:
 	spreadLend = int(args.spreadlend)
 if args.gapbottom:
@@ -110,7 +110,7 @@ if args.gapbottom:
 if args.gaptop:
 	gapTop = Decimal(args.gapbottom)
 if args.sixtydaythreshold:
-	sixtyDayThreshold = Decimal(args.sixtydaythreshold)
+	sixtyDayThreshold = Decimal(args.sixtydaythreshold)/100
 if args.dryrun:
 	dryRun = True
 else:
@@ -203,14 +203,14 @@ bot = Poloniex(apiKey, apiSecret)
 log = {}
 
 # check if json output is enabled
-jsonOutputEnabled = (config.has_option('BOT', 'jsonfile') and config.has_option('BOT', 'jsonlogsize')) or (args.jsonfile and args.jsonLogSize) 
+jsonOutputEnabled = (config.has_option('BOT', 'jsonfile') and config.has_option('BOT', 'jsonlogsize')) or (args.jsonfile and args.jsonlogsize) 
 if jsonOutputEnabled:
 	if config_needed:
 		jsonFile = config.get("BOT","jsonfile")
 		jsonLogSize = int(config.get("BOT","jsonlogsize"))
 	else:
 		jsonFile = args.jsonfile
-		jsonLogSize = args.jsonLogSize
+		jsonLogSize = args.jsonlogsize
 	log = Logger(jsonFile, jsonLogSize)
 else:
 	log = Logger()
