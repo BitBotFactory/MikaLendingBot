@@ -112,7 +112,7 @@
                     cell.setAttribute("colspan", earningsColspan);
                     cell.innerHTML = earnings;
                     
-                    if(earningsBTC) {
+                    if(!isNaN(highestBidBTC)) {
                         var cell = row.appendChild(document.createElement("td"));
                             cell.innerHTML = "<b>"+ couple +"<br/>highest bid:<br/>"+ highestBidBTC +"<b>";
                         var cell = row.appendChild(document.createElement("td"));
