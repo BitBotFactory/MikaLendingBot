@@ -1,9 +1,9 @@
 var localFile, reader;
 
-var	Hour = new Timespan("Hour",1/24);
-var	Day = new Timespan("Day",1);
-var	Week = new Timespan("Week",7);
-var	Month = new Timespan("Month",30);
+var Hour = new Timespan("Hour",1/24);
+var Day = new Timespan("Day",1);
+var Week = new Timespan("Week",7);
+var Month = new Timespan("Month",30);
 var timespans = [Month, Week, Day, Hour];
 
 function updateJson(data) {
@@ -43,39 +43,39 @@ function updateRawValues(rawData){
             }
             var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to Poloniex fees
 
-			var earnings = '';
-			var earningsBTC = '';
-			timespans.forEach(function(timespan) {
-				// init totalBTCEarnings
-				if(isNaN(totalBTCEarnings[timespan.name])) {
-					totalBTCEarnings[timespan.name] = 0;
-				}
+            var earnings = '';
+            var earningsBTC = '';
+            timespans.forEach(function(timespan) {
+                // init totalBTCEarnings
+                if(isNaN(totalBTCEarnings[timespan.name])) {
+                    totalBTCEarnings[timespan.name] = 0;
+                }
 
-				// calculate coin earnings
-				timespanEarning = timespan.calcEarnings(lentSum, rate);
-				earnings += timespan.formatEarnings(currency, timespanEarning);
-				if(currency == 'BTC') {
-					totalBTCEarnings[timespan.name] += timespanEarning;
-				}
+                // calculate coin earnings
+                timespanEarning = timespan.calcEarnings(lentSum, rate);
+                earnings += timespan.formatEarnings(currency, timespanEarning);
+                if(currency == 'BTC') {
+                    totalBTCEarnings[timespan.name] += timespanEarning;
+                }
 
-				// calculate BTC earnings
-				if(!isNaN(highestBidBTC)) {
-					timespanEarningBTC = timespan.calcEarnings(lentSum * highestBidBTC, rate);
-					earningsBTC += timespan.formatEarnings("BTC", timespanEarningBTC);
-					totalBTCEarnings[timespan.name] += timespanEarningBTC;
-				}
-			});
+                // calculate BTC earnings
+                if(!isNaN(highestBidBTC)) {
+                    timespanEarningBTC = timespan.calcEarnings(lentSum * highestBidBTC, rate);
+                    earningsBTC += timespan.formatEarnings("BTC", timespanEarningBTC);
+                    totalBTCEarnings[timespan.name] += timespanEarningBTC;
+                }
+            });
 
 
             var effectiveRate = lentSum * rate * 100 / totalCoins;
 
             var rowValues = [currency,
-                roundFloat(lentSum, 10000) + ' ' + currency,
-                roundFloat(averageLendingRate, 100000)  + '%',
-                roundFloat(totalCoins, 10000)  + ' ' + currency,
-                roundFloat(effectiveRate, 100000) + '%' ]
+                printFloat(lentSum, 4) + ' ' + currency,
+                printFloat(averageLendingRate, 5)  + '%',
+                printFloat(totalCoins, 4)  + ' ' + currency,
+                printFloat(effectiveRate, 5) + '%' ]
 
-			// print coin status
+            // print coin status
             var row = table.insertRow();
             for (var i = 0; i < rowValues.length; ++i) {
                 var cell = row.appendChild(document.createElement("td"));
@@ -85,53 +85,55 @@ function updateRawValues(rawData){
 
             var earningsColspan = rowValues.length - 1;
 
-			// adjust coin earnings table cell span for BTC earnings
+            // adjust coin earnings table cell span for BTC earnings
             if(!isNaN(highestBidBTC)) {
                 earningsColspan = Math.round(earningsColspan / 2);
             }
 
             // print coin earnings
-			var row = table.insertRow();
-            var cell = row.appendChild(document.createElement("td"));
-            cell.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
-            cell = row.appendChild(document.createElement("td"));
-            cell.setAttribute("colspan", earningsColspan);
-            cell.innerHTML = earnings;
+            var row = table.insertRow();
+			if(lentSum > 0) {
+				var cell = row.appendChild(document.createElement("td"));
+				cell.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
+				cell = row.appendChild(document.createElement("td"));
+				cell.setAttribute("colspan", earningsColspan);
+				cell.innerHTML = earnings;
 
-			// print coin BTC earnings
-            if(!isNaN(highestBidBTC)) {
-                var cell = row.appendChild(document.createElement("td"));
-                    cell.innerHTML = "<b>"+ couple +"<br/>highest bid:<br/>"+ highestBidBTC +"<b>";
-                var cell = row.appendChild(document.createElement("td"));
-                    cell.setAttribute("colspan", rowValues.length - earningsColspan - 1);
-                    cell.innerHTML = earningsBTC;
-            }
+				// print coin BTC earnings
+				if(!isNaN(highestBidBTC)) {
+					var cell = row.appendChild(document.createElement("td"));
+						cell.innerHTML = "<b>"+ couple +"<br/>highest bid:<br/>"+ printFloat(highestBidBTC, 8) +"<b>";
+					var cell = row.appendChild(document.createElement("td"));
+						cell.setAttribute("colspan", rowValues.length - earningsColspan - 1);
+						cell.innerHTML = earningsBTC;
+				}
+			}
         }
     }
 
-	// add headers
-	var thead = table.createTHead();
-	var row = thead.insertRow();
-	var rowValues = ["Coin", "Active Loans", "Average Loan<br/>Interest Rate", "Total", "Effective<br/>Interest Rate"];
-	for (var i = 0; i < rowValues.length; ++i) {
-		var cell = row.appendChild(document.createElement("th"));
-		cell.innerHTML = rowValues[i];
-	}
+    // add headers
+    var thead = table.createTHead();
+    var row = thead.insertRow();
+    var rowValues = ["Coin", "Active Loans", "Average Loan<br/>Interest Rate", "Total", "Effective<br/>Interest Rate"];
+    for (var i = 0; i < rowValues.length; ++i) {
+        var cell = row.appendChild(document.createElement("th"));
+        cell.innerHTML = rowValues[i];
+    }
 
-	// show account summary
-	if(currencies.length > 1) {
-		earnings = '';
-		timespans.forEach(function(timespan) {
-			earnings += timespan.formatEarnings( 'BTC', totalBTCEarnings[timespan.name]);
-		});
-		var row = thead.insertRow(0);
-		var cell = row.appendChild(document.createElement("th"));
-		cell.innerHTML = "Account<br/>Estimated<br/>Earnings";
-		cell.style.verticalAlign = "text-top";
-		cell = row.appendChild(document.createElement("th"));
-		cell.setAttribute("colspan", rowValues.length - 1);
-		cell.innerHTML = earnings;
-	}
+    // show account summary
+    if(currencies.length > 1) {
+        earnings = '';
+        timespans.forEach(function(timespan) {
+            earnings += timespan.formatEarnings( 'BTC', totalBTCEarnings[timespan.name]);
+        });
+        var row = thead.insertRow(0);
+        var cell = row.appendChild(document.createElement("th"));
+        cell.innerHTML = "Account<br/>Estimated<br/>Earnings";
+        cell.style.verticalAlign = "text-top";
+        cell = row.appendChild(document.createElement("th"));
+        cell.setAttribute("colspan", rowValues.length - 1);
+        cell.innerHTML = earnings;
+    }
 }
 
 function handleLocalFile(file) {
@@ -162,24 +164,25 @@ function loadData() {
     }
 }
 
-function roundFloat(value, roundFigure) {
-    var result = Math.round(value * roundFigure) / roundFigure;
-    return result = isNaN(result) ? 0 : result;
+function printFloat(value, precision) {
+    var multiplier = Math.pow(10, precision);
+    var result = Math.round(value * multiplier) / multiplier;
+    return result = isNaN(result) ? "0" : result.toFixed(precision);
 }
 
 function Timespan(name, multiplier) {
     this.name = name;
     this.multiplier = multiplier;
-	this.calcEarnings = function(sum, rate) {
-		return sum * rate * this.multiplier;
-	};
-	this.formatEarnings = function(currency, earnings) {
-		if(currency == "BTC" && this == Hour) {
-			return Math.round(earnings * 100000000) + " Satoshi / Hour<br/>";
-		} else {
-			return roundFloat(earnings, 100000000) + " " + currency + " / " + name + "<br/>";
-		}
-	};
+    this.calcEarnings = function(sum, rate) {
+        return sum * rate * this.multiplier;
+    };
+    this.formatEarnings = function(currency, earnings) {
+        if(currency == "BTC" && this == Hour) {
+            return printFloat(earnings * 100000000, 0) + " Satoshi / Hour<br/>";
+        } else {
+            return printFloat(earnings, 8) + " " + currency + " / " + name + "<br/>";
+        }
+    };
 }
 
 $(document).ready(function () {
