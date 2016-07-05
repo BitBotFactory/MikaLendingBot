@@ -463,6 +463,7 @@ try:
 		except Exception as e:
 			log.log("ERROR: " + str(e))
 			traceback.print_exc()
+			log.persistStatus()
 			time.sleep(sleepTime)
 			pass
 except KeyboardInterrupt:

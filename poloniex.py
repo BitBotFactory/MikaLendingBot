@@ -33,13 +33,13 @@ class Poloniex:
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command))
             return json.loads(ret.read())
         elif(command == "returnOrderBook"):
-            ret = urllib2.urlopen(urllib2.Request('http://poloniex.com/public?command=' + command + '&currencyPair=' + str(req['currencyPair'])))
+            ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command + '&currencyPair=' + str(req['currencyPair'])))
             return json.loads(ret.read())
         elif(command == "returnMarketTradeHistory"):
-            ret = urllib2.urlopen(urllib2.Request('http://poloniex.com/public?command=' + "returnTradeHistory" + '&currencyPair=' + str(req['currencyPair'])))
+            ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + "returnTradeHistory" + '&currencyPair=' + str(req['currencyPair'])))
             return json.loads(ret.read())
         elif(command == "returnLoanOrders"):
-            reqUrl = 'http://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])
+            reqUrl = 'https://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])
             if(req['limit'] != ''):
                 reqUrl += '&limit=' + str(req['limit'])
             ret = urllib2.urlopen(urllib2.Request(reqUrl))
