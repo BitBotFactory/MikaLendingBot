@@ -281,6 +281,9 @@ def cancelAndLoanAll():
 
 	onOrderBalances = {}
 	for cur in loanOffers:
+		if cur in coincfg and coincfg[cur]['maxactive'] == 0:
+			# don't cancel disabled coin
+			continue
 		for offer in loanOffers[cur]:
 			onOrderBalances[cur] = onOrderBalances.get(cur, 0) + Decimal(offer['amount'])
 			if dryRun == False:
