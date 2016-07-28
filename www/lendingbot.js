@@ -68,12 +68,17 @@ function updateRawValues(rawData){
 
 
             var effectiveRate = lentSum * rate * 100 / totalCoins;
+            var yearlyRate = effectiveRate * 365; // no reinvestment
+            var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
+            var lentPerc = lentSum / totalCoins * 100;
+            var poloRateText = '&nbsp;(<span title="Rate as seen on poloniex, before 15% fee.">poloniex</span>)';
+            var effRateText =  '&nbsp;(<span title="Effective rate, after poloniex 15% fee.">effective</span>)';
 
             var rowValues = [currency,
-                printFloat(lentSum, 4) + ' ' + currency,
-                printFloat(averageLendingRate, 5)  + '%',
-                printFloat(totalCoins, 4)  + ' ' + currency,
-                printFloat(effectiveRate, 5) + '%' ]
+                printFloat(lentSum, 4) + ' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)',
+                printFloat(averageLendingRate, 5) + '% / Day' + poloRateText + '<br/>' + printFloat(effectiveRate, 5) +
+                    '% / Day' + effRateText + '<br/>' + printFloat(yearlyRate, 2) + '% / Year (not reinvest)<br/>' +
+                    printFloat(yearlyRateReinv, 2) + '% / Year (reinvest)' ];
 
             // print coin status
             var row = table.insertRow();
@@ -82,14 +87,7 @@ function updateRawValues(rawData){
                 cell.innerHTML = rowValues[i];
             }
 
-
             var earningsColspan = rowValues.length - 1;
-
-            // adjust coin earnings table cell span for BTC earnings
-            if(!isNaN(highestBidBTC)) {
-                earningsColspan = Math.round(earningsColspan / 2);
-            }
-
             // print coin earnings
             var row = table.insertRow();
 			if(lentSum > 0) {
@@ -97,16 +95,10 @@ function updateRawValues(rawData){
 				cell.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
 				cell = row.appendChild(document.createElement("td"));
 				cell.setAttribute("colspan", earningsColspan);
-				cell.innerHTML = earnings;
-
-				// print coin BTC earnings
-				if(!isNaN(highestBidBTC)) {
-					var cell = row.appendChild(document.createElement("td"));
-						cell.innerHTML = "<b>"+ couple +"<br/>highest bid:<br/>"+ printFloat(highestBidBTC, 8) +"<b>";
-					var cell = row.appendChild(document.createElement("td"));
-						cell.setAttribute("colspan", rowValues.length - earningsColspan - 1);
-						cell.innerHTML = earningsBTC;
-				}
+				if(!isNaN(highestBidBTC))
+					cell.innerHTML = earnings + "<br/>"+ couple +" highest bid: "+ printFloat(highestBidBTC, 8) + "<br/>" + earningsBTC;
+				else
+					cell.innerHTML = earnings;
 			}
         }
     }
@@ -114,7 +106,7 @@ function updateRawValues(rawData){
     // add headers
     var thead = table.createTHead();
     var row = thead.insertRow();
-    var rowValues = ["Coin", "Active Loans", "Average Loan<br/>Interest Rate", "Total", "Effective<br/>Interest Rate"];
+    var rowValues = ["Coin", "Active Loans", "Average Loan<br/>Interest Rate"];
     for (var i = 0; i < rowValues.length; ++i) {
         var cell = row.appendChild(document.createElement("th"));
         cell.innerHTML = rowValues[i];
