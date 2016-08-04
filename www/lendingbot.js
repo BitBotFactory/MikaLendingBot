@@ -71,14 +71,16 @@ function updateRawValues(rawData){
             var yearlyRate = effectiveRate * 365; // no reinvestment
             var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
             var lentPerc = lentSum / totalCoins * 100;
-            var poloRateText = '&nbsp;(<span title="Rate as seen on poloniex, before 15% fee.">poloniex</span>)';
-            var effRateText =  '&nbsp;(<span title="Effective rate, after poloniex 15% fee.">effective</span>)';
+            var avgRateText = '&nbsp;<span style="white-space:nowrap;" title="Average loan rate, simple average calculation of active loans rates.">Avg. (i)</span>';
+            var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
+            var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
 
             var rowValues = [currency,
-                printFloat(lentSum, 4) + ' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)',
-                printFloat(averageLendingRate, 5) + '% / Day' + poloRateText + '<br/>' + printFloat(effectiveRate, 5) +
-                    '% / Day' + effRateText + '<br/>' + printFloat(yearlyRate, 2) + '% / Year (not reinvest)<br/>' +
-                    printFloat(yearlyRateReinv, 2) + '% / Year (reinvest)' ];
+                'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)',
+                "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
+					+ printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>' 
+					+ "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
+					+  printFloat(yearlyRateReinv, 2) + '% Year' + compoundRateText + "</div>" ];
 
             // print coin status
             var row = table.insertRow();
@@ -91,26 +93,28 @@ function updateRawValues(rawData){
             // print coin earnings
             var row = table.insertRow();
 			if(lentSum > 0) {
-				var cell = row.appendChild(document.createElement("td"));
-				cell.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
-				cell = row.appendChild(document.createElement("td"));
-				cell.setAttribute("colspan", earningsColspan);
-				if(!isNaN(highestBidBTC))
-					cell.innerHTML = earnings + "<br/>"+ couple +" highest bid: "+ printFloat(highestBidBTC, 8) + "<br/>" + earningsBTC;
-				else
-					cell.innerHTML = earnings;
+				var cell1 = row.appendChild(document.createElement("td"));
+				cell1.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
+				var cell2 = row.appendChild(document.createElement("td"));
+				cell2.setAttribute("colspan", earningsColspan);
+				if(!isNaN(highestBidBTC)) {
+					cell1.innerHTML += "<br/><br/>" + couple +" highest bid: "+ printFloat(highestBidBTC, 8);
+					cell2.innerHTML = "<div class='inlinediv' >" + earnings + "<br/></div><div class='inlinediv'>"+ earningsBTC + "</div>";
+				} else {
+					cell2.innerHTML = "<div class='inlinediv' >" +earnings + "</div>";
+				}
 			}
         }
     }
 
     // add headers
     var thead = table.createTHead();
-    var row = thead.insertRow();
-    var rowValues = ["Coin", "Active Loans", "Average Loan<br/>Interest Rate"];
-    for (var i = 0; i < rowValues.length; ++i) {
-        var cell = row.appendChild(document.createElement("th"));
-        cell.innerHTML = rowValues[i];
-    }
+    //var row = thead.insertRow();
+    //var rowValues = ["Coin", "Active Loans", "Interest Rate"];
+    //for (var i = 0; i < rowValues.length; ++i) {
+    //    var cell = row.appendChild(document.createElement("th"));
+    //    cell.innerHTML = rowValues[i];
+    //}
 
     // show account summary
     if(currencies.length > 1) {
