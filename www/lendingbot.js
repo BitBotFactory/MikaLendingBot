@@ -68,12 +68,19 @@ function updateRawValues(rawData){
 
 
             var effectiveRate = lentSum * rate * 100 / totalCoins;
+            var yearlyRate = effectiveRate * 365; // no reinvestment
+            var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
+            var lentPerc = lentSum / totalCoins * 100;
+            var avgRateText = '&nbsp;<span style="white-space:nowrap;" title="Average loan rate, simple average calculation of active loans rates.">Avg. (i)</span>';
+            var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
+            var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
 
             var rowValues = [currency,
-                printFloat(lentSum, 4) + ' ' + currency,
-                printFloat(averageLendingRate, 5)  + '%',
-                printFloat(totalCoins, 4)  + ' ' + currency,
-                printFloat(effectiveRate, 5) + '%' ]
+                'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)',
+                "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
+					+ printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>' 
+					+ "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
+					+  printFloat(yearlyRateReinv, 2) + '% Year' + compoundRateText + "</div>" ];
 
             // print coin status
             var row = table.insertRow();
@@ -82,30 +89,19 @@ function updateRawValues(rawData){
                 cell.innerHTML = rowValues[i];
             }
 
-
             var earningsColspan = rowValues.length - 1;
-
-            // adjust coin earnings table cell span for BTC earnings
-            if(!isNaN(highestBidBTC)) {
-                earningsColspan = Math.round(earningsColspan / 2);
-            }
-
             // print coin earnings
             var row = table.insertRow();
 			if(lentSum > 0) {
-				var cell = row.appendChild(document.createElement("td"));
-				cell.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
-				cell = row.appendChild(document.createElement("td"));
-				cell.setAttribute("colspan", earningsColspan);
-				cell.innerHTML = earnings;
-
-				// print coin BTC earnings
+				var cell1 = row.appendChild(document.createElement("td"));
+				cell1.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
+				var cell2 = row.appendChild(document.createElement("td"));
+				cell2.setAttribute("colspan", earningsColspan);
 				if(!isNaN(highestBidBTC)) {
-					var cell = row.appendChild(document.createElement("td"));
-						cell.innerHTML = "<b>"+ couple +"<br/>highest bid:<br/>"+ printFloat(highestBidBTC, 8) +"<b>";
-					var cell = row.appendChild(document.createElement("td"));
-						cell.setAttribute("colspan", rowValues.length - earningsColspan - 1);
-						cell.innerHTML = earningsBTC;
+					cell1.innerHTML += "<br/><br/>" + couple +" highest bid: "+ printFloat(highestBidBTC, 8);
+					cell2.innerHTML = "<div class='inlinediv' >" + earnings + "<br/></div><div class='inlinediv'>"+ earningsBTC + "</div>";
+				} else {
+					cell2.innerHTML = "<div class='inlinediv' >" +earnings + "</div>";
 				}
 			}
         }
@@ -113,12 +109,12 @@ function updateRawValues(rawData){
 
     // add headers
     var thead = table.createTHead();
-    var row = thead.insertRow();
-    var rowValues = ["Coin", "Active Loans", "Average Loan<br/>Interest Rate", "Total", "Effective<br/>Interest Rate"];
-    for (var i = 0; i < rowValues.length; ++i) {
-        var cell = row.appendChild(document.createElement("th"));
-        cell.innerHTML = rowValues[i];
-    }
+    //var row = thead.insertRow();
+    //var rowValues = ["Coin", "Active Loans", "Interest Rate"];
+    //for (var i = 0; i < rowValues.length; ++i) {
+    //    var cell = row.appendChild(document.createElement("th"));
+    //    cell.innerHTML = rowValues[i];
+    //}
 
     // show account summary
     if(currencies.length > 1) {
