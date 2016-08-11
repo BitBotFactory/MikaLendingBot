@@ -40,6 +40,7 @@ class Poloniex:
 
         if(command == "returnTicker" or command == "return24hVolume"):
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command))
+            return _read_response(ret)
         elif(command == "returnOrderBook"):
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command + '&currencyPair=' + str(req['currencyPair'])))
             return _read_response(ret)
