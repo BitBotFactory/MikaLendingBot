@@ -127,7 +127,7 @@ function updateRawValues(rawData){
         cell.innerHTML = "Account<br/>Estimated<br/>Earnings";
         cell.style.verticalAlign = "text-top";
         cell = row.appendChild(document.createElement("th"));
-        cell.setAttribute("colspan", rowValues.length - 1);
+        cell.setAttribute("colspan", 2);
         cell.innerHTML = earnings;
     }
 }
