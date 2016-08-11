@@ -5,6 +5,9 @@ import time
 import hmac,hashlib
 import socket
 
+class PoloniexApiError(Exception):
+    pass
+
 def createTimeStamp(datestr, format="%Y-%m-%d %H:%M:%S"):
     return time.mktime(time.strptime(datestr, format))
 
@@ -29,21 +32,26 @@ class Poloniex:
 
     def api_query(self, command, req={}):
 
+        def _read_response(resp):
+            data = json.loads(resp.read())
+            if 'error' in data:
+                raise PoloniexApiError(data['error'])
+            return data
+
         if(command == "returnTicker" or command == "return24hVolume"):
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command))
-            return json.loads(ret.read())
         elif(command == "returnOrderBook"):
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command + '&currencyPair=' + str(req['currencyPair'])))
-            return json.loads(ret.read())
+            return _read_response(ret)
         elif(command == "returnMarketTradeHistory"):
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + "returnTradeHistory" + '&currencyPair=' + str(req['currencyPair'])))
-            return json.loads(ret.read())
+            return _read_response(ret)
         elif(command == "returnLoanOrders"):
             reqUrl = 'https://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])
             if(req['limit'] != ''):
                 reqUrl += '&limit=' + str(req['limit'])
             ret = urllib2.urlopen(urllib2.Request(reqUrl))
-            return json.loads(ret.read())
+            return _read_response(ret)
         else:
             req['command'] = command
             req['nonce'] = int(time.time()*1000)
@@ -56,7 +64,7 @@ class Poloniex:
             }
 
             ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/tradingApi', post_data, headers))
-            jsonRet = json.loads(ret.read())
+            jsonRet = _read_response(ret)
             return self.post_process(jsonRet)
 
 
