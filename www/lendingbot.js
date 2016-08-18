@@ -75,46 +75,44 @@ function updateRawValues(rawData){
             var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
             var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
 
-            var rowValues = [currency,
+            var rowValues = ["<b>" + currency + "</b>",
                 'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)',
                 "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
-					+ printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>' 
-					+ "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
-					+  printFloat(yearlyRateReinv, 2) + '% Year' + compoundRateText + "</div>" ];
+                    + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>' 
+                    + "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
+                    +  printFloat(yearlyRateReinv, 2) + '% Year' + compoundRateText + "</div>" ];
 
             // print coin status
             var row = table.insertRow();
             for (var i = 0; i < rowValues.length; ++i) {
                 var cell = row.appendChild(document.createElement("td"));
                 cell.innerHTML = rowValues[i];
+                cell.style.verticalAlign = "text-top";
+                if( i == 0) {
+                    cell.setAttribute("width", "20%");
+                }
             }
 
             var earningsColspan = rowValues.length - 1;
             // print coin earnings
             var row = table.insertRow();
-			if(lentSum > 0) {
-				var cell1 = row.appendChild(document.createElement("td"));
-				cell1.innerHTML = "<b>"+ currency +"<br/>Estimated<br/>Earnings<b>";
-				var cell2 = row.appendChild(document.createElement("td"));
-				cell2.setAttribute("colspan", earningsColspan);
-				if(!isNaN(highestBidBTC)) {
-					cell1.innerHTML += "<br/><br/>" + couple +" highest bid: "+ printFloat(highestBidBTC, 8);
-					cell2.innerHTML = "<div class='inlinediv' >" + earnings + "<br/></div><div class='inlinediv'>"+ earningsBTC + "</div>";
-				} else {
-					cell2.innerHTML = "<div class='inlinediv' >" +earnings + "</div>";
-				}
-			}
+            if(lentSum > 0) {
+                var cell1 = row.appendChild(document.createElement("td"));
+                cell1.innerHTML = "<span class='hidden-xs'>"+ currency +"<br/></span>Estimated<br/>Earnings";
+                var cell2 = row.appendChild(document.createElement("td"));
+                cell2.setAttribute("colspan", earningsColspan);
+                if(!isNaN(highestBidBTC)) {
+                    cell1.innerHTML += "<br/><span class='hidden-xs'><br/>" + couple +"</span> highest bid: "+ printFloat(highestBidBTC, 8);
+                    cell2.innerHTML = "<div class='inlinediv' >" + earnings + "<br/></div><div class='inlinediv' style='padding-right:0px'>"+ earningsBTC + "</div>";
+                } else {
+                    cell2.innerHTML = "<div class='inlinediv' >" +earnings + "</div>";
+                }
+            }
         }
     }
 
     // add headers
     var thead = table.createTHead();
-    //var row = thead.insertRow();
-    //var rowValues = ["Coin", "Active Loans", "Interest Rate"];
-    //for (var i = 0; i < rowValues.length; ++i) {
-    //    var cell = row.appendChild(document.createElement("th"));
-    //    cell.innerHTML = rowValues[i];
-    //}
 
     // show account summary
     if(currencies.length > 1) {
@@ -174,9 +172,13 @@ function Timespan(name, multiplier) {
     };
     this.formatEarnings = function(currency, earnings) {
         if(currency == "BTC" && this == Hour) {
-            return printFloat(earnings * 100000000, 0) + " Satoshi / Hour<br/>";
+            return printFloat(earnings * 100000000, 0) + " Satoshi / " + name + "<br/>";
         } else {
-            return printFloat(earnings, 8) + " " + currency + " / " + name + "<br/>";
+            var currencyClass = '';
+            if(currency != "BTC") {
+                currencyClass = 'hidden-xs';
+            }
+            return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / " + name + "<br/>";
         }
     };
 }

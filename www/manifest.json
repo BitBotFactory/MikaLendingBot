@@ -1,0 +1,19 @@
+{
+	"name" : "Poloniex Lending Bot",
+	"short_name" : "Lending Bot",
+	"icons" : [{
+			"src" : "images/icon192.png",
+			"sizes" : "192x192",
+			"type" : "image/png"
+		}, {
+			"src" : "images/icon384.png",
+			"sizes" : "384x384",
+			"type" : "image/png"
+		}
+	],
+    "background_color": "#FAFAFA",
+    "theme_color": "#e7e7e7",
+	"start_url" : "lendingbot.html",
+	"display" : "standalone",
+	"orientation" : "portrait"
+}

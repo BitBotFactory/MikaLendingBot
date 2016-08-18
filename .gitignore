@@ -1,3 +1,5 @@
 *.pyc
 *.swp
 default.cfg
+www/botlog.json
+nohup.out

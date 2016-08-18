@@ -4,11 +4,23 @@
 <head>
 
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://d1ujqdpfgkvqfi.cloudfront.net/favicon-generator/htdocs/favicons/2014-12-29/feeb7707325ee1596fba1cb46e5605aa.ico" />
+    <meta name="author" content="https://github.com/Mikadily/poloniexlendingbot">
+    <link rel="SHORTCUT ICON" href="images/icon.ico">
+    <link rel="icon" href="images/icon32.png" sizes="32x32"/>
+    <link rel="icon" href="images/icon48.png" sizes="48x48"/>
+    <!-- Android Add To Home Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="images/icon192.png" sizes="192x192" type="image/png">
+    <link rel="icon" href="images/icon384.png" sizes="384x384" type="image/png">
+    <meta id="theme-color" name="theme-color" content="#e7e7e7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- iOS Add To Home Settings -->
+    <link rel="apple-touch-icon" href="images/icon192.png">
+    <link rel="apple-touch-startup-image" href="images/ios_splash.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <title>Poloniex Lending Bot</title>
 
@@ -22,52 +34,54 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     
     <script src="lendingbot.js" ></script>
-	
-	<style>
-		.inlinediv {display:inline-block;padding-right:5%;vertical-align:top}
-	</style>
+    
+    <style>
+        body { padding-top: 50px; }
+        .inlinediv {display:inline-block;padding-right:5%;vertical-align:top}
+    </style>
 
 </head>
 
 <body>
-
     <!-- Page Content -->
-    <div class="container">
-      <div class="row">
-        <div class="panel-heading" style="background-color:#f2f2f2;display:flex;padding:0px" >
-          <div class="col-xs-6">
-              <h4>
-                Poloniex Lending Bot
-              </h4>
-              <input type="file" id="file" name="file" style="display:none"  onchange="handleLocalFile(this.files[0])" />
-          </div>
-          <div class="col-xs-6" style="text-align:right;margin: auto 0;" >
-            <span id="updated">Not updated</span>
-          </div>
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-6">
+                    <h4>
+                        Poloniex Lending Bot
+                    </h4>
+                </div>
+                <div class="col-xs-6" style="text-align:right;margin: 10px auto;" >
+                    <span id="updated">Not updated</span>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="row" style="overflow-x:auto">
-        <table class="table table-responsive">
-            <thead>
-                <tr>
-                    <th style="vertical-align: text-top;">Status</th><th style="vertical-align: text-top;" id="status">N/A</th>
-                </tr>
-                <tr>
-                    <td style="vertical-align: text-top;padding:0px;" colspan="2" >
-                        <table class="table table-striped table-responsive"
-                            style="margin:0px"
-                            id="detailsTable" >
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <th colspan="2">Log (Reversed ordered):</th>
-                </tr>
-            </thead>
-            <tbody id="logtable">                   
-            </tbody>
-        </table>
-      </div>
+    </nav>
+    <div class="container">
+        <div class="row" style="overflow-x:auto">
+            <div id="file" style="margin-top:8px;display:none" >Select log file: <input type="file" name="file" style="display:inline-block" onchange="handleLocalFile(this.files[0])" /></div>
+            <table class="table table-responsive">
+                <thead>
+                    <tr>
+                        <th style="vertical-align: text-top;">Status</th><th style="vertical-align: text-top;" id="status">N/A</th>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: text-top;padding:0px;" colspan="2" >
+                            <table class="table table-striped table-responsive"
+                                style="margin:0px"
+                                id="detailsTable" >
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Log (Reversed ordered):</th>
+                    </tr>
+                </thead>
+                <tbody id="logtable">                   
+                </tbody>
+            </table>
+        </div>
     </div>
     <!-- /.container -->
     
