@@ -274,10 +274,6 @@ def cancelAndLoanAll():
 	loanOffers = bot.returnOpenLoanOffers()
 	if type(loanOffers) is list: #silly api wrapper, empty dict returns a list, which brakes the code later.
 		loanOffers = {}
-	if loanOffers.get('error'):
-		print loanOffers.get('error')
-		print 'You might want to edit config file (default.cfg) and put correct apisecret and key values'
-		exit(1)
 
 	onOrderBalances = {}
 	for cur in loanOffers:
@@ -462,12 +458,27 @@ try:
 			cancelAndLoanAll()
 			log.refreshStatus(stringifyTotalLended())
 			log.persistStatus()
+			sys.stdout.flush()
 			time.sleep(sleepTime)
 		except Exception as e:
 			log.log("ERROR: " + str(e))
-			traceback.print_exc()
 			log.persistStatus()
-			time.sleep(sleepTime)
+			print timestamp();
+			print traceback.format_exc()
+			if('Invalid API key' in str(e)):
+				print "!!! Troubleshooting !!!"
+				print "Are your API keys correct? No quotation. Just plain keys."
+				exit(1);
+			if('Nonce must be greater' in str(e)):
+				print "!!! Troubleshooting !!!"
+				print "Are you reusing the API key in multiple applications? use a unique key for every application."
+				exit(1);
+			if('Permission denied' in str(e)):
+				print "!!! Troubleshooting !!!"
+				print "Are you using IP filter on the key? Maybe your IP changed?"
+				exit(1);
+			sys.stdout.flush()
+			time.sleep(sleepTime)			
 			pass
 except KeyboardInterrupt:
 	if autoRenew == 1:

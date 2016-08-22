@@ -3,3 +3,4 @@
 default.cfg
 www/botlog.json
 nohup.out
+error.log
