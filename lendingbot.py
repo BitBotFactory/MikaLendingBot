@@ -287,8 +287,11 @@ def cancelAndLoanAll():
 		for offer in loanOffers[cur]:
 			onOrderBalances[cur] = onOrderBalances.get(cur, 0) + Decimal(offer['amount'])
 			if dryRun == False:
-				msg = bot.cancelLoanOffer(cur,offer['id'])
-				log.cancelOrders(cur, msg)
+				try:
+					msg = bot.cancelLoanOffer(cur,offer['id'])
+					log.cancelOrders(cur, msg)
+				except Exception as e:
+					log.log("Error canceling loan offer: " + str(e))
 
 	lendingBalances = bot.returnAvailableAccountBalances("lending")['lending']
 	if dryRun == True: #just fake some numbers, if dryrun (testing)
