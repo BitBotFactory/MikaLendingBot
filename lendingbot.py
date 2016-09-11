@@ -264,7 +264,7 @@ def createLoanOffer(cur,amt,rate):
 		rate = float(rate) - 0.000001 #lend offer just bellow the competing one
 		amt = "%.8f" % Decimal(amt)
 		if rate > xDayThreshold:
-			days = xdays
+			days = xDays
 		if xDayThreshold == 0:
 			days = '2'
 		if dryRun == False:
