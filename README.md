@@ -59,7 +59,7 @@ spreadlend = 3
 gapbottom = 10
 gaptop = 200
 
-#Daily lend rate threshold after which we offer lends for 60 days as opposed to 2.
+#Daily lend rate threshold after which we offer lends for x days as opposed to 2.
 #If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
 xdaythreshold = 0.2
 xdays = 60
