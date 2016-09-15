@@ -43,8 +43,8 @@ gaptop = 200
 
 #Daily lend rate threshold after which we offer lends for x days as opposed to 2.
 #If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
-xdaythreshold = 0.1
-xdays = 15
+xdaythreshold = 0.2
+xdays = 60
 
 #Minimum loan size the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loans fragmentation
 minloansize = 0.001
