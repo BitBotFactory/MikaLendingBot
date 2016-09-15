@@ -83,6 +83,7 @@ parser.add_argument("-maxrate", "--maxdailyrate", help="Maximum rate you will le
 parser.add_argument("-spread", "--spreadlend", help="How many orders to split your lending into")
 parser.add_argument("-gapbot", "--gapbottom", help="Percentage of your order's volume into the ledger you start lending")
 parser.add_argument("-gaptop", "--gaptop", help="Percentage of your order's volume into the ledger you stop lending")
+parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot will request to lend for 60 days") # only used for backward compatibility
 parser.add_argument("-xdaythreshold", "--xdaythreshold", help="Rate at where bot will request to lend for xdays")
 parser.add_argument("-xdays", "--xdays", help="the length the bot will lend if xdaythreashold is met")
 parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start", action="store_true")
@@ -111,6 +112,8 @@ if args.gapbottom:
 	gapBottom = Decimal(args.gapbottom)
 if args.gaptop:
 	gapTop = Decimal(args.gapbottom)
+if args.sixtydaythreshold:
+	sixtyDayThreshold = Decimal(args.sixtydaythreshold)/100 
 if args.xdaythreshold:
 	xDayThreshold = Decimal(args.xdaythreshold)/100
 if args.xdays:
@@ -170,8 +173,13 @@ if config_needed:
 	spreadLend = int(config.get("BOT","spreadlend"))
 	gapBottom = Decimal(config.get("BOT","gapbottom"))
 	gapTop = Decimal(config.get("BOT","gaptop"))
-	xDayThreshold = Decimal(config.get("BOT","xdaythreshold"))/100
-	xDays = str(config.get("BOT","xdays"))
+	if(config.has_option("BOT", "sixtyDayThreshold")):
+                sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
+                xDayThreshold = sixtyDayThreshold
+                xDays = "60"
+	else:
+		xDayThreshold = Decimal(config.get("BOT","xdaythreshold"))/100
+		xDays = str(config.get("BOT","xdays"))
 	autorenew = int(config.get("BOT","autorenew"))
 	if(config.has_option('BOT', 'minloansize')):
 		minLoanSize = Decimal(config.get("BOT",'minloansize'))
