@@ -5,6 +5,8 @@ var Day = new Timespan("Day",1);
 var Week = new Timespan("Week",7);
 var Month = new Timespan("Month",30);
 var timespans = [Month, Week, Day, Hour];
+var BTC_Val;
+var isBTC = true;
 
 function updateJson(data) {
     $('#status').text(data.last_status);
@@ -56,10 +58,14 @@ function updateRawValues(rawData){
                 earnings += timespan.formatEarnings(currency, timespanEarning);
                 if(currency == 'BTC') {
                     totalBTCEarnings[timespan.name] += timespanEarning;
+			if(!isNaN(highestBidBTC)) {
+				BTC_Val = highestBidBTC;
+				isBTC = false;
+			}
                 }
 
                 // calculate BTC earnings
-                if(!isNaN(highestBidBTC)) {
+                if(!isNaN(highestBidBTC) && !(currency == 'BTC')) {
                     timespanEarningBTC = timespan.calcEarnings(lentSum * highestBidBTC, rate);
                     earningsBTC += timespan.formatEarnings("BTC", timespanEarningBTC);
                     totalBTCEarnings[timespan.name] += timespanEarningBTC;
@@ -118,7 +124,11 @@ function updateRawValues(rawData){
     if(currencies.length > 1) {
         earnings = '';
         timespans.forEach(function(timespan) {
-            earnings += timespan.formatEarnings( 'BTC', totalBTCEarnings[timespan.name]);
+		if(isBTC == false) {
+            		earnings += timespan.formatEarnings( 'USDT', totalBTCEarnings[timespan.name]);
+		} else {
+			earnings += timespan.formatEarnings( 'BTC', totalBTCEarnings[timespan.name]);
+		}
         });
         var row = thead.insertRow(0);
         var cell = row.appendChild(document.createElement("th"));
@@ -175,10 +185,14 @@ function Timespan(name, multiplier) {
             return printFloat(earnings * 100000000, 0) + " Satoshi / " + name + "<br/>";
         } else {
             var currencyClass = '';
-            if(currency != "BTC") {
+            if(currency != "BTC" && currency != "USDT") {
                 currencyClass = 'hidden-xs';
             }
-            return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / " + name + "<br/>";
+	    if(currency == "USDT") {
+            	return printFloat((earnings*BTC_Val), 4) + " <span class=" + currencyClass + ">USD("+printFloat(BTC_Val, 2)+")</span> / " + name + "<br/>";
+	    } else {
+		return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / "+  name + "<br/>";
+	    }
         }
     };
 }
