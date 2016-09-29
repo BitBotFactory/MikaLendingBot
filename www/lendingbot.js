@@ -189,7 +189,7 @@ function Timespan(name, multiplier) {
                 currencyClass = 'hidden-xs';
             }
 	    if(currency == "USDT") {
-            	return printFloat((earnings*BTC_Val), 4) + " <span class=" + currencyClass + ">USD("+printFloat(BTC_Val, 2)+")</span> / " + name + "<br/>";
+            	return printFloat((earnings*BTC_Val), 8) + " <span class=" + currencyClass + ">USD(@ "+printFloat(BTC_Val, 2)+")</span> / " + name + "<br/>";
 	    } else {
 		return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / "+  name + "<br/>";
 	    }
