@@ -63,6 +63,9 @@ autorenew = 0
 #jsonlogsize = 200
 #enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
 #startWebServer = true
+
+# Calculate the Account Estimated Earnings on BTC or in USD. if true = BTC, if false = USD
+CalculateOnBTC = true
 """
 
 #Defaults
@@ -89,6 +92,7 @@ parser.add_argument("-json", "--jsonfile", help="Location of .json file to save 
 parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
 parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html", action="store_true")
 parser.add_argument("-coincfg", "--coinconfig", help='Custom config per coin, useful when closing positions etc. Syntax: COIN:mindailyrate:maxactiveamount,COIN2:min2:maxactive2,...')
+parser.add_argument("-onusd", "--nobtc", help="Calculate the Account Estimated Earnings on USD.", action="store_true")
 args = parser.parse_args() #End args.
 #Start handling args.
 if args.apikey:
@@ -129,10 +133,14 @@ if args.coinconfig:
 	for cur in coinconfig:
 		cur = cur.split(':')
 		coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
+if args.nobtc:
+	onBTC = False
+else:
+	onBTC = True
 #End handling args.
 
 #Check if we need a config file at all (If all settings are passed by args, we won't)
-if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and args.sixtydaythreshold:
+if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and args.sixtydaythreshold and args.nobtc:
 	#If all that was true, we don't need a config file...
 	config_needed = False
 	print "Settings met from arguments."
@@ -168,6 +176,7 @@ if config_needed:
 	gapTop = Decimal(config.get("BOT","gaptop"))
 	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 	autorenew = int(config.get("BOT","autorenew"))
+	onBTC = config.getboolean('BOT', 'CalculateOnBTC')
 	if(config.has_option('BOT', 'minloansize')):
 		minLoanSize = Decimal(config.get("BOT",'minloansize'))
 	
@@ -283,8 +292,14 @@ def cancelAndLoanAll():
 		for offer in loanOffers[cur]:
 			onOrderBalances[cur] = onOrderBalances.get(cur, 0) + Decimal(offer['amount'])
 			if dryRun == False:
-				msg = bot.cancelLoanOffer(cur,offer['id'])
-				log.cancelOrders(cur, msg)
+				try:
+					msg = bot.cancelLoanOffer(cur,offer['id'])
+					log.cancelOrders(cur, msg)
+				except Exception as e:
+					log.log("Error canceling loan offer: " + str(e))
+
+				#msg = bot.cancelLoanOffer(cur,offer['id'])
+				#log.cancelOrders(cur, msg)
 
 	lendingBalances = bot.returnAvailableAccountBalances("lending")['lending']
 	if dryRun == True: #just fake some numbers, if dryrun (testing)
@@ -390,7 +405,8 @@ def startWebServer():
 
 	try:
 		PORT = 8000
-		HOST = '127.0.0.1'
+		HOST = '0.0.0.0'
+		#'127.0.0.1'
 
 		class QuietHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			# quiet server logs
@@ -416,6 +432,9 @@ def updateConversionRates():
 			ref = currencies[0]
 			currency = currencies[1]
 			if ref == 'BTC' and currency in totalLended:
+				log.updateStatusValue(currency, 'highestBid', tickerResponse[couple]['highestBid'])
+				log.updateStatusValue(currency, 'couple', couple)
+			if ref == 'USDT' and currency == 'BTC' and onBTC == False:
 				log.updateStatusValue(currency, 'highestBid', tickerResponse[couple]['highestBid'])
 				log.updateStatusValue(currency, 'couple', couple)
 		
