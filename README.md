@@ -1,4 +1,4 @@
-#Poloniex lending bot
+#Poloniex lending bot <img src="https://nevet.me/public/icon.png" width="50">
 
 Poloniex lending bot is written in Python for automatic lending on Poloniex exchange.
 It will lend automatically all cryptocurrencies found in your lending account.
