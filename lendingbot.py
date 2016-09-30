@@ -41,9 +41,10 @@ spreadlend = 3
 gapbottom = 10
 gaptop = 200
 
-#Daily lend rate threshold after which we offer lends for 60 days as opposed to 2.
+#Daily lend rate threshold after which we offer lends for x days as opposed to 2.
 #If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
-sixtydaythreshold = 0.2
+xdaythreshold = 0.2
+xdays = 60
 
 #Minimum loan size the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loans fragmentation
 minloansize = 0.001
@@ -82,7 +83,9 @@ parser.add_argument("-maxrate", "--maxdailyrate", help="Maximum rate you will le
 parser.add_argument("-spread", "--spreadlend", help="How many orders to split your lending into")
 parser.add_argument("-gapbot", "--gapbottom", help="Percentage of your order's volume into the ledger you start lending")
 parser.add_argument("-gaptop", "--gaptop", help="Percentage of your order's volume into the ledger you stop lending")
-parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot will request to lend for 60 days")
+parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot will request to lend for 60 days") # only used for backward compatibility
+parser.add_argument("-xdaythreshold", "--xdaythreshold", help="Rate at where bot will request to lend for xdays")
+parser.add_argument("-xdays", "--xdays", help="the length the bot will lend if xdaythreashold is met")
 parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start", action="store_true")
 parser.add_argument("-minloan", "--minloansize", help='Minimum size of offers to make')
 parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
@@ -110,7 +113,11 @@ if args.gapbottom:
 if args.gaptop:
 	gapTop = Decimal(args.gapbottom)
 if args.sixtydaythreshold:
-	sixtyDayThreshold = Decimal(args.sixtydaythreshold)/100
+	sixtyDayThreshold = Decimal(args.sixtydaythreshold)/100 
+if args.xdaythreshold:
+	xDayThreshold = Decimal(args.xdaythreshold)/100
+if args.xdays:
+	xDays = str(args.xdays)
 if args.dryrun:
 	dryRun = True
 else:
@@ -132,7 +139,7 @@ if args.coinconfig:
 #End handling args.
 
 #Check if we need a config file at all (If all settings are passed by args, we won't)
-if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and args.sixtydaythreshold:
+if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and ((args.xdaythreshold and args.xdays) or args.sixtydaythreshold):
 	#If all that was true, we don't need a config file...
 	config_needed = False
 	print "Settings met from arguments."
@@ -166,7 +173,13 @@ if config_needed:
 	spreadLend = int(config.get("BOT","spreadlend"))
 	gapBottom = Decimal(config.get("BOT","gapbottom"))
 	gapTop = Decimal(config.get("BOT","gaptop"))
-	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
+	if(config.has_option("BOT", "sixtyDayThreshold")):
+                sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
+                xDayThreshold = sixtyDayThreshold
+                xDays = "60"
+	else:
+		xDayThreshold = Decimal(config.get("BOT","xdaythreshold"))/100
+		xDays = str(config.get("BOT","xdays"))
 	autorenew = int(config.get("BOT","autorenew"))
 	if(config.has_option('BOT', 'minloansize')):
 		minLoanSize = Decimal(config.get("BOT",'minloansize'))
@@ -258,9 +271,9 @@ def createLoanOffer(cur,amt,rate):
 	if float(amt) > minLoanSize:
 		rate = float(rate) - 0.000001 #lend offer just bellow the competing one
 		amt = "%.8f" % Decimal(amt)
-		if rate > sixtyDayThreshold:
-			days = '60'
-		if sixtyDayThreshold == 0:
+		if rate > xDayThreshold:
+			days = xDays
+		if xDayThreshold == 0:
 			days = '2'
 		if dryRun == False:
 			msg = bot.createLoanOffer(cur,amt,days,0,rate)
