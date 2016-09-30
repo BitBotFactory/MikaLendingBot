@@ -140,7 +140,7 @@ else:
 #End handling args.
 
 #Check if we need a config file at all (If all settings are passed by args, we won't)
-if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and args.sixtydaythreshold and args.nobtc:
+if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and args.sixtydaythreshold:
 	#If all that was true, we don't need a config file...
 	config_needed = False
 	print "Settings met from arguments."
