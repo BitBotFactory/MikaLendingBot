@@ -64,8 +64,9 @@ autorenew = 0
 #enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
 #startWebServer = true
 
-# Calculate the Account Estimated Earnings on BTC or in USD. if true = BTC, if false = USD
-CalculateOnBTC = true
+#The currency that the HTML Overview will present the earnings summary in.
+#Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.
+#outputCurrency = BTC 
 """
 
 #Defaults
@@ -92,7 +93,7 @@ parser.add_argument("-json", "--jsonfile", help="Location of .json file to save 
 parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
 parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html", action="store_true")
 parser.add_argument("-coincfg", "--coinconfig", help='Custom config per coin, useful when closing positions etc. Syntax: COIN:mindailyrate:maxactiveamount,COIN2:min2:maxactive2,...')
-parser.add_argument("-onusd", "--nobtc", help="Calculate the Account Estimated Earnings on USD.", action="store_true")
+parser.add_argument("-outcurr", "--outputcurrency", help="The currency that the HTML Overview will present the earnings summary in. Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.")
 args = parser.parse_args() #End args.
 #Start handling args.
 if args.apikey:
@@ -133,10 +134,10 @@ if args.coinconfig:
 	for cur in coinconfig:
 		cur = cur.split(':')
 		coincfg[cur[0]] = dict(minrate=(Decimal(cur[1]))/100, maxactive=Decimal(cur[2]))
-if args.nobtc:
-	onBTC = False
+if args.outputcurrency:
+	outputCurrency = args.outputcurrency
 else:
-	onBTC = True
+	outputCurrency = 'BTC'
 #End handling args.
 
 #Check if we need a config file at all (If all settings are passed by args, we won't)
@@ -176,7 +177,8 @@ if config_needed:
 	gapTop = Decimal(config.get("BOT","gaptop"))
 	sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
 	autorenew = int(config.get("BOT","autorenew"))
-	onBTC = config.getboolean('BOT', 'CalculateOnBTC')
+	if(config.has_option('BOT', 'outputCurrency')):
+		outputCurrency = config.get('BOT', 'outputCurrency')
 	if(config.has_option('BOT', 'minloansize')):
 		minLoanSize = Decimal(config.get("BOT",'minloansize'))
 	
@@ -427,9 +429,16 @@ def updateConversionRates():
 			if ref == 'BTC' and currency in totalLended:
 				log.updateStatusValue(currency, 'highestBid', tickerResponse[couple]['highestBid'])
 				log.updateStatusValue(currency, 'couple', couple)
-			if ref == 'USDT' and currency == 'BTC' and onBTC == False:
-				log.updateStatusValue(currency, 'highestBid', tickerResponse[couple]['highestBid'])
-				log.updateStatusValue(currency, 'couple', couple)
+			if outputCurrency == 'USDT' and ref == 'USDT' and currency == 'BTC':
+				log.updateOutputCurrency('highestBid', tickerResponse[couple]['highestBid'])
+				log.updateOutputCurrency('currency', outputCurrency)
+			if outputCurrency != 'USDT' and ref == 'BTC' and currency == outputCurrency:
+                                log.updateOutputCurrency('highestBid', tickerResponse[couple]['highestBid'])
+                                log.updateOutputCurrency('currency', outputCurrency)
+		if outputCurrency == 'BTC':
+                        log.updateOutputCurrency('highestBid', '1')
+			log.updateOutputCurrency('currency', outputCurrency)
+
 		
 #Parse these down here...
 if args.clearautorenew:
@@ -447,7 +456,6 @@ def stopWebServer():
 		print 'Failed to stop WebServer' + str(e)
 	
 print 'Welcome to Poloniex Lending Bot'
-
 if config_needed:
 	webServerEnabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
 else:
