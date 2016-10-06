@@ -5,6 +5,8 @@ var Day = new Timespan("Day",1);
 var Week = new Timespan("Week",7);
 var Month = new Timespan("Month",30);
 var timespans = [Month, Week, Day, Hour];
+var Coin_Val = 1.00000000;
+var Coin = "BTC";
 
 function updateJson(data) {
     $('#status').text(data.last_status);
@@ -17,7 +19,16 @@ function updateJson(data) {
         table.append($('<tr/>').append($('<td colspan="2" />').text(data.log[i])));
     }
 
+    updateOutputCurrency(data.outputCurrency);
     updateRawValues(data.raw_data);
+}
+
+function updateOutputCurrency(outputCurrency){
+	var OutCurr = Object.keys(outputCurrency);
+	Coin = outputCurrency['currency'];
+	if(Coin != "BTC") {
+		Coin_Val = parseFloat(outputCurrency['highestBid']);
+	}	
 }
 
 function updateRawValues(rawData){
@@ -59,7 +70,7 @@ function updateRawValues(rawData){
                 }
 
                 // calculate BTC earnings
-                if(!isNaN(highestBidBTC)) {
+                if(!isNaN(highestBidBTC) && !(currency == 'BTC')) {
                     timespanEarningBTC = timespan.calcEarnings(lentSum * highestBidBTC, rate);
                     earningsBTC += timespan.formatEarnings("BTC", timespanEarningBTC);
                     totalBTCEarnings[timespan.name] += timespanEarningBTC;
@@ -118,7 +129,15 @@ function updateRawValues(rawData){
     if(currencies.length > 1) {
         earnings = '';
         timespans.forEach(function(timespan) {
-            earnings += timespan.formatEarnings( 'BTC', totalBTCEarnings[timespan.name]);
+		if(Coin == "BTC") {
+            		earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]);
+		}
+		if(Coin == "USDT") {
+			earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]*Coin_Val);
+		}
+		if(Coin != "BTC" && Coin != "USDT") {
+			earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]/Coin_Val);
+		}
         });
         var row = thead.insertRow(0);
         var cell = row.appendChild(document.createElement("th"));
@@ -175,10 +194,11 @@ function Timespan(name, multiplier) {
             return printFloat(earnings * 100000000, 0) + " Satoshi / " + name + "<br/>";
         } else {
             var currencyClass = '';
-            if(currency != "BTC") {
+            if(currency != "BTC" && currency != "USDT") {
                 currencyClass = 'hidden-xs';
             }
-            return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / " + name + "<br/>";
+	return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / "+  name + "<br/>";
+	    
         }
     };
 }

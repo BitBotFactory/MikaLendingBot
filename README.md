@@ -82,6 +82,10 @@ autorenew = 0
 #jsonlogsize = 200
 #enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
 #startWebServer = true
+
+#The currency that the HTML Overview will present the earnings summary in.
+#Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.
+#outputCurrency = BTC
 ```
 
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.

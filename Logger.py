@@ -64,7 +64,11 @@ class JsonOutput(object):
 	def clearStatusValues(self):
 		self.jsonOutputCoins = {}
 		self.jsonOutput["raw_data"] = self.jsonOutputCoins
+		self.jsonOutputCurrency = {}
+		self.jsonOutput["outputCurrency"] = self.jsonOutputCurrency
 
+	def outputCurrency(self, key, value):
+                self.jsonOutputCurrency[key] = str(value)
 
 class Logger(object):
 	def __init__(self, jsonFile = '', jsonLogSize = -1):
@@ -101,6 +105,10 @@ class Logger(object):
 	def updateStatusValue(self, coin, key, value):
 		if(hasattr(self.console , 'statusValue')):
 			self.console.statusValue(coin, key, value)
+
+        def updateOutputCurrency(self, key, value):
+		if(hasattr(self.console , 'outputCurrency')):
+			self.console.outputCurrency(key, value)
 	
 	def persistStatus(self):
 		if(hasattr(self.console , 'writeJsonFile')):
