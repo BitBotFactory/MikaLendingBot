@@ -70,10 +70,21 @@ minloansize = 0.001
 #AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
 autorenew = 0
 
-#custom config per coin, useful when closing positions etc.
-#syntax: ["COIN:mindailyrate:maxactiveamount",...]
+#Max amount to lent. if set to 0 or commented the bot will check for maxpercenttolent.
+#maxtolent = 0
+
+#Max percent to lent. if set to 0 or commented the bot will lent the 100%.
+#maxpercenttolent = 0
+
+#Max to lent conditional rate. if set to more than 0 the maxtolent or maxpercenttolent will be used when then rate is less or equal to the maxtolentrate. if set to 0 or commented the bot will use the maxtolent or maxpercenttolent all the time.
+#maxtolentrate = 0
+
+#syntax: ["COIN:mindailyrate:maxactiveamount:maxtolent:maxpercenttolent:maxtolentrate",...]
 #if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
-#coinconfig = ["BTC:0.18:1","CLAM:0.6:1"]
+#if maxtolent is 0 - check for maxpercenttolent.
+#if maxpercenttolent is 0 - 100% is going to be lent.
+if #maxtolentrate if set to more than 0 the maxtolent or maxpercenttolent will be used when then rate is less or equal to the maxtolentrate. if set to 0 the bot will use the maxtolent or maxpercenttolent all the time.
+#coinconfig = ["BTC:0.18:1:0:0:0","CLAM:0.6:1:0:0:0"]
 
 #this option creates a json log file instead of console output which includes the most recent status
 #uncomment both jsonfile and jsonlogsize to enable

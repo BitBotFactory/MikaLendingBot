@@ -42,6 +42,7 @@ function updateRawValues(rawData){
         var averageLendingRate = parseFloat(rawData[currency]['averageLendingRate']);
         var lentSum = parseFloat(rawData[currency]['lentSum']);
         var totalCoins = parseFloat(rawData[currency]['totalCoins']);
+	var maxToLend = parseFloat(rawData[currency]['maxToLend']);
         var highestBidBTC = parseFloat(rawData[currency]['highestBid']);
         var couple = rawData[currency]['couple'];
 
@@ -82,12 +83,13 @@ function updateRawValues(rawData){
             var yearlyRate = effectiveRate * 365; // no reinvestment
             var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
             var lentPerc = lentSum / totalCoins * 100;
+	    var lentPercLendable = lentSum / maxToLend * 100;
             var avgRateText = '&nbsp;<span style="white-space:nowrap;" title="Average loan rate, simple average calculation of active loans rates.">Avg. (i)</span>';
             var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
             var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
 
             var rowValues = ["<b>" + currency + "</b>",
-                'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)',
+                'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)'+' <b>Total</b><br/>'+'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(maxToLend, 4) + ' (' + printFloat(lentPercLendable, 2) + '%)  <b>Lendable</b>' ,
                 "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
                     + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>' 
                     + "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
