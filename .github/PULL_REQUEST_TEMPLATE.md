@@ -15,11 +15,12 @@
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
 
 ## Checklist:
-<!--- Go over all the following points -->
+<!--- Go over all the following points, they do not all need to be checked when you first make the PR. -->
 <!--- For us to merge your PR, after approval, ALL OF THESE CHECKBOXES NEED TO BE TICKED -->
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
 - [ ] **I have read CONTRIBUTING.md**
-- [ ] **I fully understand [Github Flow.](https://guides.github.com/introduction/flow/) **
+- [ ] **I fully understand [Github Flow.](https://guides.github.com/introduction/flow/)**
 - [ ] **My code adheres to the code style of this project**
+- [ ] **I have updated the documentation in /docs if I have changed the config, arguments, logic in how the bot works, or anything that understandably needs a documentation change.**
 - [ ] **If my change requires a change to the config, I have updated the config file and command line arguments accordingly.**
 - [ ] **I have tested the bot with no issues for 24 continuous hours. If issues were experienced, they have been patched and tested again.**
