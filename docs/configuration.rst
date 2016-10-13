@@ -1,7 +1,7 @@
 .. _configuration-section:
 
 2. Configuration
-===================
+*****************
 
 Configuring the bot can be as simple as copy-pasting your API key and Secret.
 
@@ -101,20 +101,69 @@ These values allow you to lock in a better rate for a longer period of time, as 
 - Default value: 60 days
 - Allowed range: 2 to 60 days
 
-2.6 Config per Coin
+2.6 Unimportant settings
+------------------------
+
+Very few situations require you to change these settings.
+
+``minloansize`` is the minimum size that a bot will make a loan at.
+
+- Default value: 0.001 of a coin
+- Allowed range: 0.001 and up.
+- If you dislike loan fragmentation, then this will make the minimum for each loan larger.
+
+``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
+
+2.7 Max to be lent 
+-------------------
+
+This feature group allows you to only lend a certain percentage of your total holding in a coin, until the lending rate suprasses a certain threshhold. Then it will lend at max capacity.
+
+``maxtolent`` is a raw number of how much you will lend of each coin whose lending rate is below ``maxtolentrate``.
+
+- Default value: Disabled
+- Allowed range: 0 (disabled) or ``minloansize`` and up
+- If set to 0, same as if commented.
+- If disabled, will check if ``maxpercenttolent`` is enabled and use that if it is enabled.
+- Setting this overwrites ``maxpercenttolent``
+- This is a global setting for the raw value of coin that will be lended if the coins lending value is under ``maxtolentrate``
+- Has no effect if current rate is higher than ``maxtolentrate``
+- If the remainder (after subtracting ``maxtolent``) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
+
+``maxpercenttolent`` is a percentage of how much you will lend of each coin whose lending rate is below ``maxtolentrate``
+
+- Default value: Disabled
+- Allowed range: 0 (disabled) to 100 percent
+- If set to 0, same as if commented.
+- If disabled in addition to ``maxtolent``, entire feature will be disabled.
+- This percentage is calculated per-coin, and is the percentage of the balance that will be lended if the coin's current rate is less than ``maxtolentrate``
+- Has no effect if current rate is higher than ``maxtolentrate``
+- If the remainder (after subtracting ``maxpercenttolent``'s value) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
+
+
+``maxtolentrate`` is the rate threshold when all coins are lent.
+
+- Default value: Disabled
+- Allowed range: 0 (disabled) or ``mindailyrate`` to 5 percent
+- Setting this to 0 with a limit in place causes the limit to always be active.
+- When an indiviaual coin's lending rate passes this threshold, all of the coin will be lent instead of the limits ``maxtolent`` or ``maxpercenttolent``
+
+
+2.8 Config per Coin
 ----------------------
 
 ``coincfg`` is in the form of a dictionary and allows for advanced, per-coin options.
 
 - Default value: Commented out, uncomment to enable.
-- Format: ``["COINTICKER:MINLENDRATE:ENABLED?","CLAM:0.6:1",...]``
+- Format: ``["COINTICKER:MINLENDRATE:ENABLED?:MAXTOLENT:MAXPERCENTTOLENT:MAXTOLENTRATE","CLAM:0.6:1:0:.75:.1",...]``
 - COINTICKER refers to the ticker of the coin, ex. BTC, CLAM, MAID, DOGE.
 - MINLENDRATE is that coins minimum lending rate, overrides the global setting. Follows the limits of ``minlendrate``
 - ENABLED? refers to a value of ``0`` if the coin is disabled and will no longer lend. Any positive integer will enable lending for the coin.
+- MAXTOLENT, MAXPERCENTTOLENT, and MAXTOLENTRATE refer to their respective settings above, but are unique to the specified coin specifically.
 - There can be as many different coins as you want in coincfg, but each coin may only appear once.
 
-2.7 Advanced logging
-----------------------
+2.9 Advanced logging and Web Display
+--------------------------------------
 
 ``jsonfile`` is the location where the bot will log to a .json file instead of into console.
 
@@ -140,14 +189,3 @@ These values allow you to lock in a better rate for a longer period of time, as 
 - Default value: BTC
 - Acceptable values: BTC, USDT, Any coin with a direct Poloniex BTC trading pair (ex. DOGE, MAID, ETH)
 - Will be a close estimate, due to unexpected market fluctuations, trade fees, and other unforseeable factors.
-
-2.8 Unimportant settings
-------------------------
-
-``minloansize`` is the minimum size that a bot will make a loan at.
-
-- Default value: 0.001 of a coin
-- Allowed range: 0.001 and up.
-- If you dislike loan fragmentation, then this will make each loan larger.
-
-``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
