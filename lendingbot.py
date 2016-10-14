@@ -1,4 +1,4 @@
-import io, sys, time, datetime, urllib2, json, argparse 
+import io, sys, time, datetime, urllib2, json, argparse , shutil
 import traceback
 from poloniex import Poloniex
 from ConfigParser import SafeConfigParser
@@ -10,76 +10,6 @@ SATOSHI = Decimal(10) ** -8
 config = SafeConfigParser()
 config_location = 'default.cfg'
 
-defaultconfig =\
-"""
-[API]
-apikey = YourAPIKey
-secret = YourSecret
-
-[BOT]
-#sleep between active iterations, time in seconds (1-3600)
-sleeptimeactive = 60
-
-#sleep between inactive iterations, time in seconds (1-3600)
-#set to same as sleeptimeactive to disable
-sleeptimeinactive = 300
-
-#minimum daily lend rate in percent (0.00003-0.05)
-mindailyrate = 0.04
-
-#max rate. 2% is good choice because it's default at margin trader interface.
-#5% is max to be accepted by the exchange (0.00003-0.05)
-maxdailyrate = 2
-
-#The number of offers to split the available balance across the [gaptop, gapbottom] range. (1-20)
-spreadlend = 3
-
-#The depth of lendbook (in percent of lendable balance) to move through
-#before placing the first (gapbottom) and last (gaptop) offer.
-#If gapbottom is set to 0, the first offer will be at the lowest possible rate.
-#However some low value is recommended (say 10%) to skip dust offers.
-gapbottom = 10
-gaptop = 200
-
-#Daily lend rate threshold after which we offer lends for x days as opposed to 2.
-#If set to 0 all offers will be placed for a 2 day period (0.00003-0.05)
-xdaythreshold = 0.2
-xdays = 60
-
-#Minimum loan size the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loans fragmentation
-minloansize = 0.001
-
-#AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
-autorenew = 0
-
-#Max amount to lent. if set to 0 or commented the bot will check for maxpercenttolent.
-#maxtolent = 0
-
-#Max percent to lent. if set to 0 or commented the bot will lent the 100%.
-#maxpercenttolent = 0
-
-#Max to lent conditional rate. if set to more than 0 the maxtolent or maxpercenttolent will be used when then rate is less or equal to the maxtolentrate. if set to 0 or commented the bot will use the maxtolent or maxpercenttolent all the time.
-#maxtolentrate = 0
-
-#syntax: ["COIN:mindailyrate:maxactiveamount:maxtolent:maxpercenttolent:maxtolentrate",...]
-#if maxactive amount is 0 - stop lending this coin. in the future you'll be able to limit amount to be lent.
-#if maxtolent is 0 - check for maxpercenttolent.
-#if maxpercenttolent is 0 - 100% is going to be lent.
-#if maxtolentrate is set to more than 0 the maxtolent or maxpercenttolent will be used when then rate is less or equal to the maxtolentrate. if set to 0 the bot will use the maxtolent or maxpercenttolent all the time.
-#coinconfig = ["BTC:0.18:1:0:0:0","CLAM:0.6:1:0:0:0"]
-
-#this option creates a json log file instead of console output which includes the most recent status
-#uncomment both jsonfile and jsonlogsize to enable
-#jsonfile = www/botlog.json
-#limits the amount of log lines to save
-#jsonlogsize = 200
-#enables a webserver for the www folder, in order to easily use the lendingbot.html with the json log
-#startWebServer = true
-
-#The currency that the HTML Overview will present the earnings summary in.
-#Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.
-#outputCurrency = BTC 
-"""
 
 #Defaults
 minLoanSize = 0.001
@@ -185,13 +115,12 @@ else:
 #When true, will overwrite anything passed by args with the found cfg
 if config_needed: 
 	loadedFiles = config.read([config_location])
-	# Create default config file if not found
+	# Copy default config file if not found
 	if len(loadedFiles) != 1:
-		config.readfp(io.BytesIO(defaultconfig))
-		with open(config_location, "w") as configfile:
-			configfile.write(defaultconfig)
-			print 'Edit default.cfg file with your api key and secret values'
-			exit(0)
+		shutil.copy('default.cfg.example', 'default.cfg')
+		print '\ndefault.cfg.example has been copied to default.cfg\nEdit it with your API key and custom settings.\n'
+		raw_input("Press Enter to acknowledge and exit...")
+		exit(0)
 
 	try:
 		sleepTimeActive = float(config.get("BOT","sleeptimeactive"))
@@ -364,7 +293,7 @@ def amountToLent(activeCurTestBalance,activeCur,lendingBalance,lowrate):
 	if restrictLent == False:
 		log.updateStatusValue(activeCur, "maxToLend", activeCurTestBalance)
 		activeBal = lendingBalance
-	if((lendingBalance - activeBal) < 0.001):
+	if((lendingBalance - activeBal) < minLoanSize):
 		activeBal = lendingBalance
 	if(activeBal < lendingBalance):
 		log.log(logdata+" Lending "+str("%.8f" % Decimal(activeBal))+" of "+str("%.8f" % Decimal(lendingBalance))+" Available")

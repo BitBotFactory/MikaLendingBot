@@ -23,7 +23,18 @@ To download the bot you can either:
 - Download the source .zip file from the GitHub repo page or from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_. Extract it into an empty folder you won't accidentally delete.
 - Run ``git clone https://github.com/Mikadily/poloniexlendingbot`` if you have git installed.
 
-1.1.3 Running
+1.1.3 Configuring
+------------------
+
+To configure the bot with your settings:
+
+1. Copy ``default.cfg.example`` to ``default.cfg``
+2. Open ``default.cfg`` and enter your desired settings `(information on settings here) <http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html>`_.
+3. Save ``default.cfg`` 
+
+You are now ready to run the bot.
+
+1.1.4 Running
 -----------------------
 
 To run, either double-click lendingbot.py (if you have .py associated with the Python executable)

@@ -7,7 +7,7 @@ Configuring the bot can be as simple as copy-pasting your API key and Secret.
 
 New features are required to be backwards compatible with previous versions of the .cfg but it is still recommended that you update your config immediately after updating to take advantage of new features.
 
-To generate default.cfg, run ``python lendingbot.py``
+To begin, copy ``default.cfg.example`` to ``default.cfg``. Now you can edit your settings.
 
 2.1 API key and Secret
 ---------------------------
@@ -66,6 +66,8 @@ HIGHLY Recommended:
 
 2.4 Spreading your Lends
 ---------------------------
+
+If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
 
 ``spreadlend`` is the amount (as an integer) of separate lends the bot will split your balance into across the order book.
 
