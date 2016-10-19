@@ -103,8 +103,20 @@ These values allow you to lock in a better rate for a longer period of time, as 
 - Default value: 60 days
 - Allowed range: 2 to 60 days
 
-2.6 Unimportant settings
-------------------------
+2.6 Auto-transfer from Exchange Balance
+----------------------------------------
+
+If you regularly transfer funds into your Poloniex account but don't enjoy having to log in yourself and transfer them to the lending balance, this feature is for you.
+
+``transferableCurrencies`` is a list of currencies you would like to be transferred.
+
+- Default value: Commented out
+- Format: ``CURRENCY_TICKER,STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT``
+- Commenting it out will disable the feature.
+- Coins will be transferred every time the bot runs (60 seconds by default) so if you intend to trade or withdrawal it is recommended to turn off the bot or disable this feature.
+
+2.7 Unimportant settings
+-------------------------
 
 Very few situations require you to change these settings.
 
@@ -116,7 +128,7 @@ Very few situations require you to change these settings.
 
 ``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
 
-2.7 Max to be lent 
+2.8 Max to be lent
 -------------------
 
 This feature group allows you to only lend a certain percentage of your total holding in a coin, until the lending rate suprasses a certain threshhold. Then it will lend at max capacity.
@@ -151,7 +163,7 @@ This feature group allows you to only lend a certain percentage of your total ho
 - When an indiviaual coin's lending rate passes this threshold, all of the coin will be lent instead of the limits ``maxtolent`` or ``maxpercenttolent``
 
 
-2.8 Config per Coin
+2.9 Config per Coin
 ----------------------
 
 ``coincfg`` is in the form of a dictionary and allows for advanced, per-coin options.
@@ -164,7 +176,7 @@ This feature group allows you to only lend a certain percentage of your total ho
 - MAXTOLENT, MAXPERCENTTOLENT, and MAXTOLENTRATE refer to their respective settings above, but are unique to the specified coin specifically.
 - There can be as many different coins as you want in coincfg, but each coin may only appear once.
 
-2.9 Advanced logging and Web Display
+2.10 Advanced logging and Web Display
 --------------------------------------
 
 ``jsonfile`` is the location where the bot will log to a .json file instead of into console.

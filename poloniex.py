@@ -80,6 +80,9 @@ class Poloniex:
 
     def returnMarketTradeHistory (self, currencyPair):
         return self.api_query("returnMarketTradeHistory", {'currencyPair': currencyPair})
+	
+    def transferBalance (self, currency, amount, fromAccount, toAccount):
+        return self.api_query("transferBalance", {'currency': currency,'amount': amount,'fromAccount': fromAccount,'toAccount': toAccount})
 
 
     # Returns all of your balances.

@@ -31,6 +31,7 @@ parser.add_argument("-gaptop", "--gaptop", help="Percentage of your order's volu
 parser.add_argument("-60day", "--sixtydaythreshold", help="Rate at where bot will request to lend for 60 days") # only used for backward compatibility
 parser.add_argument("-xdaythreshold", "--xdaythreshold", help="Rate at where bot will request to lend for xdays")
 parser.add_argument("-xdays", "--xdays", help="the length the bot will lend if xdaythreashold is met")
+parser.add_argument("-trans", "--transferablecurrencies", help="A list of currencies to transfer from exchange to lending balance.")
 parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start", action="store_true")
 parser.add_argument("-minloan", "--minloansize", help='Minimum size of offers to make')
 parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
@@ -67,6 +68,8 @@ if args.xdaythreshold:
 	xDayThreshold = Decimal(args.xdaythreshold)/100
 if args.xdays:
 	xDays = str(args.xdays)
+if args.transferablecurrencies:
+	transferableCurrencies = args.transferablecurrencies
 if args.dryrun:
 	dryRun = True
 else:
@@ -155,7 +158,11 @@ if config_needed:
 		maxtolentrate = Decimal(config.get('BOT', 'maxtolentrate'))/100
 	if(config.has_option('BOT', 'minloansize')):
 		minLoanSize = Decimal(config.get("BOT",'minloansize'))
-	
+	if (config.has_option('BOT', "transferableCurrencies")):
+		transferableCurrencies = (config.get("BOT", "transferableCurrencies")).split(",")
+	else:
+		transferableCurrencies = []
+
 	try:
 		#parsed
 		coinconfig = (json.loads(config.get("BOT","coinconfig")))
@@ -476,7 +483,21 @@ def updateConversionRates():
                         log.updateOutputCurrency('highestBid', '1')
 			log.updateOutputCurrency('currency', outputCurrency)
 
-		
+def transferBalances():
+	#Transfers all balances on the included list to Lending.
+	# transferableCurrencies = config list of currencies.
+	if len(transferableCurrencies) > 0:
+		exchangeBalances = bot.returnBalances() #This grabs only exchange balances.
+		for rawcoin in transferableCurrencies:
+			coin = rawcoin.strip().upper() #Make sure spaces and caps don't break everything.
+			if coin in exchangeBalances and Decimal(exchangeBalances[coin]) > 0: #Check if coin has an outstanding balance.
+				msg = bot.transferBalance(coin, exchangeBalances[coin], 'exchange', 'lending')
+				log.log(log.digestApiMsg(msg))
+			if coin not in exchangeBalances:
+				print "ERROR: Incorrect coin entered for transferCurrencies: " + coin
+
+
+
 #Parse these down here...
 if args.clearautorenew:
 	setAutoRenew(0)
@@ -535,7 +556,7 @@ try:
 				print "Are you using IP filter on the key? Maybe your IP changed?"
 				exit(1);
 			sys.stdout.flush()
-			time.sleep(sleepTime)			
+			time.sleep(sleepTime)
 			pass
 except KeyboardInterrupt:
 	if autoRenew == 1:

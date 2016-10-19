@@ -33,6 +33,11 @@ gaptop = 200
 xdaythreshold = 0.2
 xdays = 60
 
+#Auto-transfer of funds from exchange to lending balance.
+#Full list for your reference: STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+#The currencies you enter below (comment it out to disable entirely, just leaving empty will result in an error) will be automatically transferred from your exchange balance to your lending balance whenever you deposit them.
+#transferableCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+
 #Minimum loan size the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loans fragmentation
 minloansize = 0.001
 
