@@ -533,6 +533,7 @@ try:
 		try:
 			refreshTotalLended()
 			updateConversionRates()
+			transferBalances()
 			cancelAndLoanAll()
 			log.refreshStatus(stringifyTotalLended())
 			log.persistStatus()
