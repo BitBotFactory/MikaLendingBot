@@ -1,2 +1,2 @@
-pprovals = 1
+approvals = 1
 pattern = "(?i)LGTM"
