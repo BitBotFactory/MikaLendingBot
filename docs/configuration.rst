@@ -1,7 +1,7 @@
 .. _configuration-section:
 
 2. Configuration
-*****************
+****************
 
 Configuring the bot can be as simple as copy-pasting your API key and Secret.
 
@@ -10,7 +10,7 @@ New features are required to be backwards compatible with previous versions of t
 To begin, copy ``default.cfg.example`` to ``default.cfg``. Now you can edit your settings.
 
 2.1 API key and Secret
----------------------------
+----------------------
 
 CREATE A NEW API key and Secret from `Poloniex <https://poloniex.com/apiKeys>`_ and paste them into the respective slots in the config. 
 
@@ -49,7 +49,7 @@ HIGHLY Recommended:
 - If the bot finishes a cycle and has lend orders to manage, it will change to active mode.
 
 2.3 Min and Max Rates
----------------------------
+---------------------
 
 ``mindailyrate`` is the minimum rate (in percent) that the bot will allow lends to open.
 
@@ -65,7 +65,7 @@ HIGHLY Recommended:
 - 2% is the default value offered by the exchange, but there is little reason not to set it higher if you feel optimistic.
 
 2.4 Spreading your Lends
----------------------------
+------------------------
 
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
 
@@ -89,7 +89,7 @@ If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot le
 - This value should be adjusted based on your coin volume to avoid going astronomically far away from a realistic rate.
 
 2.5 Variable loan Length
----------------------------
+------------------------
 
 These values allow you to lock in a better rate for a longer period of time, as per your configuration.
 
@@ -104,7 +104,7 @@ These values allow you to lock in a better rate for a longer period of time, as 
 - Allowed range: 2 to 60 days
 
 2.6 Auto-transfer from Exchange Balance
-----------------------------------------
+---------------------------------------
 
 If you regularly transfer funds into your Poloniex account but don't enjoy having to log in yourself and transfer them to the lending balance, this feature is for you.
 
@@ -116,7 +116,7 @@ If you regularly transfer funds into your Poloniex account but don't enjoy havin
 - Coins will be transferred every time the bot runs (60 seconds by default) so if you intend to trade or withdrawal it is recommended to turn off the bot or disable this feature.
 
 2.7 Unimportant settings
--------------------------
+------------------------
 
 Very few situations require you to change these settings.
 
@@ -129,7 +129,7 @@ Very few situations require you to change these settings.
 ``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
 
 2.8 Max to be lent
--------------------
+------------------
 
 This feature group allows you to only lend a certain percentage of your total holding in a coin, until the lending rate suprasses a certain threshhold. Then it will lend at max capacity.
 
@@ -164,7 +164,7 @@ This feature group allows you to only lend a certain percentage of your total ho
 
 
 2.9 Config per Coin
-----------------------
+-------------------
 
 ``coincfg`` is in the form of a dictionary and allows for advanced, per-coin options.
 
@@ -177,7 +177,7 @@ This feature group allows you to only lend a certain percentage of your total ho
 - There can be as many different coins as you want in coincfg, but each coin may only appear once.
 
 2.10 Advanced logging and Web Display
---------------------------------------
+-------------------------------------
 
 ``jsonfile`` is the location where the bot will log to a .json file instead of into console.
 
@@ -191,12 +191,22 @@ This feature group allows you to only lend a certain percentage of your total ho
 - Format: ``200``
 - Reasons to lower this include: you are conscious of bandwidth when hosting your webserver, you prefer (slightly) faster loading times and less RAM usage of bot.
 
-``startwebserver`` if true, this enables a webserver on the www/ folder.
+``startWebServer`` if true, this enables a webserver on the www/ folder.
 
 - Default value: Commented out, uncomment to enable.
-- The server page can be accessed locally at ``http://127.0.0.1:8000/lendingbot.html``
-- If you want to access this page remotely, you need to modify line 420 (as of 10/11/16) to change HOST to ``0.0.0.0``. You may then access the webpage on ``<computer local IP address>:8000/lendingbot.html``.
-- You must close bot with a keyboard interrupt (CTRL-C on Windows) to properly shutdown the server and release the socket, otherwise you will have to wait several minutes for it to release itself.
+- The server page can be accessed locally, at ``http://localhost:8000/lendingbot.html`` by default.
+- You must close bot with a keyboard interrupt (CTRL-C on Windows) to properly shutdown the server and release the socket, otherwise you may have to wait several minutes for it to release itself.
+
+``customWebServerAddress`` is the IP address and port that the webserver can be found at.
+
+- Advanced users only.
+- Default value: 0.0.0.0:8000 Uncomment to change
+- Format: ``IP:PORT``
+- Setting the ip to ``127.0.0.1`` will ONLY allow the webpage to be accessed at localhost (``127.0.0.1``)
+- Setting the ip to ``0.0.0.0`` will allow the webpage to be accessed at localhost (``127.0.0.1``) as well as at the computer's LAN IP address within the local network. This option is the most versatile, and is default.
+- Setting the ip to ``192.168.0.<LAN IP>`` will ONLY allow the webpage to be access at the computer's LAN IP address within the local network (And not through localhost.) It is recommended to be sure the device has a static local IP.
+- Do not set the port to a `reserved port <http://www.ingate.com/files/422/fwmanual-en/xa10285.html>`_ or you will receive an error when running the bot or attempting to connect (depending on HOW reserved a port is.)
+- You must know what you are doing when changing the IP address to anything other than the three suggested configurations above.
 
 ``outputCurrency`` this is the ticker of the coin which you would like the website to report your summary earnings in.
 

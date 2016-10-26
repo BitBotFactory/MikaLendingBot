@@ -36,7 +36,8 @@ parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot sto
 parser.add_argument("-minloan", "--minloansize", help='Minimum size of offers to make')
 parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
 parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
-parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on 127.0.0.1:8000/lendingbot.html", action="store_true")
+parser.add_argument("-server", "--startwebserver", help="If enabled, starts a webserver for the /www/ folder on customwebserveraddress/lendingbot.html", action="store_true")
+parser.add_argument("-customip","--customwebserveraddress", help="The webserver's ip address. Advanced users only.")
 parser.add_argument("-coincfg", "--coinconfig", help='Custom config per coin, useful when closing positions etc. Syntax: COIN:mindailyrate:maxactiveamount,COIN2:min2:maxactive2,...')
 parser.add_argument("-outcurr", "--outputcurrency", help="The currency that the HTML Overview will present the earnings summary in. Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.")
 parser.add_argument("-maxlent", "--maxtolent", help="Max amount to lent. if set to 0 the bot will check for maxpercenttolent.")
@@ -63,7 +64,7 @@ if args.gapbottom:
 if args.gaptop:
 	gapTop = Decimal(args.gapbottom)
 if args.sixtydaythreshold:
-	sixtyDayThreshold = Decimal(args.sixtydaythreshold)/100 
+	sixtyDayThreshold = Decimal(args.sixtydaythreshold)/100
 if args.xdaythreshold:
 	xDayThreshold = Decimal(args.xdaythreshold)/100
 if args.xdays:
@@ -141,9 +142,9 @@ if config_needed:
 	gapBottom = Decimal(config.get("BOT","gapbottom"))
 	gapTop = Decimal(config.get("BOT","gaptop"))
 	if(config.has_option("BOT", "sixtyDayThreshold")):
-                sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
-                xDayThreshold = sixtyDayThreshold
-                xDays = "60"
+				sixtyDayThreshold = float(config.get("BOT","sixtydaythreshold"))/100
+				xDayThreshold = sixtyDayThreshold
+				xDays = "60"
 	else:
 		xDayThreshold = Decimal(config.get("BOT","xdaythreshold"))/100
 		xDays = str(config.get("BOT","xdays"))
@@ -281,7 +282,7 @@ def amountToLent(activeCurTestBalance,activeCur,lendingBalance,lowrate):
         	if coincfg[activeCur]['maxtolent'] == 0 and coincfg[activeCur]['maxpercenttolent'] == 0:
 			log.updateStatusValue(activeCur, "maxToLend", activeCurTestBalance)
 			activeBal = lendingBalance
-		
+
 	if (activeCur not in coincfg):
 		if(maxtolentrate == 0 and lowrate > 0 or lowrate <= maxtolentrate and lowrate > 0):
                 	logdata = ("The Lower Rate found on "+activeCur+" is "+str("%.4f" % (Decimal(lowrate)*100))+"% vs conditional rate "+str("%.4f" % (Decimal(maxtolentrate)*100))+"%. ")
@@ -330,12 +331,12 @@ def cancelAndLoanAll():
 		if type(lendingBalances) is list: #silly api wrapper, empty dict returns a list, which brakes the code later.
 			lendingBalances = {}
 		lendingBalances.update(onOrderBalances)
-		
+
 	#Fill the (maxToLend) balances on the botlog.json for display it on the web
 	for key in sorted(totalLended):
 		if(len(lendingBalances) == 0 or key not in lendingBalances):
 			amountToLent(totalLended[key],key,0,0)
-	
+
 	activeCurIndex = 0
 	usableCurrencies = 0
 	global sleepTime #We need global var to edit sleeptime
@@ -344,9 +345,9 @@ def cancelAndLoanAll():
 		activeCurIndex += 1
 		activeCurTestBalance = Decimal(lendingBalances[activeCur])
 		activeBal = 0
-                if activeCur in totalLended:
-                	activeCurTestBalance += Decimal(totalLended[activeCur])
-		
+		if activeCur in totalLended:
+			activeCurTestBalance += Decimal(totalLended[activeCur])
+
 		#min daily rate can be changed per currency
 		curMinDailyRate = minDailyRate
 		if activeCur in coincfg:
@@ -359,17 +360,17 @@ def cancelAndLoanAll():
 		#log total coin
 		log.updateStatusValue(activeCur, "totalCoins", (Decimal(activeCurTestBalance)))
 
-		
-		
+
+
 		# make sure we have a request limit for this currency
 		if(activeCur not in loanOrdersRequestLimit):
 			loanOrdersRequestLimit[activeCur] = defaultLoanOrdersRequestLimit
-			
+
 		loans = bot.returnLoanOrders(activeCur, loanOrdersRequestLimit[activeCur] )
 		loansLength = len(loans['offers'])
-		
+
 		activeBal = amountToLent(activeCurTestBalance,activeCur,Decimal(lendingBalances[activeCur]),Decimal(loans['offers'][0]['rate']))
-		
+
 		if float(activeBal) > minLoanSize: #Check if any currencies have enough to lend, if so, make sure sleeptimer is set to active.
 			usableCurrencies = 1
 		else:
@@ -444,8 +445,8 @@ def startWebServer():
 	import os
 
 	try:
-		PORT = 8000
-		HOST = '127.0.0.1'
+		PORT = int(webServerPort)
+		HOST = webServerIP
 
 		class QuietHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 			# quiet server logs
@@ -454,18 +455,22 @@ def startWebServer():
 			# serve from www folder under current working dir
 			def translate_path(self, path):
 				return SimpleHTTPServer.SimpleHTTPRequestHandler.translate_path(self, '/www' + path)
-		
+
 		global server
 		server = SocketServer.TCPServer((HOST, PORT), QuietHandler)
-		print 'Started WebServer, lendingbot status available at http://'+ HOST +':' + str(PORT) + '/lendingbot.html'
+		if HOST == "0.0.0.0":
+			HOST1 = "localhost"
+		else:
+			HOST1 = HOST
+		print 'Started WebServer, lendingbot status available at http://'+ HOST1 +':' + str(PORT) + '/lendingbot.html'
 		server.serve_forever()
 	except Exception as e:
 		print 'Failed to start WebServer' + str(e)
-		
+
 def updateConversionRates():
 	global jsonOutputEnabled, totalLended
 	if(jsonOutputEnabled):
-		tickerResponse = bot.returnTicker();
+		tickerResponse = bot.returnTicker()
 		for couple in tickerResponse:
 			currencies = couple.split('_')
 			ref = currencies[0]
@@ -477,10 +482,10 @@ def updateConversionRates():
 				log.updateOutputCurrency('highestBid', tickerResponse[couple]['highestBid'])
 				log.updateOutputCurrency('currency', outputCurrency)
 			if outputCurrency != 'USDT' and ref == 'BTC' and currency == outputCurrency:
-                                log.updateOutputCurrency('highestBid', tickerResponse[couple]['highestBid'])
-                                log.updateOutputCurrency('currency', outputCurrency)
+				log.updateOutputCurrency('highestBid', tickerResponse[couple]['highestBid'])
+				log.updateOutputCurrency('currency', outputCurrency)
 		if outputCurrency == 'BTC':
-                        log.updateOutputCurrency('highestBid', '1')
+			log.updateOutputCurrency('highestBid', '1')
 			log.updateOutputCurrency('currency', outputCurrency)
 
 def transferBalances():
@@ -509,16 +514,30 @@ if args.setautorenew:
 def stopWebServer():
 	try:
 		print "Stopping WebServer"
-		server.shutdown();
+		server.shutdown()
 	except Exception as e:
 		print 'Failed to stop WebServer' + str(e)
-	
+
 print 'Welcome to Poloniex Lending Bot'
-if config_needed:
+if config_needed: #Configure webserver
 	webServerEnabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
+	if config.has_option('BOT', 'customWebServerAddress'):
+		customWebServerAddress = (config.get('BOT', 'customWebServerAddress').split(':'))
+		if len(customWebServerAddress) == 1:
+			customWebServerAddress.append("8000")
+			print "WARNING: Please specify a port for the webserver in the form IP:PORT, default port 8000 used."
+	else:
+		customWebServerAddress = ['0.0.0.0','8000']
 else:
 	webServerEnabled = args.startwebserver
-if webServerEnabled:
+	if args.customwebserveraddress:
+		customWebServerAddress = args.customwebserveraddress
+	else:
+		customWebServerAddress = ['0.0.0.0','8000']
+webServerIP = customWebServerAddress[0]
+webServerPort = customWebServerAddress[1]
+
+if webServerEnabled: #Run webserver
 	import threading
 	thread = threading.Thread(target = startWebServer)
 	thread.deamon = True
@@ -526,7 +545,7 @@ if webServerEnabled:
 
 #if config includes autorenew - start by clearing the current loans
 if autoRenew == 1:
-	setAutoRenew(0);
+	setAutoRenew(0)
 
 try:
 	while True:
@@ -542,7 +561,7 @@ try:
 		except Exception as e:
 			log.log("ERROR: " + str(e))
 			log.persistStatus()
-			print timestamp();
+			print timestamp()
 			print traceback.format_exc()
 			if('Invalid API key' in str(e)):
 				print "!!! Troubleshooting !!!"
@@ -551,17 +570,17 @@ try:
 			if('Nonce must be greater' in str(e)):
 				print "!!! Troubleshooting !!!"
 				print "Are you reusing the API key in multiple applications? use a unique key for every application."
-				exit(1);
+				exit(1)
 			if('Permission denied' in str(e)):
 				print "!!! Troubleshooting !!!"
 				print "Are you using IP filter on the key? Maybe your IP changed?"
-				exit(1);
+				exit(1)
 			sys.stdout.flush()
 			time.sleep(sleepTime)
 			pass
 except KeyboardInterrupt:
 	if autoRenew == 1:
-		setAutoRenew(1);
+		setAutoRenew(1)
 	if webServerEnabled:
 		stopWebServer()
 	log.log('bye')
