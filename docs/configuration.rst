@@ -14,9 +14,9 @@ To begin, copy ``default.cfg.example`` to ``default.cfg``. Now you can edit your
 
 CREATE A NEW API key and Secret from `Poloniex <https://poloniex.com/apiKeys>`_ and paste them into the respective slots in the config. 
 
-	apikey = XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX
+	``apikey = XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX``
 	
-	secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	``secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx``
 
 Your API key is all capital letters and numbers in groups of 8, separated by hyphens.
 Your secret is 128 lowercase letters and numbers.

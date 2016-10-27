@@ -1,4 +1,4 @@
-## How to contribute to Slither.io-bot
+## How to contribute to Poloniexlendingbot
 
 #### **Did you find a bug?**
 
@@ -58,4 +58,4 @@ Poloniex lending bot is a volunteer effort and is a collaborative and fun projec
 
 Thanks!
 
-Mikadily, Raanan, Evanito and other contributers...
+Mikadily, Raanan, Evanito and other contributors...
