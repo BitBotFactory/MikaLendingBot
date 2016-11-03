@@ -53,14 +53,14 @@ HIGHLY Recommended:
 
 ``mindailyrate`` is the minimum rate (in percent) that the bot will allow lends to open.
 
-- Default value: 0.04 percent
+- Default value: 0.005 percent
 - Allowed range: 0.0031 to 5 percent
 - It is not worth it to settle at a low rate, 0.0031% every day for a year comes out to about 1%. That is worse than bank interest.
 - The current default value is a optimistic but very viable for the more high volume currencies. Not viable for lending DOGE, for example.
 
 ``maxdailyrate`` is the maximum rate (in percent) that the bot will allow lends to open.
 
-- Default value: 2 percent
+- Default value: 5 percent
 - Allowed range: 0.0031 to 5 percent 
 - 2% is the default value offered by the exchange, but there is little reason not to set it higher if you feel optimistic.
 
