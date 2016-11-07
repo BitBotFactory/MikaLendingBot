@@ -128,6 +128,12 @@ Very few situations require you to change these settings.
 
 ``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
 
+``endDate`` Bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
+
+- Default value: Disabled
+- Uncomment to enable.
+- Format: ``YEAR,MONTH,DAY``
+
 2.8 Max to be lent
 ------------------
 

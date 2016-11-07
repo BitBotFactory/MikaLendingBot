@@ -46,8 +46,8 @@ class JsonOutput(object):
         self.clearStatusValues()
         self.jsonOutputLog = RingBuffer(logLimit)
 
-    def status(self, status, time):
-        self.jsonOutput["last_update"] = time
+    def status(self, status, time, days_remaining_msg):
+        self.jsonOutput["last_update"] = time + days_remaining_msg
         self.jsonOutput["last_status"] = status
 
     def printline(self, line):
@@ -77,6 +77,7 @@ class JsonOutput(object):
 class Logger(object):
     def __init__(self, json_file='', json_log_size=-1):
         self._lended = ''
+        self._daysRemaining = ''
         if json_file != '' and json_log_size != -1:
             self.console = JsonOutput(json_file, json_log_size)
         else:
@@ -102,10 +103,12 @@ class Logger(object):
         self.console.printline(line)
         self.refreshStatus()
 
-    def refreshStatus(self, lended=''):
+    def refreshStatus(self, lended='', days_remaining=''):
         if lended != '':
             self._lended = lended
-        self.console.status(self._lended, self.timestamp())
+        if days_remaining != '':
+            self._daysRemaining = days_remaining
+        self.console.status(self._lended, self.timestamp(), self._daysRemaining)
 
     def updateStatusValue(self, coin, key, value):
         if hasattr(self.console, 'statusValue'):

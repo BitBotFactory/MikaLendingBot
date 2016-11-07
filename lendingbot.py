@@ -283,9 +283,20 @@ def create_loan_offer(currency, amt, rate):
             days = xdays
         if xday_threshold == 0:
             days = '2'
+        if config.has_option('BOT', 'endDate'):
+            days_remaining = int(get_max_duration("order"))
+            if int(days_remaining) <= 2:
+                print "endDate reached. Bot can no longer lend.\nExiting..."
+                log.log("The end date has almost been reached and the bot can no longer lend. Exiting.")
+                log.refreshStatus(stringify_total_lended(), get_max_duration("status"))
+                log.persistStatus()
+                exit(0)
+            if int(days) > days_remaining:
+                days = str(days_remaining)
         if not dry_run:
             msg = bot.createLoanOffer(currency, amt, days, 0, rate)
             log.offer(amt, currency, rate, days, msg)
+
 
 # limit of orders to request
 loanOrdersRequestLimit = {}
@@ -348,18 +359,46 @@ def amount_to_lent(active_cur_test_balance, active_cur, lending_balance, low_rat
     return active_bal
 
 
-def cancel_and_loan_all():
+def get_open_offers():
     loan_offers = bot.returnOpenLoanOffers()
-    if type(loan_offers) is list:  # silly api wrapper, empty dict returns a list, which brakes the code later.
+    if isinstance(loan_offers, list):  # silly api wrapper, empty dict returns a list, which breaks the code later.
         loan_offers = {}
+    return loan_offers
 
+
+def get_on_order_balances():
+    loan_offers = get_open_offers()
     on_order_balances = {}
+    for CUR in loan_offers:
+        for offer in loan_offers[CUR]:
+            on_order_balances[CUR] = on_order_balances.get(CUR, 0) + Decimal(offer['amount'])
+    return on_order_balances
+
+
+def get_max_duration(context):
+    if not config.has_option('BOT', 'endDate'):
+        return ""
+    try:
+        now_time = datetime.date.today()
+        config_date = map(int, config.get('BOT', 'endDate').split(','))
+        end_time = datetime.date(*config_date)  # format YEAR,MONTH,DAY all ints, also used splat operator
+        diff_days = (end_time - now_time).days
+        if context == "order":
+            return diff_days  # Order needs int
+        if context == "status":
+            return " - Days Remaining: " + str(diff_days)  # Status needs string
+    except Exception as E:
+        print "ERROR: There is something wrong with your endDate option. Error: " + str(E)
+        exit(1)
+
+
+def cancel_all():
+    loan_offers = get_open_offers()
     for CUR in loan_offers:
         if CUR in coincfg and coincfg[CUR]['maxactive'] == 0:
             # don't cancel disabled coin
             continue
         for offer in loan_offers[CUR]:
-            on_order_balances[CUR] = on_order_balances.get(CUR, 0) + Decimal(offer['amount'])
             if not dry_run:
                 try:
                     msg = bot.cancelLoanOffer(CUR, offer['id'])
@@ -367,11 +406,13 @@ def cancel_and_loan_all():
                 except Exception as E:
                     log.log("Error canceling loan offer: " + str(E))
 
+
+def loan_all():
     lending_balances = bot.returnAvailableAccountBalances("lending")['lending']
     if dry_run:  # just fake some numbers, if dryrun (testing)
-        if type(lending_balances) is list:  # silly api wrapper, empty dict returns a list, which brakes the code later.
+        if isinstance(lending_balances, list):  # silly api wrapper, empty dict returns a list, which breaks the code later.
             lending_balances = {}
-        lending_balances.update(on_order_balances)
+        lending_balances.update(get_on_order_balances())
 
     # Fill the (maxToLend) balances on the botlog.json for display it on the web
     for key in sorted(totalLended):
@@ -607,8 +648,9 @@ try:
             refresh_total_lended()
             update_conversion_rates()
             transfer_balances()
-            cancel_and_loan_all()
-            log.refreshStatus(stringify_total_lended())
+            cancel_all()
+            loan_all()
+            log.refreshStatus(stringify_total_lended(), get_max_duration("status"))
             log.persistStatus()
             sys.stdout.flush()
             time.sleep(sleep_time)

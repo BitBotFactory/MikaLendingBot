@@ -44,6 +44,11 @@ minloansize = 0.001
 #AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
 autorenew = 0
 
+#End date for lending, bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
+#Uncomment to enable.
+#Format: YEAR,MONTH,DAY
+#endDate = 2016,12,25
+
 #Max amount to lent. if set to 0 or commented the bot will check for maxpercenttolent.(0+)
 #maxtolent = 0
 
