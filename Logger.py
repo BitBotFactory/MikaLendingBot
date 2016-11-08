@@ -19,7 +19,7 @@ class ConsoleOutput(object):
         self._status += '  '  # In case the shell added a ^C
         self.status('')
 
-    def status(self, msg, time=''):
+    def status(self, msg, time='', days_remaining_msg=''):
         status = str(msg)
         cols = ConsoleUtils.get_terminal_size()[0]
         if msg != '' and len(status) > cols:
