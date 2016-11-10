@@ -16,6 +16,7 @@
 
 ## Checklist:
 <!--- Go over all the following points, they do not all need to be checked when you first make the PR. -->
+<!--- Enter N/A in any tickboxes that do not apply to your change. Example: "- [N/A] Blah blah..."
 <!--- For us to merge your PR, after approval, ALL OF THESE CHECKBOXES NEED TO BE TICKED -->
 <!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
 - [ ] **I have read CONTRIBUTING.md**

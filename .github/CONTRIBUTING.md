@@ -8,9 +8,9 @@
 
 When making your report, be sure to mention:
 
-* Title: Short description of what the issue is. (Clearer the better.)
+* Title: Short description of what the issue is. (The clearer the better.)
 * **Label: Add the Bug label**
-* Your configuration.cfg file, or what arguments you are executing with.
+* Your configuration.cfg file. Be sure not to share your API key.
 * What version of the bot you are using.
 * What you think caused this issue. (On your end, you don't need to diagnose our code, tell us what you did that caused it.)
 * If you can, suggest a solution. (Again, you don't need to be technical in your description.)
@@ -24,7 +24,7 @@ When making your report, be sure to mention:
 
 * Ensure the PR template is filled in **fully** and required conditions are met.
 
-* Adhere to the current code style.
+* Adhere to the current code style outlined in the Documentation page.
 
 * If is all is good, wait for approvals by contributors which decide if your PR will be merged. The repo owner can also merge it in early **if there is good reason to do so**.
 
@@ -33,7 +33,7 @@ When making your report, be sure to mention:
 #### **Do you intend to add a new feature or change an existing one?**
 Check if it's been suggested already [here](https://github.com/Mikadily/poloniexlendingbot/issues).
 
-If it has, or something very similar has :
+If it has, or something very similar has:
 * Check out the discussion on that suggestion.
 * If you feel you have more to add, then comment it there. Don't make a brand new issue for something that has already been suggested.
 
@@ -43,7 +43,7 @@ Be sure to include in your report:
 
 * Title: A clear, short description of what you suggest. You can always go into detail in the description.
 * Information about your suggestion. (Does not need to be technical.)
-* **Label: Add the Suggestion label.**
+* **Label: Add the Enhancement label.**
 * Why you think this would improve the bot if added.
 * If you have Python experience, feel free to include snippets of code. (or even refer to a pull request or fork)
 
@@ -56,6 +56,6 @@ Be sure to include in your report:
 
 Poloniex lending bot is a volunteer effort and is a collaborative and fun project. We encourage you to pitch in and [join the team](https://gitter.im/Mikadily/poloniexlendingbot)!
 
-Thanks!
+Thanks,
 
-Mikadily, Raanan, Evanito and other contributors...
+Mikadily, Raanan, Evanito and other contributors.

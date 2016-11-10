@@ -1,31 +1,38 @@
 #Poloniex lending bot <img src="https://nevet.me/public/icon.png" width="50">
 
-Poloniex lending bot is written in Python for automatic lending on Poloniex exchange.
-It will lend automatically all cryptocurrencies found in your lending account.
+The Poloniex lending bot is written in Python and features automatic lending on the exchange Poloniex.
+It will automatically lend all cryptocurrencies found in your lending account.
 
 It uses an advanced lending strategy which will spread offers across the lend book to take advantage of possible spikes in lending rates. Inspired by [MarginBot](https://github.com/HFenter/MarginBot) and [BitfinexLendingBot](https://github.com/eAndrius/BitfinexLendingBot).
 
-[![Join the chat at https://gitter.im/Mikadily/poloniexlendingbot](https://badges.gitter.im/Mikadily/poloniexlendingbot.svg)](https://gitter.im/Mikadily/poloniexlendingbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Join the chat at [![Join the chat at https://gitter.im/Mikadily/poloniexlendingbot](https://badges.gitter.im/Mikadily/poloniexlendingbot.svg)](https://gitter.im/Mikadily/poloniexlendingbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Click the chart to see our workflow management with Waffle.io
+Workflow management with Waffle.io
+
 [![Throughput Graph](https://graphs.waffle.io/Mikadily/poloniexlendingbot/throughput.svg)](https://waffle.io/Mikadily/poloniexlendingbot/)
 
 ##Documentation
 [Click here to read the Documentation, hosted by readthedocs.io](http://poloniexlendingbot.readthedocs.io/en/latest/index.html)
 
 
-### Command Line Parameters
-[View Arguments Documentation in the Wiki](https://github.com/Mikadily/poloniexlendingbot/wiki/Arguments)
+### Features
+- Automatically lend your coins on Poloniex at the highest possible rates, 24 hours a day.
+- Configure your own lending strategy! Be aggressive and hold out for a great rate or be conservative and lend often but at a lower rate, your choice!
+- The ability to spread your offers out to take advantage of spikes in the lending rate.
+- Withhold lending a percentage of your coins until the going rate reaches a certain threshold to maximize your profits.
+- Lock in a high daily rate for a longer period of time period of up to sixty days, all configurable!
+- Automatically transfer any funds you deposit (configurable on a coin-by-coin basis) to your lending account instantly after deposit.
+- View a summary of your bot's activities, status, and reports via an easy-to-set-up webpage that you can access from anywhere!
+- Choose any currency to see your profits in, even show how much you are making in USD!
+- Select different lending strategies on a coin-by-coin basis.
+- Run multiple instances of the bot for multiple accounts easily using multiple config files.
+- Automatically enable Poloniex's AutoRenew feature whenever you shut the bot down, so even then your loans can continue.
+- Configure a date you would like your coins back, and watch the bot make sure all your coins are available to be traded or withdrawn at the beginning of that day.
+- And the best feature of all: It is absolutely free!
 
-
-### Bot Status Webpage
-Under www folder you can find lendingbot.html webpage, it can be used to parse the json output file.
-- currently javascript expects 'botlog.json' file to be in the same folder i.e. jsonfile = www\botlog.json (or webserver folder)
-- will refresh every 30sec
-- events log is presented in reverse order - last is on top
-- uncomment startWebServer = true if you need a webserver for viewing, this will start a simple webserver.
 
 ##Donations
 
 If you find it useful, please consider donating some bitcoins: 37VoSLbiqVWGDA5Y8rmo5XaQxPo551gBY8
-This address goes to a Multisig wallet with keys held by Mikadily, rnevet, and Evanito. 
+
+This address goes to a multisignature wallet with keys held by the lead contributors: Mikadily, rnevet, and Evanito.
