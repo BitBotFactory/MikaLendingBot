@@ -4,19 +4,19 @@
 *******************************************
 
 1.1 Installing on a Computer
-===============================
+============================
 
 Installing the bot on a computer is drag-and-drop and platform independent.
 
 1.1.1 Prerequisites
-----------------------------
+-------------------
 
 You will need:
 
 - Python 2.7.10 (Must be added to PATH)
 
 1.1.2 Downloading
-----------------------------
+-----------------
 
 To download the bot you can either:
 
@@ -24,7 +24,7 @@ To download the bot you can either:
 - Run ``git clone https://github.com/Mikadily/poloniexlendingbot`` if you have git installed.
 
 1.1.3 Configuring
-------------------
+-----------------
 
 To configure the bot with your settings:
 
@@ -35,11 +35,13 @@ To configure the bot with your settings:
 You are now ready to run the bot.
 
 1.1.4 Running
------------------------
+-------------
 
 To run, either double-click lendingbot.py (if you have .py associated with the Python executable)
 
 or run ``python lendingbot.py`` in console.
+
+.. note:: You can use arguments to specify a specific config file ``-cfg`` or to do dry runs ``-dry``. To see these args do: ``python lendingbot.py -h``
 
 1.2 Installing on Pythonanywhere.com 
 ====================================
@@ -47,7 +49,7 @@ or run ``python lendingbot.py`` in console.
 `Pythonanywhere.com <https://www.pythonanywhere.com>`_ is a useful website that will host and run Python code for you. This is perfect for our bot.
 
 1.2.1 Prerequisites
----------------------
+-------------------
 
 You will need:
 

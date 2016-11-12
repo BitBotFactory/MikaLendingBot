@@ -15,7 +15,6 @@ from poloniex import Poloniex
 SATOSHI = Decimal(10) ** -8
 
 config = SafeConfigParser()
-config_location = 'default.cfg'
 
 # Defaults
 min_loan_size = 0.001
@@ -23,179 +22,80 @@ min_loan_size = 0.001
 parser = argparse.ArgumentParser()  # Start args.
 parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
 parser.add_argument("-dry", "--dryrun", help="Make pretend orders", action="store_true")
-parser.add_argument("-clrrenew", "--clearautorenew", help="Stops all autorenew orders", action="store_true")
-parser.add_argument("-setrenew", "--setautorenew", help="Sets all orders to autorenew", action="store_true")
-parser.add_argument("-key", "--apikey", help="Account API key, should be unique to this script.")
-parser.add_argument("-secret", "--apisecret", help="Account API secret, should be unique to this script.")
-parser.add_argument("-sleepactive", "--sleeptimeactive", help="Time between active iterations, seconds")
-parser.add_argument("-sleepinactive", "--sleeptimeinactive", help="Time between inactive iterations, seconds")
-parser.add_argument("-minrate", "--mindailyrate", help="Minimum rate you will lend at")
-parser.add_argument("-maxrate", "--maxdailyrate", help="Maximum rate you will lend at")
-parser.add_argument("-spread", "--spreadlend", help="How many orders to split your lending into")
-parser.add_argument("-gapbot", "--gapbottom",
-                    help="Percentage of your order's volume into the ledger you start lending")
-parser.add_argument("-gaptop", "--gaptop", help="Percentage of your order's volume into the ledger you stop lending")
-parser.add_argument("-60day", "--sixtydaythreshold",
-                    help="Rate at where bot will request to lend for 60 days")  # only used for backward compatibility
-parser.add_argument("-xdaythreshold", "--xdaythreshold", help="Rate at where bot will request to lend for xdays")
-parser.add_argument("-xdays", "--xdays", help="the length the bot will lend if xdaythreashold is met")
-parser.add_argument("-trans", "--transferablecurrencies",
-                    help="A list of currencies to transfer from exchange to lending balance.")
-parser.add_argument("-autorenew", "--autorenew", help="Sets autorenew on bot stop, and clears autorenew on start",
-                    action="store_true")
-parser.add_argument("-minloan", "--minloansize", help='Minimum size of offers to make')
-parser.add_argument("-json", "--jsonfile", help="Location of .json file to save log to")
-parser.add_argument("-jsonsize", "--jsonlogsize", help="How many lines to keep saved to the json log file")
-parser.add_argument("-server", "--startwebserver",
-                    help="If enabled, starts a webserver for the /www/ folder on customip/lendingbot.html",
-                    action="store_true")
-parser.add_argument("-customip", "--customwebserveraddress", help="The webserver's ip address. Advanced users only.")
-parser.add_argument("-coincfg", "--coinconfig",
-                    help='Custom config per coin, useful when closing positions etc.')
-parser.add_argument("-outcurr", "--outputcurrency",
-                    help="The currency that the HTML Overview will present the earnings summary in.")
-parser.add_argument("-maxlent", "--maxtolent",
-                    help="Max amount to lent. if set to 0 the bot will check for maxpercenttolent.")
-parser.add_argument("-maxplent", "--maxpercenttolent",
-                    help="Max percent to lent. if set to 0 the bot will lent the 100%.")
-parser.add_argument("-maxlentr", "--maxtolentrate",
-                    help="Max to lent rate. The lending rate to trigger disabling maxtolent.")
 args = parser.parse_args()  # End args.
 # Start handling args.
-if args.apikey:
-    api_key = args.apikey
-if args.apisecret:
-    api_secret = args.apisecret
-if args.sleeptimeactive:
-    sleep_time_active = int(args.sleeptimeactive)
-if args.sleeptimeinactive:
-    sleep_time_inactive = int(args.sleeptimeinactive)
-if args.mindailyrate:
-    min_daily_rate = Decimal(args.mindailyrate) / 100
-if args.maxdailyrate:
-    max_daily_rate = Decimal(args.maxdailyrate) / 100
-if args.spreadlend:
-    spread_lend = int(args.spreadlend)
-if args.gapbottom:
-    gap_bottom = Decimal(args.gapbottom)
-if args.gaptop:
-    gap_top = Decimal(args.gapbottom)
-if args.sixtydaythreshold:
-    sixty_day_threshold = Decimal(args.sixtydaythreshold) / 100
-if args.xdaythreshold:
-    xday_threshold = Decimal(args.xdaythreshold) / 100
-if args.xdays:
-    xdays = str(args.xdays)
-if args.transferablecurrencies:
-    transferable_currencies = args.transferablecurrencies
-if args.dryrun:
-    dry_run = True
-else:
-    dry_run = False
+dry_run = bool(args.dryrun)
 if args.config:
     config_location = args.config
-if args.autorenew:
-    auto_renew = 1
 else:
-    auto_renew = 0
-if args.minloansize:
-    min_loan_size = Decimal(args.minloansize)
-coincfg = {}
-if args.coinconfig:
-    coinconfig = args.coinconfig.split(',')
-    for cur in coinconfig:
-        cur = cur.split(':')
-        coincfg[cur[0]] = dict(minrate=(Decimal(cur[1])) / 100, maxactive=Decimal(cur[2]), maxtolent=Decimal(cur[3]),
-                               maxpercenttolent=(Decimal(cur[4])) / 100, maxtolentrate=(Decimal(cur[5])) / 100)
-if args.outputcurrency:
-    output_currency = args.outputcurrency
+    config_location = 'default.cfg'
+# End handling args.
+loaded_files = config.read([config_location])
+# Copy default config file if not found
+if len(loaded_files) != 1:
+    shutil.copy('default.cfg.example', 'default.cfg')
+    print '\ndefault.cfg.example has been copied to default.cfg\nEdit it with your API key and custom settings.\n'
+    raw_input("Press Enter to acknowledge and exit...")
+    exit(0)
+
+if config.has_option('BOT', 'sleeptimeactive') and config.has_option('BOT', 'sleeptimeinactive'):
+    sleep_time_active = float(config.get("BOT", "sleeptimeactive"))
+    sleep_time_inactive = float(config.get("BOT", "sleeptimeinactive"))
+else:
+    sleep_time = float(config.get("BOT", "sleeptime"))  # If it can't find a setting, run with the old cfg.
+    sleep_time_active = sleep_time
+    sleep_time_inactive = sleep_time
+    print "!!! Please update to new config that includes Inactive Mode. !!!"  # Update alert.
+api_key = config.get("API", "apikey")
+api_secret = config.get("API", "secret")
+min_daily_rate = Decimal(config.get("BOT", "mindailyrate")) / 100
+max_daily_rate = Decimal(config.get("BOT", "maxdailyrate")) / 100
+spread_lend = int(config.get("BOT", "spreadlend"))
+gap_bottom = Decimal(config.get("BOT", "gapbottom"))
+gap_top = Decimal(config.get("BOT", "gaptop"))
+if config.has_option("BOT", "sixtyDayThreshold"):
+    sixty_day_threshold = float(config.get("BOT", "sixtydaythreshold")) / 100
+    xday_threshold = sixty_day_threshold
+    xdays = "60"
+else:
+    xday_threshold = Decimal(config.get("BOT", "xdaythreshold")) / 100
+    xdays = str(config.get("BOT", "xdays"))
+auto_renew = int(config.get("BOT", "autorenew"))
+if config.has_option('BOT', 'outputCurrency'):
+    output_currency = config.get('BOT', 'outputCurrency')
 else:
     output_currency = 'BTC'
-if args.maxtolent:
-    maxtolent = Decimal(args.maxtolent)
+if config.has_option('BOT', 'maxtolent'):
+    maxtolent = Decimal(config.get('BOT', 'maxtolent'))
 else:
     maxtolent = 0
-if args.maxpercenttolent:
-    maxpercenttolent = Decimal(args.maxpercenttolent) / 100
+if config.has_option('BOT', 'maxpercenttolent'):
+    maxpercenttolent = Decimal(config.get('BOT', 'maxpercenttolent')) / 100
 else:
     maxpercenttolent = 0
-if args.maxtolentrate:
-    maxtolentrate = Decimal(args.maxtolentrate) / 100
+if config.has_option('BOT', 'maxtolentrate'):
+    maxtolentrate = Decimal(config.get('BOT', 'maxtolentrate')) / 100
 else:
     maxtolentrate = 0
-# End handling args.
-
-# Check if we need a config file at all (If all settings are passed by args, we won't)
-if args.apikey and args.apisecret and args.sleeptimeactive and args.sleeptimeinactive and args.mindailyrate and (
-                        args.maxdailyrate and args.spreadlend and args.gapbottom and args.gaptop and (
-                            (args.xdaythreshold and args.xdays) or args.sixtydaythreshold)):
-    # If all that was true, we don't need a config file...
-    config_needed = False
-    print "Settings met from arguments."
+if config.has_option('BOT', 'minloansize'):
+    min_loan_size = Decimal(config.get("BOT", 'minloansize'))
+if config.has_option('BOT', "transferableCurrencies"):
+    transferable_currencies = (config.get("BOT", "transferableCurrencies")).split(",")
 else:
-    config_needed = True
-    print "Obtaining settings from config file."
-
-# When true, will overwrite anything passed by args with the found cfg
-if config_needed:
-    loaded_files = config.read([config_location])
-    # Copy default config file if not found
-    if len(loaded_files) != 1:
-        shutil.copy('default.cfg.example', 'default.cfg')
-        print '\ndefault.cfg.example has been copied to default.cfg\nEdit it with your API key and custom settings.\n'
-        raw_input("Press Enter to acknowledge and exit...")
-        exit(0)
-
-    if config.has_option('BOT', 'sleeptimeactive') and config.has_option('BOT', 'sleeptimeinactive'):
-        sleep_time_active = float(config.get("BOT", "sleeptimeactive"))
-        sleep_time_inactive = float(config.get("BOT", "sleeptimeinactive"))
-    else:
-        sleep_time = float(config.get("BOT", "sleeptime"))  # If it can't find a setting, run with the old cfg.
-        sleep_time_active = sleep_time
-        sleep_time_inactive = sleep_time
-        print "!!! Please update to new config that includes Inactive Mode. !!!"  # Update alert.
-    api_key = config.get("API", "apikey")
-    api_secret = config.get("API", "secret")
-    min_daily_rate = Decimal(config.get("BOT", "mindailyrate")) / 100
-    max_daily_rate = Decimal(config.get("BOT", "maxdailyrate")) / 100
-    spread_lend = int(config.get("BOT", "spreadlend"))
-    gap_bottom = Decimal(config.get("BOT", "gapbottom"))
-    gap_top = Decimal(config.get("BOT", "gaptop"))
-    if config.has_option("BOT", "sixtyDayThreshold"):
-        sixty_day_threshold = float(config.get("BOT", "sixtydaythreshold")) / 100
-        xday_threshold = sixty_day_threshold
-        xdays = "60"
-    else:
-        xday_threshold = Decimal(config.get("BOT", "xdaythreshold")) / 100
-        xdays = str(config.get("BOT", "xdays"))
-    auto_renew = int(config.get("BOT", "autorenew"))
-    if config.has_option('BOT', 'outputCurrency'):
-        output_currency = config.get('BOT', 'outputCurrency')
-    if config.has_option('BOT', 'maxtolent'):
-        maxtolent = Decimal(config.get('BOT', 'maxtolent'))
-    if config.has_option('BOT', 'maxpercenttolent'):
-        maxpercenttolent = Decimal(config.get('BOT', 'maxpercenttolent')) / 100
-    if config.has_option('BOT', 'maxtolentrate'):
-        maxtolentrate = Decimal(config.get('BOT', 'maxtolentrate')) / 100
-    if config.has_option('BOT', 'minloansize'):
-        min_loan_size = Decimal(config.get("BOT", 'minloansize'))
-    if config.has_option('BOT', "transferableCurrencies"):
-        transferable_currencies = (config.get("BOT", "transferableCurrencies")).split(",")
-    else:
-        transferable_currencies = []
-
-    if config.has_option("BOT", "coinconfig"):
-        try:
-            # parsed
-            coinconfig = (json.loads(config.get("BOT", "coinconfig")))
-            for cur in coinconfig:
-                cur = cur.split(':')
-                coincfg[cur[0]] = dict(minrate=(Decimal(cur[1])) / 100, maxactive=Decimal(cur[2]),
-                                       maxtolent=Decimal(cur[3]), maxpercenttolent=(Decimal(cur[4])) / 100,
-                                       maxtolentrate=(Decimal(cur[5])) / 100)
-        except Exception as e:
-            print "Coinconfig parsed incorrectly, please refer to the documentation. Error: " + e
-            pass
+    transferable_currencies = []
+coincfg = {}
+if config.has_option("BOT", "coinconfig"):
+    try:
+        # parsed
+        coinconfig = (json.loads(config.get("BOT", "coinconfig")))
+        for cur in coinconfig:
+            cur = cur.split(':')
+            coincfg[cur[0]] = dict(minrate=(Decimal(cur[1])) / 100, maxactive=Decimal(cur[2]),
+                                   maxtolent=Decimal(cur[3]), maxpercenttolent=(Decimal(cur[4])) / 100,
+                                   maxtolentrate=(Decimal(cur[5])) / 100)
+    except Exception as e:
+        print "Coinconfig parsed incorrectly, please refer to the documentation. Error: " + str(e)
+        pass
 
 sleep_time = sleep_time_active  # Start with active mode
 # sanity checks
@@ -221,15 +121,10 @@ bot = Poloniex(api_key, api_secret)
 log = {}
 
 # check if json output is enabled
-jsonOutputEnabled = (config.has_option('BOT', 'jsonfile') and config.has_option('BOT', 'jsonlogsize')) or (
-    args.jsonfile and args.jsonlogsize)
-if jsonOutputEnabled:
-    if config_needed:
-        jsonFile = config.get("BOT", "jsonfile")
-        jsonLogSize = int(config.get("BOT", "jsonlogsize"))
-    else:
-        jsonFile = args.jsonfile
-        jsonLogSize = args.jsonlogsize
+json_output_enabled = (config.has_option('BOT', 'jsonfile') and config.has_option('BOT', 'jsonlogsize'))
+if json_output_enabled:
+    jsonFile = config.get("BOT", "jsonfile")
+    jsonLogSize = int(config.get("BOT", "jsonlogsize"))
     log = Logger(jsonFile, jsonLogSize)
 else:
     log = Logger()
@@ -410,7 +305,7 @@ def cancel_all():
 def loan_all():
     lending_balances = bot.returnAvailableAccountBalances("lending")['lending']
     if dry_run:  # just fake some numbers, if dryrun (testing)
-        if isinstance(lending_balances, list):  # silly api wrapper, empty dict returns a list, which breaks the code later.
+        if isinstance(lending_balances, list):  # silly api wrapper, empty dict returns a list, which breaks code later.
             lending_balances = {}
         lending_balances.update(get_on_order_balances())
 
@@ -559,8 +454,7 @@ def start_web_server():
 
 
 def update_conversion_rates():
-    global jsonOutputEnabled, totalLended
-    if jsonOutputEnabled:
+    if json_output_enabled:
         ticker_response = bot.returnTicker()
         for couple in ticker_response:
             currencies = couple.split('_')
@@ -595,15 +489,6 @@ def transfer_balances():
                 print "ERROR: Incorrect coin entered for transferCurrencies: " + coin
 
 
-# Parse these down here...
-if args.clearautorenew:
-    set_auto_renew(0)
-    raise SystemExit
-if args.setautorenew:
-    set_auto_renew(1)
-    raise SystemExit
-
-
 def stop_web_server():
     try:
         print "Stopping WebServer"
@@ -613,21 +498,15 @@ def stop_web_server():
 
 
 print 'Welcome to Poloniex Lending Bot'
-if config_needed:  # Configure webserver
-    web_server_enabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
-    if config.has_option('BOT', 'customWebServerAddress'):
-        custom_web_server_address = (config.get('BOT', 'customWebServerAddress').split(':'))
-        if len(custom_web_server_address) == 1:
-            custom_web_server_address.append("8000")
-            print "WARNING: Please specify a port for the webserver in the form IP:PORT, default port 8000 used."
-    else:
-        custom_web_server_address = ['0.0.0.0', '8000']
+# Configure webserver
+web_server_enabled = config.has_option('BOT', 'startWebServer') and config.getboolean('BOT', 'startWebServer')
+if config.has_option('BOT', 'customWebServerAddress'):
+    custom_web_server_address = (config.get('BOT', 'customWebServerAddress').split(':'))
+    if len(custom_web_server_address) == 1:
+        custom_web_server_address.append("8000")
+        print "WARNING: Please specify a port for the webserver in the form IP:PORT, default port 8000 used."
 else:
-    web_server_enabled = args.startwebserver
-    if args.customwebserveraddress:
-        custom_web_server_address = args.customwebserveraddress
-    else:
-        custom_web_server_address = ['0.0.0.0', '8000']
+    custom_web_server_address = ['0.0.0.0', '8000']
 web_server_ip = custom_web_server_address[0]
 web_server_port = custom_web_server_address[1]
 
