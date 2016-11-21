@@ -56,7 +56,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1):
     coin_cfg = Config.get_coin_cfg()
     dry_run = dry_run1
     transferable_currencies = Config.get_transferable_currencies()
-    keep_stuck_orders = Config.get('BOT', "keepstuckorders", True)
+    keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
 
     sleep_time = sleep_time_active  # Start with active mode
 
@@ -100,7 +100,10 @@ def cancel_all():
             # don't cancel disabled coin
             continue
         if keep_stuck_orders:
-            cur_sum = float(available_balances['lending'][CUR])
+            if isinstance(available_balances['lending'], dict):
+                cur_sum = float(available_balances['lending'][CUR])
+            else:
+                cur_sum = 0
             for offer in loan_offers[CUR]:
                 cur_sum += float(offer['amount'])
         else:

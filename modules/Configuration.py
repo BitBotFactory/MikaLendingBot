@@ -23,8 +23,11 @@ def has_option(category, option):
     return config.has_option(category, option)
 
 
-def getboolean(category, option):
-    return config.getboolean(category, option)
+def getboolean(category, option, default_value=False):
+    if config.has_option(category, option):
+        return config.getboolean(category, option)
+    else:
+        return default_value
 
 
 def get(category, option, default_value=False, lower_limit=False, upper_limit=False):
