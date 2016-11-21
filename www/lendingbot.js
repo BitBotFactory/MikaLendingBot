@@ -87,11 +87,15 @@ function updateRawValues(rawData){
             var avgRateText = '&nbsp;<span style="white-space:nowrap;" title="Average loan rate, simple average calculation of active loans rates.">Avg. (i)</span>';
             var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
             var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
+            var lentStr = 'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
-            var rowValues = ["<b>" + currency + "</b>",
-                'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)'+' <b>Total</b><br/>'+'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(maxToLend, 4) + ' (' + printFloat(lentPercLendable, 2) + '%)  <b>Lendable</b>' ,
+            if (totalCoins != maxToLend) {
+                lentStr += ' <b>Total</b><br/>Lent ' + printFloat(lentSum, 4) + ' of ' + printFloat(maxToLend, 4) + ' (' + printFloat(lentPercLendable, 2) + '%) <b>Lendable</b>';
+            }
+
+            var rowValues = ["<b>" + currency + "</b>", lentStr,
                 "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
-                    + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>' 
+                    + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>'
                     + "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
                     +  printFloat(yearlyRateReinv, 2) + '% Year' + compoundRateText + "</div>" ];
 
