@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import shlex
 import struct
@@ -21,7 +22,6 @@ def get_terminal_size():
     if current_os in ['Linux', 'Darwin'] or current_os.startswith('CYGWIN'):
         tuple_xy = _get_terminal_size_linux()
     if tuple_xy is None:
-        print "default"
         tuple_xy = (80, 25)      # default value
     return tuple_xy
 

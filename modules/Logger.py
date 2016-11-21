@@ -79,9 +79,9 @@ class Logger(object):
         self._lended = ''
         self._daysRemaining = ''
         if json_file != '' and json_log_size != -1:
-            self.console = JsonOutput(json_file, json_log_size)
+            self.output = JsonOutput(json_file, json_log_size)
         else:
-            self.console = ConsoleOutput()
+            self.output = ConsoleOutput()
         self.refreshStatus()
 
     def timestamp(self):
@@ -89,18 +89,18 @@ class Logger(object):
         return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
     def log(self, msg):
-        self.console.printline(self.timestamp() + ' ' + msg)
+        self.output.printline(self.timestamp() + ' ' + msg)
         self.refreshStatus()
 
     def offer(self, amt, cur, rate, days, msg):
         line = self.timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(
             float(rate) * 100) + '% for ' + days + ' days... ' + self.digestApiMsg(msg)
-        self.console.printline(line)
+        self.output.printline(line)
         self.refreshStatus()
 
     def cancelOrders(self, cur, msg):
         line = self.timestamp() + ' Canceling all ' + str(cur) + ' orders... ' + self.digestApiMsg(msg)
-        self.console.printline(line)
+        self.output.printline(line)
         self.refreshStatus()
 
     def refreshStatus(self, lended='', days_remaining=''):
@@ -108,21 +108,21 @@ class Logger(object):
             self._lended = lended
         if days_remaining != '':
             self._daysRemaining = days_remaining
-        self.console.status(self._lended, self.timestamp(), self._daysRemaining)
+        self.output.status(self._lended, self.timestamp(), self._daysRemaining)
 
     def updateStatusValue(self, coin, key, value):
-        if hasattr(self.console, 'statusValue'):
-            self.console.statusValue(coin, key, value)
+        if hasattr(self.output, 'statusValue'):
+            self.output.statusValue(coin, key, value)
 
     def updateOutputCurrency(self, key, value):
-        if hasattr(self.console, 'outputCurrency'):
-            self.console.outputCurrency(key, value)
+        if hasattr(self.output, 'outputCurrency'):
+            self.output.outputCurrency(key, value)
 
     def persistStatus(self):
-        if hasattr(self.console, 'writeJsonFile'):
-            self.console.writeJsonFile()
-        if hasattr(self.console, 'clearStatusValues'):
-            self.console.clearStatusValues()
+        if hasattr(self.output, 'writeJsonFile'):
+            self.output.writeJsonFile()
+        if hasattr(self.output, 'clearStatusValues'):
+            self.output.clearStatusValues()
 
     def digestApiMsg(self, msg):
         m = ""

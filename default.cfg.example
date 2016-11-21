@@ -46,29 +46,33 @@ minloansize = 0.001
 #AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
 autorenew = 0
 
+#Keep Stuck Orders - Sometimes an order gets partially filled. When this happens it may leave the remainder of your coin under the set minloansize.
+#If this happens, KeepStuckOrders will keep your order where it is so maybe it can be filled. Otherwise it will be canceled and held until orders expire.
+keepstuckorders = True
+
 #End date for lending, bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
 #Uncomment to enable.
 #Format: YEAR,MONTH,DAY
 #endDate = 2016,12,25
 
-#Raw maximum amount to lend if under maxtolentrate.
-#If set to 0 or commented: the bot will check for maxpercenttolent.(0+)
-#maxtolent = 0
+#Raw maximum amount to lend if under maxtolendrate.
+#If set to 0 or commented: the bot will check for maxpercenttolend.(0+)
+#maxtolend = 0
 
-#Maximum percent to lend if under maxtolentrate.
+#Maximum percent to lend if under maxtolendrate.
 #If set to 0 or commented: the bot will lend 100% of your balance regardless of rate. (0-100)
-#maxpercenttolent = 0
+#maxpercenttolend = 0
 
-#Max to lent conditional rate.
-#If set to more than 0: the maxtolent or maxpercenttolent will be used when the rate is less than or equal to the maxtolentrate.
-#If set to 0 or commented: the bot will use the maxtolent or maxpercenttolent all the time. (0.0031-5)
-#maxtolentrate = 0
+#Max to lend conditional rate.
+#If set to more than 0: the maxtolend or maxpercenttolend will be used when the rate is less than or equal to the maxtolendrate.
+#If set to 0 or commented: the bot will use the maxtolend or maxpercenttolend all the time. (0.0031-5)
+#maxtolendrate = 0
 
-#Syntax: ["COIN:mindailyrate:maxactiveamount:maxtolent:maxpercenttolent:maxtolentrate",...]
-#If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lent.
-#If maxtolent is 0: check for maxpercenttolent.
-#If maxpercenttolent is 0: 100% is going to be lent.
-#If maxtolentrate is set to more than 0: the maxtolent or maxpercenttolent will be used when then rate is less or equal to the maxtolentrate. if set to 0 the bot will use the maxtolent or maxpercenttolent all the time.
+#Syntax: ["COIN:mindailyrate:maxactiveamount:maxtolend:maxpercenttolend:maxtolendrate",...]
+#If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lend.
+#If maxtolend is 0: check for maxpercenttolend.
+#If maxpercenttolend is 0: 100% is going to be lend.
+#If maxtolendrate is set to more than 0: the maxtolend or maxpercenttolend will be used when then rate is less or equal to the maxtolendrate. if set to 0 the bot will use the maxtolend or maxpercenttolend all the time.
 #coinconfig = ["BTC:0.18:1:0:0:0","CLAM:0.6:1:0:0:0"]
 
 #This option creates a json log file instead of console output which includes the most recent status.

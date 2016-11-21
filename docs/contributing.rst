@@ -38,7 +38,7 @@ Only comment your code if you are apologizing for writing confusing code or need
 3.1.4 Variable or Option Naming
 -------------------------------
 
-Whenever you create a variable or configuration option, we follow PEP8 standards, they are as follows:
+Whenever you create a variable or configuration option, follow PEP8 standards, they are as follows:
 
 Do not make global single-letter variable names, those do not help anybody. Using them within a function for a few lines in context is okay, but calling it much later should require it be given a proper name.
 
@@ -50,3 +50,22 @@ Functions are named like ``create_new_offer()`` and variables are named similarl
 To make it simple to review code in a diff viewer (and several other reasons) line length is limited to 128 characters in Python code.
 
 Python allows plenty of features for one line to be split into multiple lines, those are permitted.
+
+3.1.6 Configuration Options
+---------------------------
+
+New configuration options should be placed near similar options (see categories on the configuration page) and require a short description above the actual setting.
+
+If a setting is added that changes functionality, it is required that you add handling for having the option commented out.
+
+How to use the Configuration module:
+
+- If your change is in a new module, you need to init it to import the Config object. Create a function init(<args>) that set the args to global variables within the module. With this, pass Config from the main of the bot.
+- Use ``option = Config.get(CATEGORY, OPTION, DEFAULT_VALUE, LOWER_LIMIT, UPPER_LIMIT)`` to get the option from the Config. Only do this in your init()
+- CATEGORY: The category of the config file it goes under. Currently there is only 'API' and 'BOT'
+- OPTION: Case-sensitive name of the option you are pulling from the bot.
+- DEFAULT_VALUE: Default: False. This is the value that .get() will return if no value is set (option is commented). If set to "None": the bot will not allow it to be left blank ever. Optional.
+- LOWER_LIMIT: Default: False. The lower float value that the option can be set to. If OPTION's value is lesser than this, the bot will alert them and exit. Optional. Only use for numerical options.
+- UPPER_LIMIT: Default: False. The upper float value that the option can be set to. If OPTION's value is greater than this, the bot will alert them and exit. Optional. Only use for numerical options.
+
+``Config.has_option(CATEGORY, OPTION)`` will always return a boolean for whether the option exists or not. If the option is commented it will return False.

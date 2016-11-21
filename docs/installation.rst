@@ -53,16 +53,18 @@ or run ``python lendingbot.py`` in console.
 
 You will need:
 
-- A pythonanywhere.com account (Free version works fine, premium recommended)
+- A pythonanywhere.com account (Free version works fine)
 
 1.2.2 Uploading the bot's files to Pythonanywhere
 -------------------------------------------------
 
 1. Download the bot's code from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_.
 2. Extract the files, and run ``lendingbot.py`` once to generate the default.cfg
-3. Modify the default.cfg with your settings (See section 2, Configuration.) It is recommended to use a high sleeptimeinactive time for this website, as they meter your CPU usage if you are a free user.
+3. Modify the default.cfg with your settings (See section 2, Configuration.)
 4. Go to the "files" tab of the website.
 5. Create a new directory, preferably named "poloniexlendingbot" and upload all the files within the folder. (You cannot upload the .zip or a folder itself, you must do all the contents.)
+
+.. note:: If you are running out of CPU time every day: It is recommended to use a high sleeptimeinactive time for this website, as they meter your CPU usage.
 
 1.2.3 Creating the Web App (Optional)
 -------------------------------------
@@ -82,7 +84,7 @@ You will need:
  2. Add a new "Custom console," name it "Poloniexlendingbot" and set the path to "python /home/<username>/poloniexlendingbot/lendingbot.py"
  3. Click this link whenever you want to start the bot, it will run continuously until the website goes down for maintenance or the bot experiences an unexpected error.
  
- To have the bot restart itself every 24 hours, you need to have a `premium pythonanywhere account <https://www.pythonanywhere.com/pricing/>`_. This will make the bot more or less invincible to crashes and resets.
+ To have the bot restart itself every 24 hours, you need to have a `premium pythonanywhere account <https://www.pythonanywhere.com/pricing/>`_. This will make the bot more or less invincible to crashes and resets, but is not necessary.
  
  1. Navigate to the "Schedule" tab.
  2. Create a new task to run daily (time does not matter) set the path to: ``python /home/<username>/poloniexlendingbot/lendingbot.py`` 

@@ -128,6 +128,13 @@ Very few situations require you to change these settings.
 
 ``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
 
+``KeepStuckOrders`` If True, keeps orders that are "stuck" in the market instead of canceling them.
+
+- Default value: True
+- Allowed values: True or False
+- A "Stuck" order occurs when it partially fills and leaves the coins balance total (total = open orders + let in balance) below your ``minloansize`` and so the bot would not be able to lend it again if it was canceled.
+- When disabled, stuck orders will be canceled and held in balance until enough orders expire to allow it to lend again.
+
 ``endDate`` Bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
 
 - Default value: Disabled
@@ -139,34 +146,34 @@ Very few situations require you to change these settings.
 
 This feature group allows you to only lend a certain percentage of your total holding in a coin, until the lending rate suprasses a certain threshhold. Then it will lend at max capacity.
 
-``maxtolent`` is a raw number of how much you will lend of each coin whose lending rate is below ``maxtolentrate``.
+``maxtolend`` is a raw number of how much you will lend of each coin whose lending rate is below ``maxtolendrate``.
 
 - Default value: Disabled
 - Allowed range: 0 (disabled) or ``minloansize`` and up
 - If set to 0, same as if commented.
-- If disabled, will check if ``maxpercenttolent`` is enabled and use that if it is enabled.
-- Setting this overwrites ``maxpercenttolent``
-- This is a global setting for the raw value of coin that will be lended if the coins lending value is under ``maxtolentrate``
-- Has no effect if current rate is higher than ``maxtolentrate``
-- If the remainder (after subtracting ``maxtolent``) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
+- If disabled, will check if ``maxpercenttolend`` is enabled and use that if it is enabled.
+- Setting this overwrites ``maxpercenttolend``
+- This is a global setting for the raw value of coin that will be lended if the coins lending value is under ``maxtolendrate``
+- Has no effect if current rate is higher than ``maxtolendrate``
+- If the remainder (after subtracting ``maxtolend``) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
 
-``maxpercenttolent`` is a percentage of how much you will lend of each coin whose lending rate is below ``maxtolentrate``
+``maxpercenttolend`` is a percentage of how much you will lend of each coin whose lending rate is below ``maxtolendrate``
 
 - Default value: Disabled
 - Allowed range: 0 (disabled) to 100 percent
 - If set to 0, same as if commented.
-- If disabled in addition to ``maxtolent``, entire feature will be disabled.
-- This percentage is calculated per-coin, and is the percentage of the balance that will be lended if the coin's current rate is less than ``maxtolentrate``
-- Has no effect if current rate is higher than ``maxtolentrate``
-- If the remainder (after subtracting ``maxpercenttolent``'s value) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
+- If disabled in addition to ``maxtolend``, entire feature will be disabled.
+- This percentage is calculated per-coin, and is the percentage of the balance that will be lended if the coin's current rate is less than ``maxtolendrate``
+- Has no effect if current rate is higher than ``maxtolendrate``
+- If the remainder (after subtracting ``maxpercenttolend``'s value) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
 
 
-``maxtolentrate`` is the rate threshold when all coins are lent.
+``maxtolendrate`` is the rate threshold when all coins are lent.
 
 - Default value: Disabled
 - Allowed range: 0 (disabled) or ``mindailyrate`` to 5 percent
 - Setting this to 0 with a limit in place causes the limit to always be active.
-- When an indiviaual coin's lending rate passes this threshold, all of the coin will be lent instead of the limits ``maxtolent`` or ``maxpercenttolent``
+- When an indiviaual coin's lending rate passes this threshold, all of the coin will be lent instead of the limits ``maxtolend`` or ``maxpercenttolend``
 
 
 2.9 Config per Coin
