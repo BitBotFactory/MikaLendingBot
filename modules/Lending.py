@@ -100,7 +100,8 @@ def cancel_all():
             # don't cancel disabled coin
             continue
         if keep_stuck_orders:
-            if isinstance(available_balances['lending'], dict):
+            lending_balances = available_balances['lending']
+            if isinstance(lending_balances, dict) and CUR in lending_balances:
                 cur_sum = float(available_balances['lending'][CUR])
             else:
                 cur_sum = 0
