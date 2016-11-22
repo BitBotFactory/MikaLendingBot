@@ -1,3 +1,5 @@
+// vim: ts=4:sw=4:et
+
 var localFile, reader;
 
 var Hour = new Timespan("Hour",1/24);
@@ -24,11 +26,11 @@ function updateJson(data) {
 }
 
 function updateOutputCurrency(outputCurrency){
-	var OutCurr = Object.keys(outputCurrency);
-	Coin = outputCurrency['currency'];
-	if(Coin != "BTC") {
-		Coin_Val = parseFloat(outputCurrency['highestBid']);
-	}	
+    var OutCurr = Object.keys(outputCurrency);
+    Coin = outputCurrency['currency'];
+    if(Coin != "BTC") {
+        Coin_Val = parseFloat(outputCurrency['highestBid']);
+    }
 }
 
 function updateRawValues(rawData){
@@ -42,7 +44,7 @@ function updateRawValues(rawData){
         var averageLendingRate = parseFloat(rawData[currency]['averageLendingRate']);
         var lentSum = parseFloat(rawData[currency]['lentSum']);
         var totalCoins = parseFloat(rawData[currency]['totalCoins']);
-	var maxToLend = parseFloat(rawData[currency]['maxToLend']);
+        var maxToLend = parseFloat(rawData[currency]['maxToLend']);
         var highestBidBTC = parseFloat(rawData[currency]['highestBid']);
         var couple = rawData[currency]['couple'];
 
@@ -83,7 +85,7 @@ function updateRawValues(rawData){
             var yearlyRate = effectiveRate * 365; // no reinvestment
             var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
             var lentPerc = lentSum / totalCoins * 100;
-	    var lentPercLendable = lentSum / maxToLend * 100;
+            var lentPercLendable = lentSum / maxToLend * 100;
             var avgRateText = '&nbsp;<span style="white-space:nowrap;" title="Average loan rate, simple average calculation of active loans rates.">Avg. (i)</span>';
             var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
             var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
@@ -135,15 +137,15 @@ function updateRawValues(rawData){
     if(currencies.length > 1) {
         earnings = '';
         timespans.forEach(function(timespan) {
-		if(Coin == "BTC") {
-            		earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]);
-		}
-		if(Coin == "USDT") {
-			earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]*Coin_Val);
-		}
-		if(Coin != "BTC" && Coin != "USDT") {
-			earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]/Coin_Val);
-		}
+            if(Coin == "BTC") {
+                earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]);
+            }
+            if(Coin == "USDT") {
+                earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]*Coin_Val);
+            }
+            if(Coin != "BTC" && Coin != "USDT") {
+                earnings += timespan.formatEarnings( Coin, totalBTCEarnings[timespan.name]/Coin_Val);
+            }
         });
         var row = thead.insertRow(0);
         var cell = row.appendChild(document.createElement("th"));
@@ -176,9 +178,9 @@ function loadData() {
             // reload every 30sec
             setTimeout('loadData()',30000)
         }).fail( function(d, textStatus, error) {
-           $('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
-           // retry after 60sec
-           setTimeout('loadData()',60000)
+            $('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
+            // retry after 60sec
+            setTimeout('loadData()',60000)
         });;
     }
 }
@@ -203,8 +205,7 @@ function Timespan(name, multiplier) {
             if(currency != "BTC" && currency != "USDT") {
                 currencyClass = 'hidden-xs';
             }
-	return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / "+  name + "<br/>";
-	    
+            return printFloat(earnings, 8) + " <span class=" + currencyClass + ">" + currency + "</span> / "+  name + "<br/>";
         }
     };
 }
