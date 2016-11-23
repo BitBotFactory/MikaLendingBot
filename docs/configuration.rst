@@ -226,3 +226,14 @@ This feature group allows you to only lend a certain percentage of your total ho
 - Default value: BTC
 - Acceptable values: BTC, USDT, Any coin with a direct Poloniex BTC trading pair (ex. DOGE, MAID, ETH)
 - Will be a close estimate, due to unexpected market fluctuations, trade fees, and other unforseeable factors.
+
+2.11 lengdingbot.html options
+-----------------------------
+
+You can pass options to statistics page by adding them to URL. Eg, ``http://localhost:8000/lendingbot.html?option1=value&option2=0``
+
+``effrate`` controls how effective loan rate is calculated. Yearly rates are calculated based on effective rate, so this option affects them as well. Last used mode remembered by browser, so you do not have to specify this option every time. By default, effective loan rate is calculated considering lent precentage (from total available coins) and poloniex 15% fee.
+
+- Allowed values: ``lentperc``, ``onlyfee``.
+- Default value: ``lentperc``.
+- ``onlyfee`` calculates effective rate without considering coin lent percentage.

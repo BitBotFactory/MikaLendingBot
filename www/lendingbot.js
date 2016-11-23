@@ -9,6 +9,7 @@ var Month = new Timespan("Month",30);
 var timespans = [Month, Week, Day, Hour];
 var Coin_Val = 1.00000000;
 var Coin = "BTC";
+var effRateMode = 'lentperc';
 
 function updateJson(data) {
     $('#status').text(data.last_status);
@@ -81,7 +82,11 @@ function updateRawValues(rawData){
             });
 
 
-            var effectiveRate = lentSum * rate * 100 / totalCoins;
+            var effectiveRate;
+            if (effRateMode == 'lentperc')
+                effectiveRate = lentSum * rate * 100 / totalCoins;
+            else
+                effectiveRate = rate * 100;
             var yearlyRate = effectiveRate * 365; // no reinvestment
             var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
             var lentPerc = lentSum / totalCoins * 100;
@@ -210,7 +215,29 @@ function Timespan(name, multiplier) {
     };
 }
 
+function setEffRateMode() {
+    var validModes = ['lentperc', 'onlyfee'];
+    var q = location.search.match(/[\?&]effrate=[^&]+/);
+
+    if (q) {
+        //console.log('Got effective rate mode from URI');
+        effRateMode = q[0].split('=')[1];
+    } else {
+        if (localStorage.effRateMode) {
+            //console.log('Got effective rate mode from localStorage');
+            effRateMode = localStorage.effRateMode;
+        }
+    }
+    if (validModes.indexOf(effRateMode) == -1) {
+        console.error(effRateMode + ' is not valid effective rate mode! Valid values are ' + validModes);
+        effRateMode = validModes[0];
+    }
+    localStorage.effRateMode = effRateMode;
+    console.log('Effective rate mode: ' + effRateMode);
+}
+
 $(document).ready(function () {
+    setEffRateMode();
     loadData();
     if (window.location.protocol == "file:") {
         $('#file').show();
