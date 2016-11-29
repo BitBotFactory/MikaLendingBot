@@ -92,15 +92,15 @@ function updateRawValues(rawData){
             var lentPerc = lentSum / totalCoins * 100;
             var lentPercLendable = lentSum / maxToLend * 100;
             function makeSpan(title, text) {
-                return '&nbsp;<span style="white-space:nowrap;" title="' + title + '">' + text + '</span>';
+                return '&nbsp;<a data-toggle="tooltip" class="plb-tooltip" title="' + title + '">' + text + '</a>';
             }
-            var avgRateText = makeSpan("Average loan rate, simple average calculation of active loans rates.", "Avg. (i)");
+            var avgRateText = makeSpan("Average loan rate, simple average calculation of active loans rates.", "Avg.");
             var effRateText;
             if (effRateMode == 'lentperc')
-                effRateText = makeSpan("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff. (i)");
+                effRateText = makeSpan("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff.");
             else
-                effRateText = makeSpan("Effective loan rate, considering poloniex 15% fee.", "Eff. (i)");
-            var compoundRateText = makeSpan("Compound yearly rate, the result of reinvesting the interest.", "Comp. (i)");
+                effRateText = makeSpan("Effective loan rate, considering poloniex 15% fee.", "Eff.");
+            var compoundRateText = makeSpan("Compound yearly rate, the result of reinvesting the interest.", "Comp.");
             var lentStr = 'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
             if (totalCoins != maxToLend) {
@@ -123,6 +123,7 @@ function updateRawValues(rawData){
                     cell.setAttribute("width", "20%");
                 }
             }
+            $(row).find('[data-toggle="tooltip"]').tooltip();
 
             var earningsColspan = rowValues.length - 1;
             // print coin earnings
