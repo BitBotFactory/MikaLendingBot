@@ -91,9 +91,16 @@ function updateRawValues(rawData){
             var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
             var lentPerc = lentSum / totalCoins * 100;
             var lentPercLendable = lentSum / maxToLend * 100;
-            var avgRateText = '&nbsp;<span style="white-space:nowrap;" title="Average loan rate, simple average calculation of active loans rates.">Avg. (i)</span>';
-            var effRateText =  '&nbsp;<span style="white-space:nowrap;" title="Effective loan rate, considering lent precentage and poloniex 15% fee.">Eff. (i)</span>';
-            var compoundRateText =  '&nbsp;<span style="white-space:nowrap;" title="Compound yearly rate, the result of reinvesting the interest.">Comp. (i)</span>';
+            function makeSpan(title, text) {
+                return '&nbsp;<span style="white-space:nowrap;" title="' + title + '">' + text + '</span>';
+            }
+            var avgRateText = makeSpan("Average loan rate, simple average calculation of active loans rates.", "Avg. (i)");
+            var effRateText;
+            if (effRateMode == 'lentperc')
+                effRateText = makeSpan("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff. (i)");
+            else
+                effRateText = makeSpan("Effective loan rate, considering poloniex 15% fee.", "Eff. (i)");
+            var compoundRateText = makeSpan("Compound yearly rate, the result of reinvesting the interest.", "Comp. (i)");
             var lentStr = 'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
             if (totalCoins != maxToLend) {
