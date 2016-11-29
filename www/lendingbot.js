@@ -91,16 +91,16 @@ function updateRawValues(rawData){
             var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
             var lentPerc = lentSum / totalCoins * 100;
             var lentPercLendable = lentSum / maxToLend * 100;
-            function makeSpan(title, text) {
+            function makeTooltip(title, text) {
                 return '&nbsp;<a data-toggle="tooltip" class="plb-tooltip" title="' + title + '">' + text + '</a>';
             }
-            var avgRateText = makeSpan("Average loan rate, simple average calculation of active loans rates.", "Avg.");
+            var avgRateText = makeTooltip("Average loan rate, simple average calculation of active loans rates.", "Avg.");
             var effRateText;
             if (effRateMode == 'lentperc')
-                effRateText = makeSpan("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff.");
+                effRateText = makeTooltip("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff.");
             else
-                effRateText = makeSpan("Effective loan rate, considering poloniex 15% fee.", "Eff.");
-            var compoundRateText = makeSpan("Compound yearly rate, the result of reinvesting the interest.", "Comp.");
+                effRateText = makeTooltip("Effective loan rate, considering poloniex 15% fee.", "Eff.");
+            var compoundRateText = makeTooltip("Compound yearly rate, the result of reinvesting the interest.", "Comp.");
             var lentStr = 'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
             if (totalCoins != maxToLend) {
