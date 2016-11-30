@@ -62,8 +62,8 @@ def get_coin_cfg():
             for cur in coin_config:
                 cur = cur.split(':')
                 coin_cfg[cur[0]] = dict(minrate=(Decimal(cur[1])) / 100, maxactive=Decimal(cur[2]),
-                                        maxtolent=Decimal(cur[3]), maxpercenttolent=(Decimal(cur[4])) / 100,
-                                        maxtolentrate=(Decimal(cur[5])) / 100)
+                                        maxtolend=Decimal(cur[3]), maxpercenttolend=(Decimal(cur[4])) / 100,
+                                        maxtolendrate=(Decimal(cur[5])) / 100)
         except Exception as ex:
             print "Coinconfig parsed incorrectly, please refer to the documentation. Error: " + str(ex)
     return coin_cfg
