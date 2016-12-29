@@ -126,8 +126,6 @@ Very few situations require you to change these settings.
 - Allowed range: 0.001 and up.
 - If you dislike loan fragmentation, then this will make the minimum for each loan larger.
 
-``autorenew`` If 0, does nothing. If 1, will enable autorenew on loans once the bot closes with CTRL-C.
-
 ``KeepStuckOrders`` If True, keeps orders that are "stuck" in the market instead of canceling them.
 
 - Default value: True

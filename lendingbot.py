@@ -32,7 +32,6 @@ Config.init([config_location])
 # Define the variable from the option in the module where you use it.
 api_key = Config.get("API", "apikey", None)
 api_secret = Config.get("API", "secret", None)
-auto_renew = int(Config.get("BOT", "autorenew", None, 0, 1))
 output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
 end_date = Config.get('BOT', 'endDate')
 json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
@@ -50,26 +49,6 @@ Data.init(api, log)
 Lending.init(Config, api, log, Data, MaxToLend, dry_run)
 
 
-def set_auto_renew(auto):
-    i = int(0)  # counter
-    try:
-        action = 'Clearing'
-        if auto == 1:
-            action = 'Setting'
-        log.log(action + ' AutoRenew...(Please Wait)')
-        crypto_lended = api.return_active_loans()
-        loans_count = len(crypto_lended["provided"])
-        for item in crypto_lended["provided"]:
-            if int(item["autoRenew"]) != auto:
-                log.refreshStatus('Processing AutoRenew - ' + str(i) + ' of ' + str(loans_count) + ' loans')
-                api.toggle_auto_renew(int(item["id"]))
-                i += 1
-    except KeyboardInterrupt:
-        log.log('Toggled AutoRenew for ' + str(i) + ' loans')
-        raise SystemExit
-    log.log('Toggled AutoRenew for ' + str(i) + ' loans')
-
-
 print 'Welcome to Poloniex Lending Bot'
 # Configure web server
 
@@ -77,10 +56,6 @@ web_server_enabled = Config.get('BOT', 'startWebServer')
 if web_server_enabled:  # Run web server
     import modules.WebServer as WebServer
     WebServer.initialize_web_server(Config)
-
-# if config includes autorenew - start by clearing the current loans
-if auto_renew == 1:
-    set_auto_renew(0)
 
 try:
     while True:
@@ -115,8 +90,6 @@ try:
             time.sleep(Lending.get_sleep_time())
             pass
 except KeyboardInterrupt:
-    if auto_renew == 1:
-        set_auto_renew(1)
     if web_server_enabled:
         WebServer.stop_web_server()
     log.log('bye')

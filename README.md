@@ -26,7 +26,6 @@ Workflow management with Waffle.io
 - Choose any currency to see your profits in, even show how much you are making in USD!
 - Select different lending strategies on a coin-by-coin basis.
 - Run multiple instances of the bot for multiple accounts easily using multiple config files.
-- Automatically enable Poloniex's AutoRenew feature whenever you shut the bot down, so even then your loans can continue.
 - Configure a date you would like your coins back, and watch the bot make sure all your coins are available to be traded or withdrawn at the beginning of that day.
 - And the best feature of all: It is absolutely free!
 

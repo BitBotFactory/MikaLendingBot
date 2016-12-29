@@ -43,9 +43,6 @@ xdays = 60
 #Minimum loan size, the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loan fragmentation.
 minloansize = 0.001
 
-#AutoRenew - if set to 1 the bot will set the AutoRenew flag for the loans when you stop it (Ctrl+C) and clear the AutoRenew flag when on started
-autorenew = 0
-
 #Keep Stuck Orders - Sometimes an order gets partially filled. When this happens it may leave the remainder of your coin under the set minloansize.
 #If this happens, KeepStuckOrders will keep your order where it is so maybe it can be filled. Otherwise it will be canceled and held until orders expire.
 keepstuckorders = True
