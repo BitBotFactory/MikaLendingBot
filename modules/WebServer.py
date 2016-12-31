@@ -44,6 +44,7 @@ def start_web_server():
                 return SimpleHTTPServer.SimpleHTTPRequestHandler.translate_path(self, '/www' + path)
 
         global server
+        SocketServer.TCPServer.allow_reuse_address = True
         server = SocketServer.TCPServer((host, port), QuietHandler)
         if host == "0.0.0.0":
             host1 = "localhost"
