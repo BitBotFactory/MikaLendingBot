@@ -92,6 +92,13 @@ class Logger(object):
         self.output.printline(self.timestamp() + ' ' + msg)
         self.refreshStatus()
 
+    def log_error(self, msg):
+        log_message = self.timestamp() + ' Error: ' + msg
+        self.output.printline(log_message)
+        if type(self.output) is JsonOutput:
+            print log_message
+        self.refreshStatus()
+
     def offer(self, amt, cur, rate, days, msg):
         line = self.timestamp() + ' Placing ' + str(amt) + ' ' + str(cur) + ' at ' + str(
             float(rate) * 100) + '% for ' + days + ' days... ' + self.digestApiMsg(msg)

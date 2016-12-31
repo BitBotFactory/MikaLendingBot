@@ -46,38 +46,44 @@ class Poloniex:
                 raise PoloniexApiError(data['error'])
             return data
 
-        if command == "returnTicker" or command == "return24hVolume":
-            ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command))
-            return _read_response(ret)
-        elif command == "returnOrderBook":
-            ret = urllib2.urlopen(urllib2.Request(
-                'https://poloniex.com/public?command=' + command + '&currencyPair=' + str(req['currencyPair'])))
-            return _read_response(ret)
-        elif command == "returnMarketTradeHistory":
-            ret = urllib2.urlopen(urllib2.Request(
-                'https://poloniex.com/public?command=' + "returnTradeHistory" + '&currencyPair=' + str(
-                    req['currencyPair'])))
-            return _read_response(ret)
-        elif command == "returnLoanOrders":
-            req_url = 'https://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])
-            if req['limit'] != '':
-                req_url += '&limit=' + str(req['limit'])
-            ret = urllib2.urlopen(urllib2.Request(req_url))
-            return _read_response(ret)
-        else:
-            req['command'] = command
-            req['nonce'] = int(time.time() * 1000)
-            post_data = urllib.urlencode(req)
+        try:
+            if command == "returnTicker" or command == "return24hVolume":
+                ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/public?command=' + command))
+                return _read_response(ret)
+            elif command == "returnOrderBook":
+                ret = urllib2.urlopen(urllib2.Request(
+                    'https://poloniex.com/public?command=' + command + '&currencyPair=' + str(req['currencyPair'])))
+                return _read_response(ret)
+            elif command == "returnMarketTradeHistory":
+                ret = urllib2.urlopen(urllib2.Request(
+                    'https://poloniex.com/public?command=' + "returnTradeHistory" + '&currencyPair=' + str(
+                        req['currencyPair'])))
+                return _read_response(ret)
+            elif command == "returnLoanOrders":
+                req_url = 'https://poloniex.com/public?command=' + "returnLoanOrders" + '&currency=' + str(req['currency'])
+                if req['limit'] != '':
+                    req_url += '&limit=' + str(req['limit'])
+                ret = urllib2.urlopen(urllib2.Request(req_url))
+                return _read_response(ret)
+            else:
+                req['command'] = command
+                req['nonce'] = int(time.time() * 1000)
+                post_data = urllib.urlencode(req)
 
-            sign = hmac.new(self.Secret, post_data, hashlib.sha512).hexdigest()
-            headers = {
-                'Sign': sign,
-                'Key': self.APIKey
-            }
+                sign = hmac.new(self.Secret, post_data, hashlib.sha512).hexdigest()
+                headers = {
+                    'Sign': sign,
+                    'Key': self.APIKey
+                }
 
-            ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/tradingApi', post_data, headers))
-            json_ret = _read_response(ret)
-            return self.post_process(json_ret)
+                ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/tradingApi', post_data, headers))
+                json_ret = _read_response(ret)
+                return self.post_process(json_ret)
+        except Exception as ex:
+            # add command information to exception
+            # (this isn't compatible with python 3)
+            import sys
+            raise type(ex), type(ex)(ex.message + ' Requesting %s' % command), sys.exc_info()[2]
 
     def return_ticker(self):
         return self.api_query("returnTicker")
