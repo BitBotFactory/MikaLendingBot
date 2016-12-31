@@ -5,6 +5,7 @@ api = None
 log = None
 Data = None
 MaxToLend = None
+Analysis = None
 
 SATOSHI = Decimal(10) ** -8
 
@@ -30,13 +31,14 @@ loanOrdersRequestLimit = {}
 defaultLoanOrdersRequestLimit = 200
 
 
-def init(cfg, api1, log1, data, maxtolend, dry_run1):
-    global Config, api, log, Data, MaxToLend
+def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis):
+    global Config, api, log, Data, MaxToLend, Analysis
     Config = cfg
     api = api1
     log = log1
     Data = data
     MaxToLend = maxtolend
+    Analysis = analysis
 
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom, gap_top, xday_threshold, xdays, min_loan_size, end_date, coin_cfg, dry_run, \
@@ -55,7 +57,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1):
     end_date = Config.get('BOT', 'endDate')
     coin_cfg = Config.get_coin_cfg()
     dry_run = dry_run1
-    transferable_currencies = Config.get_transferable_currencies()
+    transferable_currencies = Config.get_currencies_list('transferableCurrencies')
     keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
 
     sleep_time = sleep_time_active  # Start with active mode
@@ -155,6 +157,10 @@ def lend_cur(active_cur, total_lended, lending_balances):
             return 0
         cur_min_daily_rate = coin_cfg[active_cur]['minrate']
         log.log('Using custom mindailyrate ' + str(coin_cfg[active_cur]['minrate'] * 100) + '% for ' + active_cur)
+    if Config.has_option('BOT', 'analyseCurrencies'):
+        recommended_min = Analysis.get_rate_suggestion(active_cur)
+        if cur_min_daily_rate < recommended_min:
+            cur_min_daily_rate = recommended_min
 
     # log total coin
     log.updateStatusValue(active_cur, "totalCoins", (Decimal(active_cur_test_balance)))
@@ -223,11 +229,30 @@ def transfer_balances():
     # Transfers all balances on the included list to Lending.
     if len(transferable_currencies) > 0:
         exchange_balances = api.return_balances()  # This grabs only exchange balances.
-        for raw_coin in transferable_currencies:
-            coin = raw_coin.strip().upper()
+        for coin in transferable_currencies:
             if coin in exchange_balances and Decimal(
                     exchange_balances[coin]) > 0:
                 msg = api.transfer_balance(coin, exchange_balances[coin], 'exchange', 'lending')
                 log.log(log.digestApiMsg(msg))
             if coin not in exchange_balances:
                 print "ERROR: Incorrect coin entered for transferCurrencies: " + coin
+
+
+def set_auto_renew(auto):
+    i = int(0)  # counter
+    try:
+        action = 'Clearing'
+        if auto == 1:
+            action = 'Setting'
+        log.log(action + ' AutoRenew...(Please Wait)')
+        crypto_lended = api.return_active_loans()
+        loans_count = len(crypto_lended["provided"])
+        for item in crypto_lended["provided"]:
+            if int(item["autoRenew"]) != auto:
+                log.refreshStatus('Processing AutoRenew - ' + str(i) + ' of ' + str(loans_count) + ' loans')
+                api.toggle_auto_renew(int(item["id"]))
+                i += 1
+    except KeyboardInterrupt:
+        log.log('Toggled AutoRenew for ' + str(i) + ' loans')
+        raise SystemExit
+    log.log('Toggled AutoRenew for ' + str(i) + ' loans')

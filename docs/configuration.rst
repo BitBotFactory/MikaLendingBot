@@ -1,7 +1,7 @@
 .. _configuration-section:
 
-2. Configuration
-****************
+Configuration
+*************
 
 Configuring the bot can be as simple as copy-pasting your API key and Secret.
 
@@ -9,8 +9,8 @@ New features are required to be backwards compatible with previous versions of t
 
 To begin, copy ``default.cfg.example`` to ``default.cfg``. Now you can edit your settings.
 
-2.1 API key and Secret
-----------------------
+API key and Secret
+------------------
 
 CREATE A NEW API key and Secret from `Poloniex <https://poloniex.com/apiKeys>`_ and paste them into the respective slots in the config. 
 
@@ -31,8 +31,8 @@ HIGHLY Recommended:
 .. note:: If you use an API key that has been used by any other application, it will likely fail for one application or the other. This is because the API requires a `nonce <https://en.wikipedia.org/wiki/Cryptographic_nonce>`_.
 
 
-2.2 Sleeptime
------------------
+Sleeptime
+---------
 
 ``sleeptimeactive`` is how long the bot will "rest" (in seconds) between running while the bot has lends waiting to be filled.
 
@@ -48,8 +48,8 @@ HIGHLY Recommended:
 - Allowed range: 1 to 3600 seconds
 - If the bot finishes a cycle and has lend orders to manage, it will change to active mode.
 
-2.3 Min and Max Rates
----------------------
+Min and Max Rates
+-----------------
 
 ``mindailyrate`` is the minimum rate (in percent) that the bot will allow lends to open.
 
@@ -64,8 +64,8 @@ HIGHLY Recommended:
 - Allowed range: 0.0031 to 5 percent 
 - 2% is the default value offered by the exchange, but there is little reason not to set it higher if you feel optimistic.
 
-2.4 Spreading your Lends
-------------------------
+Spreading your Lends
+--------------------
 
 If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot lending at lowest possible offer.
 
@@ -88,8 +88,8 @@ If `spreadlend = 1` and `gapbottom = 0`, it will behave as simple lending bot le
 - Allowed range: 0 to <arbitrary large number> percent
 - This value should be adjusted based on your coin volume to avoid going astronomically far away from a realistic rate.
 
-2.5 Variable loan Length
-------------------------
+Variable loan Length
+--------------------
 
 These values allow you to lock in a better rate for a longer period of time, as per your configuration.
 
@@ -103,20 +103,23 @@ These values allow you to lock in a better rate for a longer period of time, as 
 - Default value: 60 days
 - Allowed range: 2 to 60 days
 
-2.6 Auto-transfer from Exchange Balance
----------------------------------------
+Auto-transfer from Exchange Balance
+-----------------------------------
 
 If you regularly transfer funds into your Poloniex account but don't enjoy having to log in yourself and transfer them to the lending balance, this feature is for you.
 
 ``transferableCurrencies`` is a list of currencies you would like to be transferred.
 
 - Default value: Commented out
-- Format: ``CURRENCY_TICKER,STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT``
+- Format: ``CURRENCY_TICKER,STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT,ALL,ACTIVE``
 - Commenting it out will disable the feature.
+- Entering ``ACTIVE`` within the list will transfer any currencies that are found in your lending account, as well as any other currencies alongside it. Example: ``ACTIVE, BTC, CLAM`` will do BTC, CLAM, and any coins you are already lending.
+- Entering ``ALL`` will simply transfer all coins available to lending.
+- Do not worry about duplicates when using ``ACTIVE``, they are handled.
 - Coins will be transferred every time the bot runs (60 seconds by default) so if you intend to trade or withdrawal it is recommended to turn off the bot or disable this feature.
 
-2.7 Unimportant settings
-------------------------
+Unimportant settings
+--------------------
 
 Very few situations require you to change these settings.
 
@@ -139,8 +142,8 @@ Very few situations require you to change these settings.
 - Uncomment to enable.
 - Format: ``YEAR,MONTH,DAY``
 
-2.8 Max to be lent
-------------------
+Max to be lent
+--------------
 
 This feature group allows you to only lend a certain percentage of your total holding in a coin, until the lending rate suprasses a certain threshhold. Then it will lend at max capacity.
 
@@ -174,21 +177,56 @@ This feature group allows you to only lend a certain percentage of your total ho
 - When an indiviaual coin's lending rate passes this threshold, all of the coin will be lent instead of the limits ``maxtolend`` or ``maxpercenttolend``
 
 
-2.9 Config per Coin
--------------------
+Market Analysis
+---------------
+
+This feature allows you to record a currency's market and have the bot see trends. With this data, we can compute a recommended minimum lending rate per currency to avoid lending at times when the rate dips.
+
+``analyseCurrencies`` is the list of currencies to analyse.
+
+- Format: ``CURRENCY_TICKER,STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT,ALL,ACTIVE``
+- Commenting it out will disable the entire feature.
+- Entering ``ACTIVE`` within the list will transfer any currencies that are found in your lending account, as well as any other currencies alongside it. Example: ``ACTIVE, BTC, CLAM`` will do BTC, CLAM, and any coins you are already lending.
+- Entering ``ALL`` will simply analyse all coins on the lending market, whether or not you are using them.
+- Do not worry about duplicates when using ``ACTIVE``, they are handled.
+
+
+``analyseMaxAge`` is the maximum duration to store market data.
+
+- Default value: 30 days
+- Allowed range: 1-365 days
+
+``analyseUpdateInterval`` is how often (asynchronous to the bot) to record each market's data.
+
+ - Default value: 60 seconds
+ - Allowed range: 10-3600 seconds
+
+ .. note:: Storage usage caused by the above two settings can be calculated by: ``<amountOfCurrencies> * 30 * analyseMaxAge * (86,400 / analyseUpdateInterval)`` bytes. Default settings with ``ALL`` currencies enabled will result in using ``15.552 MegaBytes`` maximum.
+
+``lendingStyle`` lets you choose the percentile of each currency's market to lend at.
+
+- Default value: 75
+- Allowed range: 1-99
+- Recommendations: Conservative = 50, Moderate = 75, Aggressive = 90, Very Aggressive = 99
+- This is a percentile, so choosing 75 would mean that your minimum will be the value that the market is above 25% of the recorded time.
+- This will stop the bot from lending during a large dip in rate, but will still allow you to take advantage of any spikes in rate.
+
+
+Config per Coin
+---------------
 
 ``coincfg`` is in the form of a dictionary and allows for advanced, per-coin options.
 
 - Default value: Commented out, uncomment to enable.
-- Format: ``["COINTICKER:MINLENDRATE:ENABLED?:MAXTOLENT:MAXPERCENTTOLENT:MAXTOLENTRATE","CLAM:0.6:1:0:.75:.1",...]``
+- Format: ``["COINTICKER:MINLENDRATE:ENABLED?:MAXTOLEND:MAXPERCENTTOLEND:MAXTOLENDRATE","CLAM:0.6:1:0:.75:.1",...]``
 - COINTICKER refers to the ticker of the coin, ex. BTC, CLAM, MAID, DOGE.
 - MINLENDRATE is that coins minimum lending rate, overrides the global setting. Follows the limits of ``minlendrate``
 - ENABLED? refers to a value of ``0`` if the coin is disabled and will no longer lend. Any positive integer will enable lending for the coin.
-- MAXTOLENT, MAXPERCENTTOLENT, and MAXTOLENTRATE refer to their respective settings above, but are unique to the specified coin specifically.
+- MAXTOLEND, MAXPERCENTTOLEND, and MAXTOLENDRATE refer to their respective settings above, but are unique to the specified coin specifically.
 - There can be as many different coins as you want in coincfg, but each coin may only appear once.
 
-2.10 Advanced logging and Web Display
--------------------------------------
+Advanced logging and Web Display
+--------------------------------
 
 ``jsonfile`` is the location where the bot will log to a .json file instead of into console.
 
@@ -225,8 +263,8 @@ This feature group allows you to only lend a certain percentage of your total ho
 - Acceptable values: BTC, USDT, Any coin with a direct Poloniex BTC trading pair (ex. DOGE, MAID, ETH)
 - Will be a close estimate, due to unexpected market fluctuations, trade fees, and other unforseeable factors.
 
-2.11 lengdingbot.html options
------------------------------
+lendingbot.html options
+-----------------------
 
 You can pass options to statistics page by adding them to URL. Eg, ``http://localhost:8000/lendingbot.html?option1=value&option2=0``
 

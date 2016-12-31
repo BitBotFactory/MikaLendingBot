@@ -5,3 +5,4 @@ www/botlog.json
 nohup.out
 error.log
 *.idea
+*.csv

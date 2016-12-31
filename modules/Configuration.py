@@ -2,11 +2,14 @@
 from ConfigParser import SafeConfigParser
 
 config = SafeConfigParser()
+Data = None
 # This module is the middleman between the bot and a SafeConfigParser object, so that we can add extra functionality
 # without clogging up lendingbot.py with all the config logic. For example, added a default value to get().
 
 
-def init(file_location):
+def init(file_location, data=None):
+    global Data
+    Data = data
     loaded_files = config.read(file_location)
     if len(loaded_files) != 1:
         import shutil
@@ -69,8 +72,20 @@ def get_coin_cfg():
     return coin_cfg
 
 
-def get_transferable_currencies():
-    if config.has_option("BOT", "transferableCurrencies"):
-        return (config.get("BOT", "transferableCurrencies")).split(",")
+def get_currencies_list(option):
+    if config.has_option("BOT", option):
+        full_list = ['STR', 'BTC', 'BTS', 'CLAM', 'DOGE', 'DASH', 'LTC', 'MAID', 'XMR', 'XRP', 'ETH', 'FCT']
+        cur_list = []
+        raw_cur_list = config.get("BOT", option).split(",")
+        for raw_cur in raw_cur_list:
+            cur = raw_cur.strip(' ').upper()
+            if cur == 'ALL':
+                return full_list
+            elif cur == 'ACTIVE':
+                cur_list += Data.get_lending_currencies()
+            else:
+                if cur in full_list:
+                    cur_list.append(cur)
+        return list(set(cur_list))
     else:
         return []

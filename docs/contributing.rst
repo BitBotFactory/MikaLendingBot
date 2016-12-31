@@ -1,15 +1,15 @@
-3. Contributing
-***************
+Contributing
+************
 
-3.1 How to format Python Code
-=============================
+How to format Python Code
+=========================
 
 If you want to make a successful pull request, `here are some suggestions. <http://blog.ploeh.dk/2015/01/15/10-tips-for-better-pull-requests/>`_
 
 Recommended IDE: `PyCharm <https://www.jetbrains.com/pycharm/>`_
 
-3.1.1 PEP8
-----------
+PEP8
+----
 
 Poloniex lending bot follows `PEP8 styling guidelines <https://www.python.org/dev/peps/pep-0008/>`_ to maximize code readability and maintenance.
 
@@ -18,15 +18,15 @@ Hound follows ``flake8`` standards, which may extend past PEP8 conventions. We r
 
 To make following PEP8 as painless as possible, we strongly recommend using an Integrated Development Environment that features PEP8 suggestions, such as `PyCharm <https://www.jetbrains.com/pycharm/>`_.
 
-3.1.2 Indent Style
-------------------
+Indent Style
+------------
 
 You may have your own preference, it does not matter because *spaces and tabs do not mix.*
 
 Poloniexlendingbot uses *spaces* to conform with PEP8 standards. Please use an IDE that can help you with this.
 
-3.1.3 Commenting Code
----------------------
+Commenting Code
+---------------
 
 Many coders learned to code without commenting their logic.
 That works if you are the only person working on the project, but quickly becomes a problem when it is your job to decipher what someone else was thinking when coding.
@@ -35,8 +35,8 @@ You will probably be relieved to read that code comments are not mandatory, beca
 
 Only comment your code if you are apologizing for writing confusing code or need to leave a note. (We won't judge you for it.)
 
-3.1.4 Variable or Option Naming
--------------------------------
+Variable or Option Naming
+-------------------------
 
 Whenever you create a variable or configuration option, follow PEP8 standards, they are as follows:
 
@@ -44,15 +44,15 @@ Do not make global single-letter variable names, those do not help anybody. Usin
 
 Functions are named like ``create_new_offer()`` and variables are named similarly, like ``amount_of_lends``.
 
-3.1.5 Line Length
------------------
+Line Length
+-----------
 
 To make it simple to review code in a diff viewer (and several other reasons) line length is limited to 128 characters in Python code.
 
 Python allows plenty of features for one line to be split into multiple lines, those are permitted.
 
-3.1.6 Configuration Options
----------------------------
+Configuration Options
+---------------------
 
 New configuration options should be placed near similar options (see categories on the configuration page) and require a short description above the actual setting.
 

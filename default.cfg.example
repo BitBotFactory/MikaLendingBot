@@ -36,7 +36,7 @@ xdaythreshold = 0.2
 xdays = 60
 
 #Auto-transfer of funds from exchange to lending balance.
-#Full list for your reference: STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+#Enter ALL to transfer all coins, enter ACTIVE to transfer any coins you have in your lending account when the bot starts, these can be mixed.
 #The currencies you enter below (comment it out to disable entirely, just leaving empty will result in an error) will be automatically transferred from your exchange balance to your lending balance whenever you deposit them.
 #transferableCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
 
@@ -65,10 +65,21 @@ keepstuckorders = True
 #If set to 0 or commented: the bot will use the maxtolend or maxpercenttolend all the time. (0.0031-5)
 #maxtolendrate = 0
 
+# Local Market Analysis: Choose which coins to record the market of in order to analyse them and compute a recommended lending rate.
+# Enter ALL to analyse all coins, enter ACTIVE to analyse the markets of any coins you have in your lending account when the bot starts, these can be mixed.
+#analyseCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+# Choose how long to keep market data. (In days) (1-365)
+#analyseMaxAge = 30
+# Choose how often to record a market's rate. (In seconds.) (10-3600)
+#analyseUpdateInterval = 60
+# Choose how aggressive to lend at based on a market's performance. (As a percentile of the market's rate.) (1-99)
+# Recommendations: Conservative = 50, Moderate = 75, Aggressive = 90, Very Aggressive = 99
+#lendingStyle = 75
+
 #Syntax: ["COIN:mindailyrate:maxactiveamount:maxtolend:maxpercenttolend:maxtolendrate",...]
-#If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lend.
+#If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lent.
 #If maxtolend is 0: check for maxpercenttolend.
-#If maxpercenttolend is 0: 100% is going to be lend.
+#If maxpercenttolend is 0: 100% is going to be lent.
 #If maxtolendrate is set to more than 0: the maxtolend or maxpercenttolend will be used when then rate is less or equal to the maxtolendrate. if set to 0 the bot will use the maxtolend or maxpercenttolend all the time.
 #coinconfig = ["BTC:0.18:1:0:0:0","CLAM:0.6:1:0:0:0"]
 
