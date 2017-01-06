@@ -144,7 +144,7 @@ def lend_all():
 
 
 def lend_cur(active_cur, total_lended, lending_balances):
-    usable_currencies = 0
+    currency_usable = 0
     active_cur_test_balance = Decimal(lending_balances[active_cur])
     if active_cur in total_lended:
         active_cur_test_balance += Decimal(total_lended[active_cur])
@@ -177,16 +177,20 @@ def lend_cur(active_cur, total_lended, lending_balances):
                                           Decimal(loans['offers'][0]['rate']))
 
     if float(active_bal) > min_loan_size:  # Make sure sleeptimer is set to active if any currencies can lend.
-        usable_currencies = 1
+        currency_usable = 1
+    else:
+        return currency_usable  # Return early to end function.
 
     lower_sum = Decimal(0)  # sum
     order_num = int(0)  # offer book iterator
     spread_steps = int(0)  # spread step count
     lent = Decimal(0)
-    step_pct = (gap_top - gap_bottom) / spread_lend
-    # TODO check for minimum lendable amount, and try to decrease the spread.
-    # e.g. at the moment balances lower than 0.001 won't be lent
     # in case of empty lendbook, lend at max
+    cur_spread_lend = int(spread_lend)  # Checks if active_bal can't be spread that many times, and may go down to 1.
+    while active_bal < (cur_spread_lend * min_loan_size):
+        cur_spread_lend -= 1
+    step_pct = (gap_top - gap_bottom) / cur_spread_lend
+
     active_plus_lended = Decimal(active_bal)
     if active_cur in total_lended:
         active_plus_lended += Decimal(total_lended[active_cur])
@@ -200,15 +204,15 @@ def lend_cur(active_cur, total_lended, lending_balances):
             gap_multiplier = gap_bottom / 100 + (step_pct / 100 * spread_steps)
             if upper_sum > active_plus_lended * gap_multiplier and Decimal(offer['rate']) > cur_min_daily_rate:
                 spread_steps += 1
-                upper_sum += Decimal(active_bal) / spread_lend
+                upper_sum += Decimal(active_bal) / cur_spread_lend
             else:
                 create_lend_offer(active_cur, sum_diff, offer['rate'])
                 lent += sum_diff.quantize(SATOSHI)
                 break
-            if spread_steps == spread_lend:
+            if spread_steps == cur_spread_lend:
                 create_lend_offer(active_cur, Decimal(active_bal) - lent, offer['rate'])
                 break
-        if spread_steps == spread_lend:
+        if spread_steps == cur_spread_lend:
             break
         order_num += 1
         if order_num == loans_length:  # end of the offers
@@ -222,7 +226,7 @@ def lend_cur(active_cur, total_lended, lending_balances):
                     loanOrdersRequestLimit[active_cur]))
                 # repeat currency
                 lend_cur(active_cur, total_lended, lending_balances)
-    return usable_currencies
+    return currency_usable
 
 
 def transfer_balances():
