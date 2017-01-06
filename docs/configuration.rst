@@ -136,6 +136,14 @@ Very few situations require you to change these settings.
 - A "Stuck" order occurs when it partially fills and leaves the coins balance total (total = open orders + let in balance) below your ``minloansize`` and so the bot would not be able to lend it again if it was canceled.
 - When disabled, stuck orders will be canceled and held in balance until enough orders expire to allow it to lend again.
 
+``hideCoins`` If True, will not lend any of a coin if its market low is below the set ``mindailyrate``.
+
+- Default value: True
+- Allowed values: True or False. Commented defaults to True
+- This hides your coins from appearing in walls.
+- Allows you to catch a higher rate if it spikes past your ``mindailyrate``.
+- Not necessarily recommended if used with ``analyseCurrencies`` with an aggressive ``lendingStyle``, as the bot may miss short-lived rate spikes.
+
 ``endDate`` Bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
 
 - Default value: Disabled

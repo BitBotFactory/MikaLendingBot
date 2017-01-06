@@ -25,6 +25,7 @@ coin_cfg = None
 dry_run = 0
 transferable_currencies = []
 keep_stuck_orders = True
+hide_coins = True
 
 # limit of orders to request
 loanOrdersRequestLimit = {}
@@ -42,7 +43,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis):
 
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom, gap_top, xday_threshold, xdays, min_loan_size, end_date, coin_cfg, dry_run, \
-        transferable_currencies, keep_stuck_orders
+        transferable_currencies, keep_stuck_orders, hide_coins
 
     sleep_time_active = float(Config.get("BOT", "sleeptimeactive", None, 1, 3600))
     sleep_time_inactive = float(Config.get("BOT", "sleeptimeinactive", None, 1, 3600))
@@ -59,6 +60,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis):
     dry_run = dry_run1
     transferable_currencies = Config.get_currencies_list('transferableCurrencies')
     keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
+    hide_coins = Config.getboolean('BOT', 'hideCoins', True)
 
     sleep_time = sleep_time_active  # Start with active mode
 
@@ -171,6 +173,9 @@ def lend_cur(active_cur, total_lended, lending_balances):
 
     loans = api.return_loan_orders(active_cur, loanOrdersRequestLimit[active_cur])
     loans_length = len(loans['offers'])
+    if hide_coins and Decimal(loans['offers'][0]['rate']) < Decimal(cur_min_daily_rate):
+        log.log("Not lending " + active_cur + " due to low rate.")
+        return 0
 
     active_bal = MaxToLend.amount_to_lend(active_cur_test_balance, active_cur,
                                           Decimal(lending_balances[active_cur]),

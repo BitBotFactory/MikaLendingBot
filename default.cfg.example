@@ -47,6 +47,9 @@ minloansize = 0.001
 #If this happens, KeepStuckOrders will keep your order where it is so maybe it can be filled. Otherwise it will be canceled and held until orders expire.
 keepstuckorders = True
 
+#Hide coins - Instead of keeping your coins lent out at minlendrate when it is not met, the bot will hold them and wait for the rate to surpass it.
+hideCoins = True
+
 #End date for lending, bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
 #Uncomment to enable.
 #Format: YEAR,MONTH,DAY
