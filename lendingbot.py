@@ -12,6 +12,7 @@ import modules.MaxToLend as MaxToLend
 import modules.Data as Data
 import modules.Lending as Lending
 
+os.chdir(os.path.dirname(sys.argv[0]))  # Allow relative paths
 
 parser = argparse.ArgumentParser()  # Start args.
 parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
@@ -25,7 +26,7 @@ else:
     config_location = 'default.cfg'
 # End handling args.
 
-Config.init([config_location])
+Config.init(config_location)
 # Config format: Config.get(category, option, default_value=False, lower_limit=False, upper_limit=False)
 # A default_value "None" means that the option is required and the bot will not run without it.
 # Do not use lower or upper limit on any config options which are not numbers.

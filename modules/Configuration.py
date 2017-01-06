@@ -14,11 +14,15 @@ def init(file_location, data=None):
     if len(loaded_files) != 1:
         import shutil
         # Copy default config file if not found
-        shutil.copy('default.cfg.example', 'default.cfg')
-        print '\ndefault.cfg.example has been copied to default.cfg\n' \
-              'Edit it with your API key and custom settings.\n'
-        raw_input("Press Enter to acknowledge and exit...")
-        exit(1)
+        try:
+            shutil.copy('default.cfg.example', file_location)
+            print '\ndefault.cfg.example has been copied to ' + file_location + '\n' \
+                  'Edit it with your API key and custom settings.\n'
+            raw_input("Press Enter to acknowledge and exit...")
+            exit(1)
+        except Exception as ex:
+            print "Failed to automatically copy config. Please do so manually. Error: " + str(ex)
+            exit(1)
     return config
 
 
