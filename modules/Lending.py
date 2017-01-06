@@ -157,7 +157,7 @@ def lend_cur(active_cur, total_lended, lending_balances):
             return 0
         cur_min_daily_rate = coin_cfg[active_cur]['minrate']
         log.log('Using custom mindailyrate ' + str(coin_cfg[active_cur]['minrate'] * 100) + '% for ' + active_cur)
-    if Config.has_option('BOT', 'analyseCurrencies'):
+    if Analysis:
         recommended_min = Analysis.get_rate_suggestion(active_cur)
         if cur_min_daily_rate < recommended_min:
             cur_min_daily_rate = recommended_min
