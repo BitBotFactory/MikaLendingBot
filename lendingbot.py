@@ -12,7 +12,10 @@ import modules.MaxToLend as MaxToLend
 import modules.Data as Data
 import modules.Lending as Lending
 
-os.chdir(os.path.dirname(sys.argv[0]))  # Allow relative paths
+try:
+    open('default.cfg.example', 'r')
+except IOError:
+    os.chdir(os.path.dirname(sys.argv[0]))  # Allow relative paths
 
 parser = argparse.ArgumentParser()  # Start args.
 parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
