@@ -125,9 +125,10 @@ Very few situations require you to change these settings.
 
 ``minloansize`` is the minimum size that a bot will make a loan at.
 
-- Default value: 0.001 of a coin
-- Allowed range: 0.001 and up.
+- Default value: 0.01 of a coin
+- Allowed range: 0.01 and up.
 - If you dislike loan fragmentation, then this will make the minimum for each loan larger.
+- Automatically adjusts to at least meet the minimum of each coin.
 
 ``KeepStuckOrders`` If True, keeps orders that are "stuck" in the market instead of canceling them.
 
@@ -223,6 +224,10 @@ This feature allows you to record a currency's market and have the bot see trend
 Config per Coin
 ---------------
 
+This can be configured in one of two ways. 
+
+**Coincfg dictionary**
+
 ``coincfg`` is in the form of a dictionary and allows for advanced, per-coin options.
 
 - Default value: Commented out, uncomment to enable.
@@ -232,6 +237,24 @@ Config per Coin
 - ENABLED? refers to a value of ``0`` if the coin is disabled and will no longer lend. Any positive integer will enable lending for the coin.
 - MAXTOLEND, MAXPERCENTTOLEND, and MAXTOLENDRATE refer to their respective settings above, but are unique to the specified coin specifically.
 - There can be as many different coins as you want in coincfg, but each coin may only appear once.
+
+**Separate coin sections**
+
+This is an alternative layout for the coin config mentioned above. It provides the ability to change the minloansize per coin, but is otherwise identical in functionality.
+To use this configuration, make sure to comment out the line where coincfg is defined, then add a section for each coin you wish to configure.
+
+.. warning:: These sections should come at the end of the file, after the other options for the bot.
+
+Configuration should look like this::
+
+    [BTC]
+    minloansize = 0.01
+    mindailyrate = 0.1
+    maxactiveamount = 1
+    maxtolend = 0
+    maxpercenttolend = 0
+    maxtolendrate = 0
+
 
 Advanced logging and Web Display
 --------------------------------

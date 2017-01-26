@@ -5,6 +5,8 @@ import sys
 import time
 import traceback
 
+from decimal import Decimal
+
 from modules.Logger import Logger
 from modules.Poloniex import Poloniex
 import modules.Configuration as Config
@@ -13,7 +15,7 @@ import modules.Data as Data
 import modules.Lending as Lending
 
 try:
-    open('default.cfg.example', 'r')
+    open('lendingbot.py', 'r')
 except IOError:
     os.chdir(os.path.dirname(sys.argv[0]))  # Allow relative paths
 
@@ -39,7 +41,7 @@ end_date = Config.get('BOT', 'endDate')
 json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
 
 
-log = Logger(Config.get('BOT', 'jsonfile', ''), Config.get('BOT', 'jsonlogsize', -1))
+log = Logger(Config.get('BOT', 'jsonfile', ''), Decimal(Config.get('BOT', 'jsonlogsize', -1)))
 api = Poloniex(Config.get("API", "apikey", None), Config.get("API", "secret", None))
 MaxToLend.init(Config, log)
 Data.init(api, log)
@@ -55,7 +57,7 @@ Lending.init(Config, api, log, Data, MaxToLend, dry_run, Analysis)
 print 'Welcome to Poloniex Lending Bot'
 # Configure web server
 
-web_server_enabled = Config.get('BOT', 'startWebServer')
+web_server_enabled = Config.getboolean('BOT', 'startWebServer')
 if web_server_enabled:  # Run web server
     import modules.WebServer as WebServer
     WebServer.initialize_web_server(Config)

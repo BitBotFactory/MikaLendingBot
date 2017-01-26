@@ -1,8 +1,11 @@
 # coding=utf-8
 from ConfigParser import SafeConfigParser
+import json
+from decimal import Decimal
 
 config = SafeConfigParser()
 Data = None
+FULL_LIST = ['STR', 'BTC', 'BTS', 'CLAM', 'DOGE', 'DASH', 'LTC', 'MAID', 'XMR', 'XRP', 'ETH', 'FCT']
 # This module is the middleman between the bot and a SafeConfigParser object, so that we can add extra functionality
 # without clogging up lendingbot.py with all the config logic. For example, added a default value to get().
 
@@ -61,10 +64,6 @@ def get_coin_cfg():
     coin_cfg = {}
     if config.has_option("BOT", "coinconfig"):
         try:
-            # parsed
-            import json
-            from decimal import Decimal
-
             coin_config = (json.loads(config.get("BOT", "coinconfig")))
             for cur in coin_config:
                 cur = cur.split(':')
@@ -73,7 +72,36 @@ def get_coin_cfg():
                                         maxtolendrate=(Decimal(cur[5])) / 100)
         except Exception as ex:
             print "Coinconfig parsed incorrectly, please refer to the documentation. Error: " + str(ex)
+    else:
+        for cur in FULL_LIST:
+            if config.has_section(cur):
+                try:
+                    coin_cfg[cur] = {}
+                    coin_cfg[cur]['minrate'] = (Decimal(config.get(cur, 'mindailyrate'))) / 100
+                    coin_cfg[cur]['maxactive'] = Decimal(config.get(cur, 'maxactiveamount'))
+                    coin_cfg[cur]['maxtolend'] = Decimal(config.get(cur, 'maxtolend'))
+                    coin_cfg[cur]['maxpercenttolend'] = (Decimal(config.get(cur, 'maxpercenttolend'))) / 100
+                    coin_cfg[cur]['maxtolendrate'] = (Decimal(config.get(cur, 'maxtolendrate'))) / 100
+                except Exception as ex:
+                    print "Coinconfig for " + cur + " parsed incorrectly, please refer to the documentation. " + \
+                          "Error: " + str(ex)
+                    # Need to raise this exception otherwise the bot will continue if you configured one cur correctly
+                    raise
     return coin_cfg
+
+
+def get_min_loan_sizes():
+    min_loan_sizes = {}
+    for cur in FULL_LIST:
+        if config.has_section(cur):
+            try:
+                min_loan_sizes[cur] = Decimal(get(cur, 'minloansize', lower_limit=0.01))
+            except Exception as ex:
+                print "minloansize for " + cur + " parsed incorrectly, please refer to the documentation. " + \
+                      "Error: " + str(ex)
+                # Bomb out if something isn't configured correctly
+                raise
+    return min_loan_sizes
 
 
 def get_currencies_list(option):

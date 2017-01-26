@@ -5,10 +5,15 @@ import datetime
 from cStringIO import StringIO
 try:
     import numpy
+    numpy.percentile([0, 1, 2, 3, 4, 5], 50, interpolation='linear')
     use_numpy = True
-except Exception as ex:
-    print "WARNING: Module Numpy not found, using manual percentile method. " \
+except ImportError as ex:
+    print "WARN: Module Numpy not found, using manual percentile method instead. " \
           "It is recommended to install Numpy. Error: " + str(ex)
+    use_numpy = False
+except TypeError as ex:
+    print "WARN: Module Numpy not up to date, using manual percentile method instead. " \
+          "It is recommended to update Numpy using 'sudo pip install numpy --upgrade' Error: " + str(ex)
     use_numpy = False
 
 currencies_to_analyse = []

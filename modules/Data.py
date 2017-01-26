@@ -1,6 +1,8 @@
 import datetime
 import time
 from decimal import Decimal
+from urllib import urlopen
+import json
 
 api = None
 log = None
@@ -95,6 +97,15 @@ def update_conversion_rates(output_currency, json_output_enabled):
         if output_currency == 'BTC':
             log.updateOutputCurrency('highestBid', '1')
             log.updateOutputCurrency('currency', output_currency)
+        elif output_currency != 'USDT':
+            url = "https://blockchain.info/tobtc?currency={0}&value=1".format(output_currency)
+            try:
+                highest_bid = json.loads(urlopen(url).read())
+                log.updateOutputCurrency('highestBid', highest_bid)
+                log.updateOutputCurrency('currency', output_currency)
+            except ValueError:
+                print "Currency {0} is not valid, choose a valid currency from here: {1}"\
+                      .format(output_currency, "https://blockchain.info/api/exchange_rates_api")
 
 
 def get_lending_currencies():
@@ -106,3 +117,13 @@ def get_lending_currencies():
     for cur in lending_balances:
         currencies.append(cur)
     return currencies
+
+
+def truncate(f, n):
+    """Truncates/pads a float f to n decimal places without rounding"""
+    # From https://stackoverflow.com/questions/783897/truncating-floats-in-python
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+    i, p, d = s.partition('.')
+    return '.'.join([i, (d+'0'*n)[:n]])

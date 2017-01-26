@@ -6,6 +6,7 @@ import socket
 import time
 import urllib
 import urllib2
+from modules.RingBuffer import RingBuffer
 
 
 class PoloniexApiError(Exception):
@@ -16,26 +17,50 @@ def create_time_stamp(datestr, formatting="%Y-%m-%d %H:%M:%S"):
     return time.mktime(time.strptime(datestr, formatting))
 
 
+def post_process(before):
+    after = before
+
+    # Add timestamps if there isnt one but is a datetime
+    if 'return' in after:
+        if isinstance(after['return'], list):
+            for x in xrange(0, len(after['return'])):
+                if isinstance(after['return'][x], dict):
+                    if 'datetime' in after['return'][x] and 'timestamp' not in after['return'][x]:
+                        after['return'][x]['timestamp'] = float(create_time_stamp(after['return'][x]['datetime']))
+
+    return after
+
+
 class Poloniex:
     def __init__(self, api_key, secret):
         self.APIKey = api_key
         self.Secret = secret
+        self.req_per_sec = 6
+        self.req_time_log = RingBuffer(self.req_per_sec)
         socket.setdefaulttimeout(30)
 
-    def post_process(self, before):
-        after = before
-
-        # Add timestamps if there isnt one but is a datetime
-        if 'return' in after:
-            if isinstance(after['return'], list):
-                for x in xrange(0, len(after['return'])):
-                    if isinstance(after['return'][x], dict):
-                        if 'datetime' in after['return'][x] and 'timestamp' not in after['return'][x]:
-                            after['return'][x]['timestamp'] = float(create_time_stamp(after['return'][x]['datetime']))
-
-        return after
+    def limit_request_rate(self):
+        now = time.time()
+        # start checking only when request time log is full
+        if len(self.req_time_log) == self.req_per_sec:
+            time_since_oldest_req = now - self.req_time_log[0]
+            # check if oldest request is more than 1sec ago
+            if time_since_oldest_req < 1:
+                # print self.req_time_log.get()
+                # uncomment to debug
+                # print "Waiting %s sec to keep api request rate" % str(1 - time_since_oldest_req)
+                # print "Req: %d  6th Req: %d  Diff: %f sec" %(now, self.req_time_log[0], time_since_oldest_req)
+                time.sleep(1 - time_since_oldest_req)
+            # uncomment to debug
+            # else:
+            #     print self.req_time_log.get()
+            #     print "Req: %d  6th Req: %d  Diff: %f sec" % (now, self.req_time_log[0], time_since_oldest_req)
+        # append current request time to the log, pushing out the 6th request time before it
+        self.req_time_log.append(now)
 
     def api_query(self, command, req=None):
+        # keep the 6 request per sec limit
+        self.limit_request_rate()
 
         if req is None:
             req = {}
@@ -78,7 +103,7 @@ class Poloniex:
 
                 ret = urllib2.urlopen(urllib2.Request('https://poloniex.com/tradingApi', post_data, headers))
                 json_ret = _read_response(ret)
-                return self.post_process(json_ret)
+                return post_process(json_ret)
         except Exception as ex:
             # add command information to exception
             # (this isn't compatible with python 3)
