@@ -291,7 +291,7 @@ Advanced logging and Web Display
 ``outputCurrency`` this is the ticker of the coin which you would like the website to report your summary earnings in.
 
 - Default value: BTC
-- Acceptable values: BTC, USDT, Any coin with a direct Poloniex BTC trading pair (ex. DOGE, MAID, ETH)
+- Acceptable values: BTC, USDT, Any coin with a direct Poloniex BTC trading pair (ex. DOGE, MAID, ETH), Currencies that have a BTC exchange rate on blockchain.info (i.e. EUR, USD)
 - Will be a close estimate, due to unexpected market fluctuations, trade fees, and other unforseeable factors.
 
 lendingbot.html options
@@ -304,3 +304,7 @@ You can pass options to statistics page by adding them to URL. Eg, ``http://loca
 - Allowed values: ``lentperc``, ``onlyfee``.
 - Default value: ``lentperc``.
 - ``onlyfee`` calculates effective rate without considering coin lent percentage.
+
+``displayUnit`` controls BTC unit output
+- Allowed values: ``BTC``, ``mBTC``, ``Bits``, ``Satoshi``.
+- Default value: ``BTC``.

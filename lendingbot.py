@@ -62,44 +62,47 @@ if web_server_enabled:  # Run web server
     import modules.WebServer as WebServer
     WebServer.initialize_web_server(Config)
 
-
-while True:
-    try:
-        Data.update_conversion_rates(output_currency, json_output_enabled)
-        Lending.transfer_balances()
-        Lending.cancel_all()
-        Lending.lend_all()
-        log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()), Data.get_max_duration(
-            end_date, "status"))
-        log.persistStatus()
-        sys.stdout.flush()
-        time.sleep(Lending.get_sleep_time())
-    except KeyboardInterrupt:
-        if web_server_enabled:
-            WebServer.stop_web_server()
-        log.log('bye')
-        print 'bye'
-        os._exit(0)  # Ad-hoc solution in place of 'exit(0)' TODO: Find out why non-daemon thread(s) are hanging on exit
-    except Exception as ex:
-        log.log_error(str(ex))
-        log.persistStatus()
-        if 'Invalid API key' in str(ex):
-            print "!!! Troubleshooting !!!"
-            print "Are your API keys correct? No quotation. Just plain keys."
-            exit(1)
-        elif 'Nonce must be greater' in str(ex):
-            print "!!! Troubleshooting !!!"
-            print "Are you reusing the API key in multiple applications? Use a unique key for every application."
-            exit(1)
-        elif 'Permission denied' in str(ex):
-            print "!!! Troubleshooting !!!"
-            print "Are you using IP filter on the key? Maybe your IP changed?"
-            exit(1)
-        elif 'timed out' in str(ex):
-            print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
-        else:
-            print traceback.format_exc()
-            print "Unhandled error, please open a Github issue so we can fix it!"
-        sys.stdout.flush()
-        time.sleep(Lending.get_sleep_time())
-        pass
+try:
+    while True:
+        try:
+            Data.update_conversion_rates(output_currency, json_output_enabled)
+            Lending.transfer_balances()
+            Lending.cancel_all()
+            Lending.lend_all()
+            log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()), Data.get_max_duration(
+                end_date, "status"))
+            log.persistStatus()
+            sys.stdout.flush()
+            time.sleep(Lending.get_sleep_time())
+        except KeyboardInterrupt:
+            # allow existing the main bot loop
+            raise
+        except Exception as ex:
+            log.log_error(str(ex))
+            log.persistStatus()
+            if 'Invalid API key' in str(ex):
+                print "!!! Troubleshooting !!!"
+                print "Are your API keys correct? No quotation. Just plain keys."
+                exit(1)
+            elif 'Nonce must be greater' in str(ex):
+                print "!!! Troubleshooting !!!"
+                print "Are you reusing the API key in multiple applications? Use a unique key for every application."
+                exit(1)
+            elif 'Permission denied' in str(ex):
+                print "!!! Troubleshooting !!!"
+                print "Are you using IP filter on the key? Maybe your IP changed?"
+                exit(1)
+            elif 'timed out' in str(ex):
+                print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
+            else:
+                print traceback.format_exc()
+                print "Unhandled error, please open a Github issue so we can fix it!"
+            sys.stdout.flush()
+            time.sleep(Lending.get_sleep_time())
+            pass
+except KeyboardInterrupt:
+    if web_server_enabled:
+        WebServer.stop_web_server()
+    log.log('bye')
+    print 'bye'
+    os._exit(0)  # Ad-hoc solution in place of 'exit(0)' TODO: Find out why non-daemon thread(s) are hanging on exit
