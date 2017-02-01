@@ -290,7 +290,7 @@ def lend_cur(active_cur, total_lended, lending_balances):
             log.log("Not lending " + active_cur + " due to low rate.")
             return 0
         elif below_min:
-            rate = str(min_daily_rate)
+            rate = str(cur_min_daily_rate)
         else:
             rate = orders['rates'][i]
 
