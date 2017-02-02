@@ -110,15 +110,15 @@ def get_rate_list(cur='all'):
         return rates
 
 
-def get_rate_suggestion(cur, percentile=lending_style):
+def get_rate_suggestion(cur):
     if cur not in open_files:
         return 0
     rates = get_rate_list(cur)
     if use_numpy:
-        result = numpy.percentile(rates, int(percentile))
+        result = numpy.percentile(rates, int(lending_style))
     else:
         rates.sort()
-        index = int(percentile * len(rates))
+        index = int(lending_style * len(rates))
         result = rates[index]
     result = float(int(result * 1000000) / 1000000.0)
     return result
