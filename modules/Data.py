@@ -134,4 +134,4 @@ def truncate(f, n):
     if 'e' in s or 'E' in s:
         return '{0:.{1}f}'.format(f, n)
     i, p, d = s.partition('.')
-    return '.'.join([i, (d+'0'*n)[:n]])
+    return float('.'.join([i, (d+'0'*n)[:n]]))
