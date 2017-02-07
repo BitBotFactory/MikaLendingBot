@@ -113,12 +113,17 @@ def get_rate_list(cur='all'):
 def get_rate_suggestion(cur):
     if cur not in open_files:
         return 0
-    rates = get_rate_list(cur)
-    if use_numpy:
-        result = numpy.percentile(rates, int(lending_style))
-    else:
-        rates.sort()
-        index = int(lending_style * len(rates))
-        result = rates[index]
-    result = float(int(result * 1000000) / 1000000.0)
-    return result
+    try:
+        rates = get_rate_list(cur)
+        if use_numpy:
+            result = numpy.percentile(rates, int(lending_style))
+        else:
+            rates.sort()
+            index = int(lending_style * len(rates))
+            result = rates[index]
+        result = Data.truncate(result, 6)
+        return result
+    except Exception as exc:
+        print "WARN: Exception found when analysing markets, if this happens for more than a couple minutes please " \
+              "make a Github issue so we can fix it. Otherwise, you can safely ignore it. Error: " + str(exc)
+        return 0
