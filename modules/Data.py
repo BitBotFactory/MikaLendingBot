@@ -82,11 +82,12 @@ def update_conversion_rates(output_currency, json_output_enabled):
         total_lended = get_total_lended()[0]
         ticker_response = api.return_ticker()
         output_currency_found = False
+        # Set this up now in case we get an exception later and don't have a currency to use
+        log.updateOutputCurrency('highestBid', '1')
+        log.updateOutputCurrency('currency', 'BTC')
         # default output currency is BTC
         if output_currency == 'BTC':
             output_currency_found = True
-            log.updateOutputCurrency('highestBid', '1')
-            log.updateOutputCurrency('currency', output_currency)
 
         for couple in ticker_response:
             currencies = couple.split('_')
@@ -95,7 +96,7 @@ def update_conversion_rates(output_currency, json_output_enabled):
             if ref == 'BTC' and currency in total_lended:
                 log.updateStatusValue(currency, 'highestBid', ticker_response[couple]['highestBid'])
                 log.updateStatusValue(currency, 'couple', couple)
-            if not output_currency_found: # check for output currency
+            if not output_currency_found:  # check for output currency
                 if ref == 'BTC' and currency == output_currency:
                     output_currency_found = True
                     log.updateOutputCurrency('highestBid', 1 / float(ticker_response[couple]['highestBid']))
@@ -104,16 +105,19 @@ def update_conversion_rates(output_currency, json_output_enabled):
                     output_currency_found = True
                     log.updateOutputCurrency('highestBid', ticker_response[couple]['highestBid'])
                     log.updateOutputCurrency('currency', output_currency)
-        if not output_currency_found: # fetch output currency rate from blockchain.info
+        if not output_currency_found:  # fetch output currency rate from blockchain.info
             url = "https://blockchain.info/tobtc?currency={0}&value=1".format(output_currency)
             try:
                 highest_bid = json.loads(urlopen(url).read())
                 log.updateOutputCurrency('highestBid', 1 / float(highest_bid))
                 log.updateOutputCurrency('currency', output_currency)
             except ValueError:
-                log.log_error("Failed to find the exchange rate for outputCurrency {0}!".format(output_currency))
-                log.log_error("Make sure that {0} is either traded on Poloniex or supported by blockchain.info: {1}"\
+                log.log_error("Failed to find the exchange rate for outputCurrency {0}! Using BTC as output currency"
+                              .format(output_currency))
+                log.log_error("Make sure that {0} is either traded on Poloniex or supported by blockchain.info: {1}"
                               .format(output_currency, "https://blockchain.info/api/exchange_rates_api"))
+            except:
+                log.log_error("Can't connect to {0} using BTC as the output currency".format(url))
 
 
 def get_lending_currencies():
@@ -134,4 +138,4 @@ def truncate(f, n):
     if 'e' in s or 'E' in s:
         return '{0:.{1}f}'.format(f, n)
     i, p, d = s.partition('.')
-    return float('.'.join([i, (d+'0'*n)[:n]]))
+    return float('.'.join([i, (d + '0' * n)[:n]]))
