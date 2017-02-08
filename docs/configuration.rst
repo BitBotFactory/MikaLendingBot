@@ -308,3 +308,7 @@ You can pass options to statistics page by adding them to URL. Eg, ``http://loca
 ``displayUnit`` controls BTC unit output
 - Allowed values: ``BTC``, ``mBTC``, ``Bits``, ``Satoshi``.
 - Default value: ``BTC``.
+
+``earningsInOutputCurrency`` define which earnings are show in output currency
+- Allowed values: ``all``, ``summary``
+- Default value: ``all``

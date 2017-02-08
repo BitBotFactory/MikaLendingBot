@@ -287,7 +287,7 @@ def lend_cur(active_cur, total_lended, lending_balances):
         below_min = Decimal(orders['rates'][i]) < Decimal(cur_min_daily_rate)
 
         if hide_coins and below_min:
-            log.log("Not lending " + active_cur + " due to low rate.")
+            log.log("Not lending {:s} due to rate below {:.4f}%".format(active_cur,(cur_min_daily_rate * 100)))
             return 0
         elif below_min:
             rate = str(cur_min_daily_rate)

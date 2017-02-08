@@ -8,6 +8,8 @@ var Week = new Timespan("Week",7);
 var Month = new Timespan("Month",30);
 var timespans = [Month, Week, Day, Hour];
 var summaryCoinRate, summaryCoin;
+var earningsOutputCoinRate, earningsOutputCoin;
+var outputCurrencyDisplayMode = 'all'
 var effRateMode = 'lentperc';
 
 // BTC DisplayUnit
@@ -36,6 +38,32 @@ function updateOutputCurrency(outputCurrency){
     var OutCurr = Object.keys(outputCurrency);
     summaryCoin = outputCurrency['currency'];
     summaryCoinRate = parseFloat(outputCurrency['highestBid']);
+    // switch between using outputCoin for summary only or all lending coins earnings
+    if(outputCurrencyDisplayMode == 'all') {
+        earningsOutputCoin = summaryCoin;
+        earningsOutputCoinRate = summaryCoinRate;
+    } else {
+        earningsOutputCoin = 'BTC'
+        earningsOutputCoinRate = 1;
+    }
+}
+
+// prints a pretty float with accuracy.
+// above zero accuracy will be used for float precision
+// below zero accuracy will indicate precision after must significat digit
+// strips trailing zeros
+function prettyFloat(value, accuracy) {
+    var precision = Math.round(Math.log10(value));
+    precision = precision < 0 ? Math.abs(precision) + accuracy : accuracy;
+    var multiplier = Math.pow(10, precision);
+    var result = Math.round(value * multiplier) / multiplier;
+    return isNaN(result) ? "0" : parseFloat(result.toFixed(precision));
+}
+
+function printFloat(value, precision) {
+    var multiplier = Math.pow(10, precision);
+    var result = Math.round(value * multiplier) / multiplier;
+    return result = isNaN(result) ? "0" : result.toFixed(precision);
 }
 
 function updateRawValues(rawData){
@@ -46,11 +74,17 @@ function updateRawValues(rawData){
     for (var keyIndex = 0; keyIndex < currencies.length; ++keyIndex)
     {
         var currency = currencies[keyIndex];
+        var btcMultiplier = currency == 'BTC' ? displayUnit.multiplier : 1;
         var averageLendingRate = parseFloat(rawData[currency]['averageLendingRate']);
         var lentSum = parseFloat(rawData[currency]['lentSum']);
         var totalCoins = parseFloat(rawData[currency]['totalCoins']);
         var maxToLend = parseFloat(rawData[currency]['maxToLend']);
         var highestBidBTC = parseFloat(rawData[currency]['highestBid']);
+        if (currency == 'BTC') {
+            // no bids for BTC provided by poloniex
+            // this is added so BTC can be handled like other coins for conversions
+            highestBidBTC = 1;
+        }
         var couple = rawData[currency]['couple'];
 
         if (!isNaN(averageLendingRate) && !isNaN(lentSum) || !isNaN(totalCoins))
@@ -63,7 +97,7 @@ function updateRawValues(rawData){
             var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to Poloniex fees
 
             var earnings = '';
-            var earningsBTC = '';
+            var earningsSummaryCoin = '';
             timespans.forEach(function(timespan) {
                 // init totalBTCEarnings
                 if (isNaN(totalBTCEarnings[timespan.name])) {
@@ -73,16 +107,16 @@ function updateRawValues(rawData){
                 // calculate coin earnings
                 timespanEarning = timespan.calcEarnings(lentSum, rate);
                 earnings += timespan.formatEarnings(currency, timespanEarning, true);
-                if (currency == 'BTC') {
-                    totalBTCEarnings[timespan.name] += timespanEarning;
+
+                // sum BTC earnings for all coins
+                if(!isNaN(highestBidBTC)) {
+                    timespanEarningBTC = timespan.calcEarnings(lentSum * highestBidBTC, rate);
+                    totalBTCEarnings[timespan.name] += timespanEarningBTC;
+                    if(currency != earningsOutputCoin) {
+                        earningsSummaryCoin += timespan.formatEarnings(earningsOutputCoin, timespanEarningBTC * earningsOutputCoinRate);
+                    }
                 }
 
-                // calculate BTC earnings
-                if (!isNaN(highestBidBTC) && !(currency == 'BTC')) {
-                    timespanEarningBTC = timespan.calcEarnings(lentSum * highestBidBTC, rate);
-                    earningsBTC += timespan.formatEarnings("BTC", timespanEarningBTC);
-                    totalBTCEarnings[timespan.name] += timespanEarningBTC;
-                }
             });
 
 
@@ -105,13 +139,18 @@ function updateRawValues(rawData){
             else
                 effRateText = makeTooltip("Effective loan rate, considering poloniex 15% fee.", "Eff.");
             var compoundRateText = makeTooltip("Compound yearly rate, the result of reinvesting the interest.", "Comp.");
-            var lentStr = 'Lent ' + printFloat(lentSum, 4) +' of ' + printFloat(totalCoins, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
+            var lentStr = 'Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + printFloat(totalCoins * btcMultiplier, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
             if (totalCoins != maxToLend) {
-                lentStr += ' <b>Total</b><br/>Lent ' + printFloat(lentSum, 4) + ' of ' + printFloat(maxToLend, 4) + ' (' + printFloat(lentPercLendable, 2) + '%) <b>Lendable</b>';
+                lentStr += ' <b>Total</b><br/>Lent ' + printFloat(lentSum * btcMultiplier, 4) + ' of ' + printFloat(maxToLend * btcMultiplier, 4) + ' (' + printFloat(lentPercLendable, 2) + '%) <b>Lendable</b>';
             }
 
-            var rowValues = ["<b>" + currency + "</b>", lentStr,
+            var displayCurrency = currency == 'BTC' ? displayUnit.name : currency;
+            var currencyStr = "<b>" + displayCurrency + "</b>";
+            if(!isNaN(highestBidBTC) && earningsOutputCoin != currency) {
+                currencyStr += "<br/>1 "+ displayCurrency + " = " + prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 2) + ' ' + earningsOutputCoin;
+            }
+            var rowValues = [currencyStr, lentStr,
                 "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
                     + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>'
                     + "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
@@ -134,14 +173,13 @@ function updateRawValues(rawData){
             var row = table.insertRow();
             if (lentSum > 0) {
                 var cell1 = row.appendChild(document.createElement("td"));
-                cell1.innerHTML = "<span class='hidden-xs'>"+ currency +"<br/></span>Estimated<br/>Earnings";
+                cell1.innerHTML = "<span class='hidden-xs'>"+ displayCurrency +"<br/></span>Estimated<br/>Earnings";
                 var cell2 = row.appendChild(document.createElement("td"));
                 cell2.setAttribute("colspan", earningsColspan);
-                if (!isNaN(highestBidBTC)) {
-                    cell1.innerHTML += "<br/><span class='hidden-xs'><br/>" + couple +"</span> highest bid: "+ printFloat(highestBidBTC, 8);
-                    cell2.innerHTML = "<div class='inlinediv' >" + earnings + "<br/></div><div class='inlinediv' style='padding-right:0px'>"+ earningsBTC + "</div>";
+                if (earningsSummaryCoin != '') {
+                    cell2.innerHTML = "<div class='inlinediv' >" + earnings + "<br/></div><div class='inlinediv' style='padding-right:0px'>"+ earningsSummaryCoin + "</div>";
                 } else {
-                    cell2.innerHTML = "<div class='inlinediv' >" +earnings + "</div>";
+                    cell2.innerHTML = "<div class='inlinediv' >" + earnings + "</div>";
                 }
             }
         }
@@ -151,7 +189,7 @@ function updateRawValues(rawData){
     var thead = table.createTHead();
 
     // show account summary
-    if (currencies.length > 1 || summaryCoin != "BTC") {
+    if (currencies.length > 1 || summaryCoin != earningsOutputCoin) {
         earnings = '';
         timespans.forEach(function(timespan) {
             earnings += timespan.formatEarnings( summaryCoin, totalBTCEarnings[timespan.name] * summaryCoinRate);
@@ -192,12 +230,6 @@ function loadData() {
             setTimeout('loadData()',60000)
         });;
     }
-}
-
-function printFloat(value, precision) {
-    var multiplier = Math.pow(10, precision);
-    var result = Math.round(value * multiplier) / multiplier;
-    return result = isNaN(result) ? "0" : result.toFixed(precision);
 }
 
 function Timespan(name, multiplier) {
@@ -276,9 +308,32 @@ function setBTCDisplayUnit() {
     console.log('displayUnitText: ' + displayUnitText);
 }
 
+function setOutputCurrencyDisplayMode() {
+    var validModes = ['all', 'summary'];
+    var q = location.search.match(/[\?&]earningsInOutputCurrency=[^&]+/);
+    var outputCurrencyDisplayModeText;
+
+    if (q) {
+        outputCurrencyDisplayModeText = q[0].split('=')[1];
+    } else {
+        if (localStorage.outputCurrencyDisplayModeText) {
+            outputCurrencyDisplayModeText = localStorage.outputCurrencyDisplayModeText;
+        }
+    }
+    validModes.forEach(function(mode) {
+        if(mode == outputCurrencyDisplayModeText) {
+            outputCurrencyDisplayMode = mode;
+            localStorage.outputCurrencyDisplayModeText = outputCurrencyDisplayModeText;
+        }
+    })
+    console.log('outputCurrencyDisplayMode: ' + outputCurrencyDisplayModeText);
+
+}
+
 $(document).ready(function () {
     setEffRateMode();
     setBTCDisplayUnit();
+    setOutputCurrencyDisplayMode();
     loadData();
     if (window.location.protocol == "file:") {
         $('#file').show();
