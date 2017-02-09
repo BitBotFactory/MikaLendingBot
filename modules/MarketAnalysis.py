@@ -25,7 +25,7 @@ def init(config, api1, data1):
     currencies_to_analyse = config.get_currencies_list('analyseCurrencies')
     max_age = int(config.get('BOT', 'analyseMaxAge', 30, 1, 365))
     update_interval = int(config.get('BOT', 'analyseUpdateInterval', 60, 10, 3600))
-    lending_style = int(config.get('BOT', 'lendingStyle', 50, 1, 99)) / 100.0
+    lending_style = int(config.get('BOT', 'lendingStyle', 50, 1, 99))
     api = api1
     Data = data1
     if len(currencies_to_analyse) != 0:
@@ -119,7 +119,7 @@ def get_rate_suggestion(cur):
             result = numpy.percentile(rates, int(lending_style))
         else:
             rates.sort()
-            index = int(lending_style * len(rates))
+            index = int(lending_style * len(rates) / 100.0)
             result = rates[index]
         result = Data.truncate(result, 6)
         return result
