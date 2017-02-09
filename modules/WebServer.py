@@ -28,6 +28,7 @@ def initialize_web_server(config):
 def start_web_server():
     import SimpleHTTPServer
     import SocketServer
+    import socket
 
     try:
         port = int(web_server_port)
@@ -47,10 +48,17 @@ def start_web_server():
         SocketServer.TCPServer.allow_reuse_address = True
         server = SocketServer.TCPServer((host, port), QuietHandler)
         if host == "0.0.0.0":
-            host1 = "localhost"
+            # Get all addresses that we could listen on the port specified
+            addresses = [i[4][0] for i in socket.getaddrinfo(socket.gethostname().split('.')[0], port)]
+            addresses = [i for i in addresses if ':' not in i]  # Filter out all IPv6 addresses
+            addresses.append('127.0.0.1')  # getaddrinfo doesn't always get localhost
+            hosts = list(set(addresses))  # Make list unique
         else:
-            host1 = host
-        print 'Started WebServer, lendingbot status available at http://' + host1 + ':' + str(port) + '/lendingbot.html'
+            hosts = [host]
+        serving_msg = "http://{0}:{1}/lendingbot.html".format(hosts[0], port)
+        for host in hosts[1:]:
+            serving_msg += ", http://{0}:{1}/lendingbot.html".format(host, port)
+        print 'Started WebServer, lendingbot status available at {0}'.format(serving_msg)
         server.serve_forever()
     except Exception as Ex:
         print 'Failed to start WebServer' + str(Ex)
