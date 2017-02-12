@@ -7,8 +7,9 @@ try:
     import numpy
     use_numpy = True
 except ImportError as ex:
-    print "WARN: Module Numpy not found, using manual percentile method instead. " \
-          "It is recommended to install Numpy. Error: " + str(ex)
+    ex.message = ex.message if ex.message else str(ex)
+    print("WARN: Module Numpy not found, using manual percentile method instead. "
+          "It is recommended to install Numpy. Error: {0}".format(ex.message))
     use_numpy = False
 
 currencies_to_analyse = []

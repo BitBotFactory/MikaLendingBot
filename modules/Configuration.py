@@ -24,7 +24,8 @@ def init(file_location, data=None):
             raw_input("Press Enter to acknowledge and exit...")
             exit(1)
         except Exception as ex:
-            print "Failed to automatically copy config. Please do so manually. Error: " + str(ex)
+            ex.message = ex.message if ex.message else str(ex)
+            print("Failed to automatically copy config. Please do so manually. Error: {0}".format(ex.message))
             exit(1)
     return config
 
@@ -71,7 +72,8 @@ def get_coin_cfg():
                                         maxtolend=Decimal(cur[3]), maxpercenttolend=(Decimal(cur[4])) / 100,
                                         maxtolendrate=(Decimal(cur[5])) / 100)
         except Exception as ex:
-            print "Coinconfig parsed incorrectly, please refer to the documentation. Error: " + str(ex)
+            ex.message = ex.message if ex.message else str(ex)
+            print("Coinconfig parsed incorrectly, please refer to the documentation. Error: {0}".format(ex.message))
     else:
         for cur in FULL_LIST:
             if config.has_section(cur):
@@ -83,8 +85,9 @@ def get_coin_cfg():
                     coin_cfg[cur]['maxpercenttolend'] = (Decimal(config.get(cur, 'maxpercenttolend'))) / 100
                     coin_cfg[cur]['maxtolendrate'] = (Decimal(config.get(cur, 'maxtolendrate'))) / 100
                 except Exception as ex:
-                    print "Coinconfig for " + cur + " parsed incorrectly, please refer to the documentation. " + \
-                          "Error: " + str(ex)
+                    ex.message = ex.message if ex.message else str(ex)
+                    print("Coinconfig for " + cur + " parsed incorrectly, please refer to the documentation. "
+                          "Error: {0}".format(ex.message))
                     # Need to raise this exception otherwise the bot will continue if you configured one cur correctly
                     raise
     return coin_cfg
@@ -97,8 +100,9 @@ def get_min_loan_sizes():
             try:
                 min_loan_sizes[cur] = Decimal(get(cur, 'minloansize', lower_limit=0.01))
             except Exception as ex:
-                print "minloansize for " + cur + " parsed incorrectly, please refer to the documentation. " + \
-                      "Error: " + str(ex)
+                ex.message = ex.message if ex.message else str(ex)
+                print("minloansize for " + cur + " parsed incorrectly, please refer to the documentation. "
+                      "Error: {0}".format(ex.message))
                 # Bomb out if something isn't configured correctly
                 raise
     return min_loan_sizes

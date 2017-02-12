@@ -137,8 +137,9 @@ def cancel_all():
                     try:
                         msg = api.cancel_loan_offer(CUR, offer['id'])
                         log.cancelOrders(CUR, msg)
-                    except Exception as Ex:
-                        log.log("Error canceling loan offer: " + str(Ex))
+                    except Exception as ex:
+                        ex.message = ex.message if ex.message else str(ex)
+                        log.log("Error canceling loan offer: {0}".format(ex.message))
         else:
             print "Not enough " + CUR + " to lend if bot canceled open orders. Not cancelling."
 

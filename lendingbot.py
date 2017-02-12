@@ -78,21 +78,21 @@ try:
             # allow existing the main bot loop
             raise
         except Exception as ex:
-            log.log_error(str(ex))
+            log.log_error(ex.message)
             log.persistStatus()
-            if 'Invalid API key' in str(ex):
+            if 'Invalid API key' in ex.message:
                 print "!!! Troubleshooting !!!"
                 print "Are your API keys correct? No quotation. Just plain keys."
                 exit(1)
-            elif 'Nonce must be greater' in str(ex):
+            elif 'Nonce must be greater' in ex.message:
                 print "!!! Troubleshooting !!!"
                 print "Are you reusing the API key in multiple applications? Use a unique key for every application."
                 exit(1)
-            elif 'Permission denied' in str(ex):
+            elif 'Permission denied' in ex.message:
                 print "!!! Troubleshooting !!!"
                 print "Are you using IP filter on the key? Maybe your IP changed?"
                 exit(1)
-            elif 'timed out' in str(ex):
+            elif 'timed out' in ex.message:
                 print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
             else:
                 print traceback.format_exc()

@@ -105,10 +105,9 @@ class Poloniex:
                 json_ret = _read_response(ret)
                 return post_process(json_ret)
         except Exception as ex:
-            # add command information to exception
-            # (this isn't compatible with python 3)
-            import sys
-            raise type(ex), type(ex)(ex.message + ' Requesting %s' % command), sys.exc_info()[2]
+            ex.message = ex.message if ex.message else str(ex)
+            ex.message = "{0} Requesting {1}".format(ex.message, command)
+            raise
 
     def return_ticker(self):
         return self.api_query("returnTicker")
