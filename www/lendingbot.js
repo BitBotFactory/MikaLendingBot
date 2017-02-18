@@ -53,11 +53,9 @@ function updateOutputCurrency(outputCurrency){
 // below zero accuracy will indicate precision after must significat digit
 // strips trailing zeros
 function prettyFloat(value, accuracy) {
-    var precision = Math.round(Math.log10(value));
-    precision = precision < 0 ? Math.abs(precision) + accuracy : accuracy;
-    var multiplier = Math.pow(10, precision);
-    var result = Math.round(value * multiplier) / multiplier;
-    return isNaN(result) ? "0" : parseFloat(result.toFixed(precision));
+  var precision = Math.round(Math.log10(value));
+  var result = precision < 0 ? value.toFixed(Math.min((accuracy - precision), 8)) : value.toFixed(accuracy);
+  return isNaN(result) ? "0" : result.replace(/(?:\.0+|(\.\d+?)0+)$/, "$1");
 }
 
 function printFloat(value, precision) {
