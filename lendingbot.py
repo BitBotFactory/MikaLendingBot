@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import traceback
+from httplib import BadStatusLine
 
 from decimal import Decimal
 
@@ -94,6 +95,8 @@ try:
                 exit(1)
             elif 'timed out' in ex.message:
                 print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
+            elif isinstance(ex, BadStatusLine):
+                print "Caught BadStatusLine exception from Poloniex, ignoring."
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
