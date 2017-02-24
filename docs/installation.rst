@@ -13,33 +13,73 @@ Prerequisites
 
 You will need:
 
-- Python 2.7.10 (Must be added to PATH)
+    - Python 2.7.x (Must be added to PATH)
+
+Recommended for easier use:
+
+    - git
+    - pip (to install Numpy)
+    - Numpy (if using Analysis module)
 
 Downloading
 -----------
 
 To download the bot you can either:
 
+- (Recommended) Run ``git clone https://github.com/Mikadily/poloniexlendingbot`` if you have git installed. Using this method will allow you to do ``git pull`` at any time to grab updates.
 - Download the source .zip file from the GitHub repo page or from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_. Extract it into an empty folder you won't accidentally delete.
-- Run ``git clone https://github.com/Mikadily/poloniexlendingbot`` if you have git installed.
+
+(Optional) Automatically Run on Startup
+---------------------------------------
+
+* Windows using Startup Folder:
+
+    Add a shortcut to ``lendingbot.py`` to the startup folder of the start menu.
+    Its location may change with OS version, but for Windows 8/10 is ``C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp``
+
+* Linux using systemd:
+
+    Create the file ``/lib/systemd/system/lendingbot.service`` which contains the following text::
+
+        [Unit]
+        Description=LendingBot service
+        After=network.target
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/python <INSTALLATION DIRECTORY>/lendingbot.py
+        WorkingDirectory=<INSTALLATION DIRECTORY>
+        RestartSec=10
+        Restart=on-failure
+
+        [Install]
+        WantedBy=multi-user.target
+    Credit to GitHub user utdrmac.
+
+    Modify the ExecStart and WorkingDirectory to match your setup.
+
+* OSx:
+
+    Help needed! If you have a solution for OSx and would like to share, you can either share it directly with us or make a PR with the edits.
 
 Configuring
 -----------
 
 To configure the bot with your settings:
 
-1. Copy ``default.cfg.example`` to ``default.cfg``
-2. Open ``default.cfg`` and enter your desired settings `(information on settings here) <http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html>`_.
-3. Save ``default.cfg`` 
+    #. Copy ``default.cfg.example`` to ``default.cfg`` (Running lendingbot.py also does this for you if default.cfg doesn't already exist.)
+    #. Open ``default.cfg`` and enter your desired settings `(information on settings here) <http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html>`_.
+    #. Save ``default.cfg``
 
 You are now ready to run the bot.
 
 Running
 -------
 
-To run, either double-click lendingbot.py (if you have .py associated with the Python executable)
+To run, either:
 
-or run ``python lendingbot.py`` in console.
+    - Double-click lendingbot.py (if you have .py associated with the Python executable)
+    - Run ``python lendingbot.py`` in command prompt or terminal.
 
 .. note:: You can use arguments to specify a specific config file ``-cfg`` or to do dry runs ``-dry``. To see these args do: ``python lendingbot.py -h``
 
@@ -53,44 +93,45 @@ Prerequisites
 
 You will need:
 
-- A pythonanywhere.com account (Free version works fine)
+    - A pythonanywhere.com account (Free version works fine)
 
 Uploading the bot's files to Pythonanywhere
 -------------------------------------------
 
-1. Download the bot's code from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_.
-2. Extract the files, and run ``lendingbot.py`` once to generate the default.cfg
-3. Modify the default.cfg with your settings (See Configuration.)
-4. Go to the "files" tab of the website.
-5. Create a new directory, preferably named "poloniexlendingbot" and upload all the files within the folder. (You cannot upload the .zip or a folder itself, you must do all the contents.)
+#. Download the bot's code from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_.
+#. Extract the files, and run ``lendingbot.py`` once to generate the default.cfg
+#. Modify the default.cfg with your settings (See Configuration.)
+#. Go to the "files" tab of the website.
+#. Create a new directory, preferably named "poloniexlendingbot" and upload all the files within the folder. (You cannot upload the .zip or a folder itself, you must do all the contents.)
 
 .. note:: If you are running out of CPU time every day: It is recommended to use a high sleeptimeinactive time for this website, as they meter your CPU usage.
 
 Creating the Web App (Optional)
 -------------------------------
-1. If you would like to use the Webserver to view your bot's status, navigate to the "Web" tab.
-2. Add a new web app.
-3. Set the working directory to ``/home/<username>/poloniexlendingbot/www/``
-4. Set the static files to URL: ``/static/`` Directory: ``/home/<username>/poloniexlendingbot/www``
-5. Refresh your website.
-6. You will be able to access the webapp at ``http://<username>.pythonanywhere.com/static/lendingbot.html`` once it finishes setting up.
 
-.. warning:: Do not use the built in Simple Web Server when using the bot on any host you do not control.
+#. If you would like to use the Webserver to view your bot's status, navigate to the "Web" tab.
+#. Add a new web app.
+#. Set the working directory to ``/home/<username>/poloniexlendingbot/www/``
+#. Set the static files to URL: ``/static/`` Directory: ``/home/<username>/poloniexlendingbot/www``
+#. Reload your website with the button at the top of the page.
+#. You will be able to access the webapp at ``http://<username>.pythonanywhere.com/static/lendingbot.html`` once it finishes setting up.
+
+.. warning:: Do not use the built-in Simple Web Server on any host you do not control.
 
 Running the Bot
 ---------------
  
- To run the bot continuously (Recommended for free accounts):
+To run the bot continuously (Recommended for free accounts):
+
+    #. Navigate to the "Consoles" tab.
+    #. Add a new "Custom console," name it "Poloniexlendingbot" and set the path to ``python /home/<username>/poloniexlendingbot/lendingbot.py``
+    #. Click this link whenever you want to start the bot, it will run continuously until the website goes down for maintenance or the bot experiences an unexpected error.
  
- 1. Navigate to the "Consoles" tab.
- 2. Add a new "Custom console," name it "Poloniexlendingbot" and set the path to "python /home/<username>/poloniexlendingbot/lendingbot.py"
- 3. Click this link whenever you want to start the bot, it will run continuously until the website goes down for maintenance or the bot experiences an unexpected error.
- 
- To have the bot restart itself every 24 hours, you need to have a `premium pythonanywhere account <https://www.pythonanywhere.com/pricing/>`_. This will make the bot more or less invincible to crashes and resets, but is not necessary.
- 
- 1. Navigate to the "Schedule" tab.
- 2. Create a new task to run daily (time does not matter) set the path to: ``python /home/<username>/poloniexlendingbot/lendingbot.py`` 
- 3. The bot will start once the time comes (UTC) and run indefinitely.
+To have the bot restart itself every 24 hours, you need to have a `premium pythonanywhere account <https://www.pythonanywhere.com/pricing/>`_. This will make the bot more or less invincible to crashes and resets, but is not necessary.
+
+    #. Navigate to the "Schedule" tab.
+    #. Create a new task to run daily (time does not matter) set the path to: ``python /home/<username>/poloniexlendingbot/lendingbot.py``
+    #. The bot will start once the time comes (UTC) and run indefinitely.
   
- .. note:: If you are a free user, it will allow you to make the scheduled restart, but then it will only run for one hour and stop for 23.
+.. note:: If you are a free user, it will allow you to make the scheduled restart, but then it will only run for one hour and stop for 23.
  

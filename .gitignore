@@ -6,3 +6,5 @@ nohup.out
 error.log
 *.idea
 *.csv
+
+docs/_build/
