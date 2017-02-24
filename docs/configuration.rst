@@ -312,3 +312,49 @@ You can pass options to statistics page by adding them to URL. Eg, ``http://loca
 ``earningsInOutputCurrency`` define which earnings are show in output currency
 - Allowed values: ``all``, ``summary``
 - Default value: ``all``
+
+
+Notifications
+-------------
+The bot supports sending notifications for serveral different events on several different platforms. To enable notifications, you must first have a section in your config called ``[notifications]``, inside which you should enable at least one of the following events and also at least one notification platfom. The list of events you can notify about are:
+
+notify_tx_coins
+    This will send a notification if any coins are transferred from your exchange account, to your lending account. You must have ``transferableCurrencies`` enabled for this to work.  Then you should set ``notify_tx_coins = True``.
+
+notify_xday_threshold
+    This will send a notification every time a loan is created that is above your ``xdaythreshold`` config value. To enable you should set ``notify_xday_threshold = True``.
+
+notify_summary_minutes
+    This will send a summary of the current loans you have every X minutes. This is similar to the information you get in the log line when running the bot, or the line a the top of the web page. To enable this add ``notify_summary_minutes = 120``. This will send you a notification every 2 hours (120 minutes)
+
+notify_caught_exception
+    This is more useful for developers and people wanting to help out by raising issues on github. This will send a notification every time there is an exception thrown in the bot that we don't handle. To enable add ``notify_caught_exception = True``.
+
+Once you have decided which notifications you want to recive, you can then go about configuring platforms to send them on. Currently the bot supports:
+
+email
+    This is probably the easiest to configure, though there can still be issues with gmail where you need to enable a few things. You can find out more about that `here <https://support.google.com/mail/answer/7126229?visit_id=1-636225201534132377-750209621&rd=2#cantsignin>`_ if you're having problems. If you don't wish to use gmail search google for the smtp settings of your email provider.
+    To enable email you should configure the following::
+
+        email = True
+        email_login_address = me@gmail.com
+        email_login_password = secretPassword
+        email_smtp_server = smtp.gmail.com
+        email_smtp_port = 465
+        email_to_addresses = me@gmail.com,you@gmail.com
+
+slack
+    Before you can post to slack you need to create an API token, to do this visit `this page <https://api.slack.com/docs/oauth-test-tokens>`_. Once you have a token you can then configure the bot as so::
+
+        slack = True
+        slack_token = xoxp-46351793751-46348393136-47931965411-a8757952e4
+        slack_channels = #cryptocurrency,@someUser
+
+    To post in a channel prefix with # and to post a dm to a user prefix with @. You can send to as many channels or users as you want.
+
+telegram
+    To have telegram notifications you need to get a bot id from the BotFather. You can do that `here <https://core.telegram.org/bots>`_. Once you have a bot id you need to create a channel for the bot to post to. Then invite the bot to that channel so it can chat there. Once you have all this in place you configure it like so::
+
+        telegram = True
+        telegram_bot_id = 281421543:AGGB1TqP7XqhxhT7VOty0Aml8DV_R6kimHw
+        telegram_chat_ids = @polo,@cryptocurrency

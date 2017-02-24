@@ -125,3 +125,34 @@ def get_currencies_list(option):
         return list(set(cur_list))
     else:
         return []
+
+
+def get_notification_config():
+    notify_conf = {}
+    notify_conf['enable_notifications'] = config.has_section('notifications')
+    if not notify_conf['enable_notifications']:
+        return notify_conf
+
+    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_summary_minutes']:
+        notify_conf[conf] = get('notifications', conf)
+
+    notify_conf['email'] = True if get('notifications', 'email') == 'True' else False
+    if notify_conf['email']:
+        for conf in ['email_login_address', 'email_login_password', 'email_smtp_server', 'email_smtp_port',
+                     'email_to_addresses']:
+            notify_conf[conf] = get('notifications', conf)
+        notify_conf['email_to_addresses'] = notify_conf['email_to_addresses'].split(',')
+
+    notify_conf['slack'] = True if get('notifications', 'slack') == 'True' else False
+    if notify_conf['slack']:
+        for conf in ['slack_token', 'slack_channels']:
+            notify_conf[conf] = get('notifications', conf)
+        notify_conf['slack_channels'] = notify_conf['slack_channels'].split(',')
+
+    notify_conf['telegram'] = True if get('notifications', 'telegram') == 'True' else False
+    if notify_conf['telegram']:
+        for conf in ['telegram_bot_id', 'telegram_chat_ids']:
+            notify_conf[conf] = get('notifications', conf)
+        notify_conf['telegram_chat_ids'] = notify_conf['telegram_chat_ids'].split(',')
+
+    return notify_conf

@@ -1,5 +1,8 @@
 # coding=utf-8
 from decimal import Decimal
+import sched
+import time
+import threading
 Config = None
 api = None
 log = None
@@ -29,24 +32,26 @@ keep_stuck_orders = True
 hide_coins = True
 coin_cfg_alerted = {}
 max_active_alerted = {}
+notify_conf = {}
 
 # limit of orders to request
 loanOrdersRequestLimit = {}
 defaultLoanOrdersRequestLimit = 100
 
 
-def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis):
-    global Config, api, log, Data, MaxToLend, Analysis
+def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
+    global Config, api, log, Data, MaxToLend, Analysis, notify_conf
     Config = cfg
     api = api1
     log = log1
     Data = data
     MaxToLend = maxtolend
     Analysis = analysis
+    notify_conf = notify_conf1
 
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom, gap_top, xday_threshold, xdays, min_loan_size, end_date, coin_cfg, min_loan_sizes, dry_run, \
-        transferable_currencies, keep_stuck_orders, hide_coins
+        transferable_currencies, keep_stuck_orders, hide_coins, scheduler
 
     sleep_time_active = float(Config.get("BOT", "sleeptimeactive", None, 1, 3600))
     sleep_time_inactive = float(Config.get("BOT", "sleeptimeinactive", None, 1, 3600))
@@ -68,6 +73,12 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis):
 
     sleep_time = sleep_time_active  # Start with active mode
 
+    scheduler = sched.scheduler(time.time, time.sleep)
+    # Wait 10 seconds before firing the first summary notifcation, then use the config time value for future updates
+    scheduler.enter(10, 1, notify_summary, (int(notify_conf['notify_summary_minutes']) * 60, ))
+    t = threading.Thread(target=scheduler.run)
+    t.start()
+
 
 def get_sleep_time():
     return sleep_time
@@ -79,6 +90,11 @@ def set_sleep_time(usable):
         sleep_time = sleep_time_inactive
     else:  # Else, use active sleep time.
         sleep_time = sleep_time_active
+
+
+def notify_summary(sleep_time):
+    log.notify(Data.stringify_total_lended(*Data.get_total_lended()), notify_conf)
+    scheduler.enter(sleep_time, 1, notify_summary, (sleep_time, ))
 
 
 def get_min_loan_size(currency):
@@ -111,6 +127,9 @@ def create_lend_offer(currency, amt, rate):
                 days = str(days_remaining)
         if not dry_run:
             msg = api.create_loan_offer(currency, amt, days, 0, rate)
+            if days == xdays:
+                text = "{0} {1} loan placed for {2} days at a rate of {3:.4f}%".format(amt, currency, days, rate * 100)
+                log.notify(text, notify_conf)
             log.offer(amt, currency, rate, days, msg)
 
 
@@ -322,5 +341,6 @@ def transfer_balances():
                     exchange_balances[coin]) > 0:
                 msg = api.transfer_balance(coin, exchange_balances[coin], 'exchange', 'lending')
                 log.log(log.digestApiMsg(msg))
+                log.notify(log.digestApiMsg(msg), notify_conf)
             if coin not in exchange_balances:
                 print "ERROR: Incorrect coin entered for transferCurrencies: " + coin

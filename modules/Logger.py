@@ -8,6 +8,7 @@ import time
 
 import ConsoleUtils
 from RingBuffer import RingBuffer
+from Notify import send_notification
 
 
 class ConsoleOutput(object):
@@ -142,3 +143,8 @@ class Logger(object):
         except KeyError:
             pass
         return m
+
+    @staticmethod
+    def notify(msg, notify_conf):
+        if notify_conf['enable_notifications']:
+            send_notification(msg, notify_conf)

@@ -41,18 +41,18 @@ output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
 end_date = Config.get('BOT', 'endDate')
 json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
 
-
 log = Logger(Config.get('BOT', 'jsonfile', ''), Decimal(Config.get('BOT', 'jsonlogsize', -1)))
 api = Poloniex(Config.get("API", "apikey", None), Config.get("API", "secret", None))
 MaxToLend.init(Config, log)
 Data.init(api, log)
 Config.init(config_location, Data)
+notify_conf = Config.get_notification_config()
 if Config.has_option('BOT', 'analyseCurrencies'):
     import modules.MarketAnalysis as Analysis
     Analysis.init(Config, api, Data)
 else:
     Analysis = None
-Lending.init(Config, api, log, Data, MaxToLend, dry_run, Analysis)
+Lending.init(Config, api, log, Data, MaxToLend, dry_run, Analysis, notify_conf)
 
 
 print 'Welcome to Poloniex Lending Bot'
@@ -100,9 +100,11 @@ try:
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
+                log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
             pass
+
 except KeyboardInterrupt:
     if web_server_enabled:
         WebServer.stop_web_server()

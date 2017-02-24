@@ -125,3 +125,24 @@ hideCoins = True
 #maxtolend = 0
 #maxpercenttolend = 0
 #maxtolendrate = 0
+
+[notifications]
+notify_tx_coins = False
+notify_xday_threshold = False
+notify_summary_minutes = False
+notify_caught_exception = False
+
+email = False
+email_login_address = me@gmail.com
+email_login_password = secretPassword
+email_smtp_server = smtp.gmail.com
+email_smtp_port = 465
+email_to_addresses = me@gmail.com,you@gmail.com
+
+slack = False
+slack_token = 1234567890abcdef
+slack_channels = #cryptocurrency,@someUser
+
+telegram = False
+telegram_bot_id = 1234567890abcdef
+telegram_chat_ids = @polopolo,@cryptocurrency
