@@ -67,6 +67,7 @@ try:
     while True:
         try:
             Data.update_conversion_rates(output_currency, json_output_enabled)
+            Data.update_total_account_balance()
             Lending.transfer_balances()
             Lending.cancel_all()
             Lending.lend_all()

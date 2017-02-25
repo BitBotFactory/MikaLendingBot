@@ -132,6 +132,15 @@ def get_lending_currencies():
     return currencies
 
 
+def update_total_account_balance():
+    balance_response = api.return_complete_balances('all')
+    balance = 0
+    for cur in balance_response:
+        balance += float(balance_response[cur]['btcValue'])
+    # added to BTC as value is BTC
+    log.updateStatusValue('BTC', 'total_account_balance', balance)
+
+
 def truncate(f, n):
     """Truncates/pads a float f to n decimal places without rounding"""
     # From https://stackoverflow.com/questions/783897/truncating-floats-in-python
