@@ -69,6 +69,7 @@ function updateRawValues(rawData){
     table.innerHTML = "";
     var currencies = Object.keys(rawData);
     var totalBTCEarnings = {};
+    var totalAccountValueBTC = NaN;
     for (var keyIndex = 0; keyIndex < currencies.length; ++keyIndex)
     {
         var currency = currencies[keyIndex];
@@ -82,6 +83,7 @@ function updateRawValues(rawData){
             // no bids for BTC provided by poloniex
             // this is added so BTC can be handled like other coins for conversions
             highestBidBTC = 1;
+            totalAccountValueBTC = parseFloat(rawData[currency]['total_account_balance']);
         }
         var couple = rawData[currency]['couple'];
 
@@ -187,19 +189,34 @@ function updateRawValues(rawData){
     var thead = table.createTHead();
 
     // show account summary
-    if (currencies.length > 1 || summaryCoin != earningsOutputCoin) {
-        earnings = '';
-        timespans.forEach(function(timespan) {
-            earnings += timespan.formatEarnings( summaryCoin, totalBTCEarnings[timespan.name] * summaryCoinRate);
-        });
+    earnings = '';
+    timespans.forEach(function(timespan) {
+        earnings += timespan.formatEarnings( summaryCoin, totalBTCEarnings[timespan.name] * summaryCoinRate);
+    });
+    var row = thead.insertRow(0);
+    var cell = row.appendChild(document.createElement("th"));
+    cell.innerHTML = "Account<br/>Estimated<br/>Earnings";
+    cell.style.verticalAlign = "text-top";
+    cell = row.appendChild(document.createElement("th"));
+    cell.style.verticalAlign = "text-top";
+    cell.setAttribute("colspan", 2);
+    cell.innerHTML = earnings;
+
+    if( !isNaN(totalAccountValueBTC)) {
+        // show account total balance
         var row = thead.insertRow(0);
         var cell = row.appendChild(document.createElement("th"));
-        cell.innerHTML = "Account<br/>Estimated<br/>Earnings";
+        cell.innerHTML = "Account Balance";
         cell.style.verticalAlign = "text-top";
         cell = row.appendChild(document.createElement("th"));
+        cell.style.verticalAlign = "text-top";
         cell.setAttribute("colspan", 2);
-        cell.innerHTML = earnings;
+        cell.innerHTML =  "<div class='inlinediv' style='padding-left:0px'>"+ prettyFloat(displayUnit.multiplier * totalAccountValueBTC, 2) + " " + displayUnit.name + "</div>"
+        if(summaryCoin != 'BTC') {
+            cell.innerHTML +=  "<div class='inlinediv' style='padding-right:0px'>"+ prettyFloat(summaryCoinRate * totalAccountValueBTC, 2) + " " + summaryCoin + "</div>"
+        }
     }
+
 }
 
 function handleLocalFile(file) {
