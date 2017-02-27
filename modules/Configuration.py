@@ -128,28 +128,28 @@ def get_currencies_list(option):
 
 
 def get_notification_config():
-    notify_conf = {}
-    notify_conf['enable_notifications'] = config.has_section('notifications')
+    notify_conf = {'enable_notifications': config.has_section('notifications')}
     if not notify_conf['enable_notifications']:
         return notify_conf
 
-    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_summary_minutes']:
-        notify_conf[conf] = get('notifications', conf)
+    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'email', 'slack', 'telegram']:
+        notify_conf[conf] = getboolean('notifications', conf)
 
-    notify_conf['email'] = True if get('notifications', 'email') == 'True' else False
+    # in order not to break current config, parsing for False
+    notify_summary_minutes = get('notifications', 'notify_summary_minutes')
+    notify_conf['notify_summary_minutes'] = 0 if notify_summary_minutes == 'False' else int(notify_summary_minutes)
+
     if notify_conf['email']:
         for conf in ['email_login_address', 'email_login_password', 'email_smtp_server', 'email_smtp_port',
                      'email_to_addresses']:
             notify_conf[conf] = get('notifications', conf)
         notify_conf['email_to_addresses'] = notify_conf['email_to_addresses'].split(',')
 
-    notify_conf['slack'] = True if get('notifications', 'slack') == 'True' else False
     if notify_conf['slack']:
         for conf in ['slack_token', 'slack_channels']:
             notify_conf[conf] = get('notifications', conf)
         notify_conf['slack_channels'] = notify_conf['slack_channels'].split(',')
 
-    notify_conf['telegram'] = True if get('notifications', 'telegram') == 'True' else False
     if notify_conf['telegram']:
         for conf in ['telegram_bot_id', 'telegram_chat_ids']:
             notify_conf[conf] = get('notifications', conf)

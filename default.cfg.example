@@ -129,7 +129,7 @@ hideCoins = True
 [notifications]
 notify_tx_coins = False
 notify_xday_threshold = False
-notify_summary_minutes = False
+notify_summary_minutes = 0
 notify_caught_exception = False
 
 email = False
