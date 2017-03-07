@@ -50,8 +50,12 @@ def init(config, api1, data1):
 
 def update_market_loop():
     while True:
-        update_markets()
-        delete_old_data()
+        try:
+            update_markets()
+            delete_old_data()
+        except Exception as ex:
+            ex.message = ex.message if ex.message else str(ex)
+            print("Error in MarketAnalysis: {0}".format(ex.message))
         time.sleep(update_interval)
 
 
