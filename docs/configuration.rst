@@ -321,6 +321,9 @@ Notifications
 -------------
 The bot supports sending notifications for serveral different events on several different platforms. To enable notifications, you must first have a section in your config called ``[notifications]``, inside which you should enable at least one of the following events and also at least one notification platfom. The list of events you can notify about are:
 
+Notification events
+~~~~~~~~~~~~~~~~~~~
+
 - ``notify_tx_coins``
 
     - This will send a notification if any coins are transferred from your exchange account, to your lending account. You must have ``transferableCurrencies`` enabled for this to work.  Then you should set ``notify_tx_coins = True``.
@@ -339,32 +342,58 @@ The bot supports sending notifications for serveral different events on several 
 
 Once you have decided which notifications you want to recive, you can then go about configuring platforms to send them on. Currently the bot supports:
 
-- ``email``
+Email notifications
+~~~~~~~~~~~~~~~~~~~
 
-    - This is probably the easiest to configure, though there can still be issues with gmail where you need to enable a few things. You can find out more about that `here <https://support.google.com/mail/answer/7126229?visit_id=1-636225201534132377-750209621&rd=2#cantsignin>`_ if you're having problems. If you don't wish to use gmail search google for the smtp settings of your email provider.
-    - To enable email you should configure the following::
+This is probably the easiest to configure, though there can still be issues with gmail where you need to enable a few things. You can find out more about that `here <https://support.google.com/mail/answer/7126229?visit_id=1-636225201534132377-750209621&rd=2#cantsignin>`_ if you're having problems. If you don't wish to use gmail search google for the smtp settings of your email provider.
+To enable email you should configure the following::
 
-        email = True
-        email_login_address = me@gmail.com
-        email_login_password = secretPassword
-        email_smtp_server = smtp.gmail.com
-        email_smtp_port = 465
-        email_to_addresses = me@gmail.com,you@gmail.com
+    email = True
+    email_login_address = me@gmail.com
+    email_login_password = secretPassword
+    email_smtp_server = smtp.gmail.com
+    email_smtp_port = 465
+    email_to_addresses = me@gmail.com,you@gmail.com
 
-- ``slack``
+Slack notifications
+~~~~~~~~~~~~~~~~~~~
 
-    - Before you can post to slack you need to create an API token, to do this visit `this page <https://api.slack.com/docs/oauth-test-tokens>`_. Once you have a token you can then configure the bot as so::
+Before you can post to slack you need to create an API token, to do this visit `this page <https://api.slack.com/docs/oauth-test-tokens>`_. Once you have a token you can then configure the bot as so::
 
-        slack = True
-        slack_token = xoxp-46351793751-46348393136-47931965411-a8757952e4
-        slack_channels = #cryptocurrency,@someUser
+    slack = True
+    slack_token = xoxp-46351793751-46348393136-47931965411-a8757952e4
+    slack_channels = #cryptocurrency,@someUser
 
-    - To post in a channel prefix with # and to post a dm to a user prefix with @. You can send to as many channels or users as you want.
+To post in a channel prefix with # and to post a dm to a user prefix with @. You can send to as many channels or users as you want.
 
-- ``telegram``
+Telegram notifications
+~~~~~~~~~~~~~~~~~~~~~~
 
-    - To have telegram notifications you need to get a bot id from the BotFather. You can do that `here <https://core.telegram.org/bots>`_. Once you have a bot id you need to create a channel for the bot to post to. Then invite the bot to that channel so it can chat there. Once you have all this in place you configure it like so::
+Quickstart
+  To have telegram notifications you need to get a bot id from the BotFather. You can do that `here <https://core.telegram.org/bots>`_.
+  Once you have a bot id you need to get your Chat ID or create a channel and invite the bot so it can chat there. Once you have all this in place you configure it like so::
 
-        telegram = True
-        telegram_bot_id = 281421543:AGGB1TqP7XqhxhT7VOty0Aml8DV_R6kimHw
-        telegram_chat_ids = @polo,@cryptocurrency
+    telegram = True
+    telegram_bot_id = 281421543:AGGB1TqP7XqhxhT7VOty0Aml8DV_R6kimHw
+    telegram_chat_ids = 123456789,@cryptocurrency
+
+Detailed
+  Messages are sent to the telegram bot API using HTTPS requests. You can read more about it `here <https://core.telegram.org/bots/api>`_.
+
+  Telegram Bots are special accounts that do not require an additional phone number to set up, they do however need a unique authentication token. This is the token we need to get and add to the lendingbot's default.cfg. They are normally in the format ``123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11``.
+  
+  When we say we are creating a new telegram bot, all it means is that we are creating an account for the lendingbot to send message through. To create a bot and get a token, we must request it from the BotFather. This is telegram's tool for creating new bots. 
+  
+  These are the steps to carry out:
+    1. Install the telegram desktop client from `their site <https://telegram.org/apps>`_. Then set it up with your phone number and login.
+    2. Start a conversation with `The BotFather <https://telegram.me/botfather>`_. When you click the link it should open up in the telegram desktop client.
+    3. Once you have a conversation started type ``/newbot``, you'll then be asked what to call the bot and it's username. The name of your bot is displayed in contact details and elsewhere. The Username is a short name, to be used in mentions and telegram.me links. When complete you'll receive a token.
+    4. You can check everything is working OK by going to https://api.telegram.org/bot*YOURTOKEN*/getme, for example my test one is https://api.telegram.org/bot288427377:AAGB1TqL7XqhxhT7VOxu8Ams8DV_J6kimHw/getme. If that's all working then move on to the next step.
+    5. Now we need somewhere to send the messages, if you want to send a message to yourself, you first need your Chat ID. The easiest way I've found to get this is to send the bot a message from your desktop client and then use the getupdates method. So search for the bot in the desktop client's search bar and start a conversation. Then in your browser go to https://api.telegram.org/bot*YOURTOKEN*/getupdates. You should see a few lines of text, the one we're interested in looks like ``"chat":{"id":123456789,"first_name":"Michael","last_name":"Robinson","type":"private"}``. The number after ID is your chat ID.
+    6. Again, just to check everything is working, lets send ourselves a message. You can do this by putting this in your browser https://api.telegram.org/bot*YOURTOKEN*/sendmessage?text=TEST%20BOT&chat_id=*YOUR_CHAT_ID* You should see a message in your desktop client. If so you have the right ID and we can move on.
+    7. The last step to get it working is just adding the two values to your default.cfg file and turning on ``telegram = True``. You should set ``telegram_bot_id`` to the token you got from the BotFather, and set the ``telegram_chat_ids`` to a comma separated list of people you want to send messages to.
+    8. (optional) If you'd like a specific channel for the bot to send messages you can follow these steps.
+        a. Open the desktop client and create a new channel
+        b. Start a conversation with the BotFather and type /setjoingroups, then follow the questsions he asks.
+        c. Click on the message we sent earlier from the bot, then click on the bot's name in the conversation. You should see 'Add To Group'. Click this and add it to the new group you created.
+        d. Now you should be able to add the ``@nameOfChannel`` to your ``default.cfg`` file and post all the updates there too. Make sure the list is comma separated and you have the '@' infront of the channel name. This is only done for names, not Chat IDs.
