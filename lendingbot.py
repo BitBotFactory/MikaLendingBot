@@ -97,6 +97,9 @@ try:
                 print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
             elif isinstance(ex, BadStatusLine):
                 print "Caught BadStatusLine exception from Poloniex, ignoring."
+            # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
+            elif 'HTTP Error 5' in ex.message:
+                print "Caught {0} from Poloniex, ignoring.".format(ex.message)
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
