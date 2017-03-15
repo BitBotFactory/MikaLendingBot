@@ -5,11 +5,12 @@ import sys
 import time
 import traceback
 from httplib import BadStatusLine
+from urllib2 import URLError
 
 from decimal import Decimal
 
 from modules.Logger import Logger
-from modules.Poloniex import Poloniex
+from modules.Poloniex import Poloniex, PoloniexApiError
 import modules.Configuration as Config
 import modules.MaxToLend as MaxToLend
 import modules.Data as Data
@@ -98,8 +99,10 @@ try:
             elif isinstance(ex, BadStatusLine):
                 print "Caught BadStatusLine exception from Poloniex, ignoring."
             # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
-            elif 'HTTP Error 5' in ex.message:
+            elif isinstance(ex, URLError):
                 print "Caught {0} from Poloniex, ignoring.".format(ex.message)
+            elif isinstance(ex, PoloniexApiError):
+                print "Caught {0} reading from Poloniex API, ignoring.".format(ex.message)
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
