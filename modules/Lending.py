@@ -171,9 +171,9 @@ def lend_all():
         lending_balances = Data.get_on_order_balances()
 
     # Fill the (maxToLend) balances on the botlog.json for display it on the web
-    for key in sorted(total_lended):
-        if len(lending_balances) == 0 or key not in lending_balances:
-            MaxToLend.amount_to_lend(total_lended[key], key, 0, 0)
+    for cur in sorted(total_lended):
+        if len(lending_balances) == 0 or cur not in lending_balances:
+            MaxToLend.amount_to_lend(total_lended[cur], cur, 0, 0)
     usable_currencies = 0
     global sleep_time  # We need global var to edit sleeptime
     try:

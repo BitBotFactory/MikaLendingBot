@@ -49,11 +49,13 @@ Data.init(api, log)
 Config.init(config_location, Data)
 notify_conf = Config.get_notification_config()
 if Config.has_option('BOT', 'analyseCurrencies'):
-    import modules.MarketAnalysis as Analysis
-    Analysis.init(Config, api, Data)
+    from modules.MarketAnalysis import MarketAnalysis
+    # Analysis.init(Config, api, Data)
+    analysis = MarketAnalysis(Config, api)
+    analysis.run()
 else:
-    Analysis = None
-Lending.init(Config, api, log, Data, MaxToLend, dry_run, Analysis, notify_conf)
+    analysis = None
+Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 
 
 print 'Welcome to Poloniex Lending Bot'
@@ -71,8 +73,8 @@ try:
             Lending.transfer_balances()
             Lending.cancel_all()
             Lending.lend_all()
-            log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()), Data.get_max_duration(
-                end_date, "status"))
+            log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()),
+                              Data.get_max_duration(end_date, "status"))
             log.persistStatus()
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
