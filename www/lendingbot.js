@@ -234,7 +234,7 @@ function Timespan(name, multiplier) {
     this.name = name;
     this.multiplier = multiplier;
     this.calcEarnings = function(sum, rate) {
-        return sum * rate * this.multiplier;
+        return sum * Math.pow(1 + rate, multiplier) - sum;
     };
     this.formatEarnings = function(currency, earnings, minimize_currency_xs) {
         if (currency == "BTC" && this == Hour) {
