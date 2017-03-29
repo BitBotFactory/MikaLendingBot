@@ -1,4 +1,5 @@
 # coding=utf-8
+import threading
 
 server = None
 web_server_ip = "0.0.0.0"
@@ -68,7 +69,7 @@ def start_web_server():
 def stop_web_server():
     try:
         print "Stopping WebServer"
-        server.shutdown()
+        threading.Thread(target = server.shutdown).start()
     except Exception as ex:
         ex.message = ex.message if ex.message else str(ex)
         print("Failed to stop WebServer: {0}".format(ex.message))

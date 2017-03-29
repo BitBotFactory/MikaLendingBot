@@ -1,4 +1,4 @@
-#Poloniex lending bot <img src="https://nevet.me/public/icon.png" width="50">
+# Poloniex lending bot <img src="https://nevet.me/public/icon.png" width="50">
 
 The Poloniex lending bot is written in Python and features automatic lending on the exchange Poloniex.
 It will automatically lend all cryptocurrencies found in your lending account.
@@ -11,7 +11,7 @@ Workflow management with Waffle.io
 
 [![Throughput Graph](https://graphs.waffle.io/Mikadily/poloniexlendingbot/throughput.svg)](https://waffle.io/Mikadily/poloniexlendingbot/)
 
-##Documentation
+## Documentation
 [Click here to read the Documentation, hosted by readthedocs.io](http://poloniexlendingbot.readthedocs.io/en/latest/index.html)
 
 
@@ -30,7 +30,7 @@ Workflow management with Waffle.io
 - And the best feature of all: It is absolutely free!
 
 
-##Donations
+## Donations
 
 If you find it useful, please consider donating some bitcoins: 37VoSLbiqVWGDA5Y8rmo5XaQxPo551gBY8
 

@@ -5,11 +5,12 @@ import sys
 import time
 import traceback
 from httplib import BadStatusLine
+from urllib2 import URLError
 
 from decimal import Decimal
 
 from modules.Logger import Logger
-from modules.Poloniex import Poloniex
+from modules.Poloniex import Poloniex, PoloniexApiError
 import modules.Configuration as Config
 import modules.MaxToLend as MaxToLend
 import modules.Data as Data
@@ -48,11 +49,13 @@ Data.init(api, log)
 Config.init(config_location, Data)
 notify_conf = Config.get_notification_config()
 if Config.has_option('BOT', 'analyseCurrencies'):
-    import modules.MarketAnalysis as Analysis
-    Analysis.init(Config, api, Data)
+    from modules.MarketAnalysis import MarketAnalysis
+    # Analysis.init(Config, api, Data)
+    analysis = MarketAnalysis(Config, api)
+    analysis.run()
 else:
-    Analysis = None
-Lending.init(Config, api, log, Data, MaxToLend, dry_run, Analysis, notify_conf)
+    analysis = None
+Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 
 
 print 'Welcome to Poloniex Lending Bot'
@@ -70,8 +73,8 @@ try:
             Lending.transfer_balances()
             Lending.cancel_all()
             Lending.lend_all()
-            log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()), Data.get_max_duration(
-                end_date, "status"))
+            log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()),
+                              Data.get_max_duration(end_date, "status"))
             log.persistStatus()
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
@@ -98,8 +101,10 @@ try:
             elif isinstance(ex, BadStatusLine):
                 print "Caught BadStatusLine exception from Poloniex, ignoring."
             # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
-            elif 'HTTP Error 5' in ex.message:
+            elif isinstance(ex, URLError):
                 print "Caught {0} from Poloniex, ignoring.".format(ex.message)
+            elif isinstance(ex, PoloniexApiError):
+                print "Caught {0} reading from Poloniex API, ignoring.".format(ex.message)
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
