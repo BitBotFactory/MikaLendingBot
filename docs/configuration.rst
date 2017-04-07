@@ -324,6 +324,10 @@ The bot supports sending notifications for serveral different events on several 
 Notification events
 ~~~~~~~~~~~~~~~~~~~
 
+- ``notify_new_loans``
+
+    - Sends a notification each time a loan offer is filled.
+
 - ``notify_tx_coins``
 
     - This will send a notification if any coins are transferred from your exchange account, to your lending account. You must have ``transferableCurrencies`` enabled for this to work.  Then you should set ``notify_tx_coins = True``.

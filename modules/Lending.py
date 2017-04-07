@@ -3,6 +3,7 @@ from decimal import Decimal
 import sched
 import time
 import threading
+import urllib2
 Config = None
 api = None
 log = None
@@ -33,6 +34,7 @@ hide_coins = True
 coin_cfg_alerted = {}
 max_active_alerted = {}
 notify_conf = {}
+loans_provided = {}
 
 # limit of orders to request
 loanOrdersRequestLimit = {}
@@ -73,10 +75,14 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
 
     sleep_time = sleep_time_active  # Start with active mode
 
-    if notify_conf['enable_notifications'] and notify_conf['notify_summary_minutes']:
-        scheduler = sched.scheduler(time.time, time.sleep)
+    # create the scheduler thread
+    scheduler = sched.scheduler(time.time, time.sleep)
+    if notify_conf['notify_summary_minutes']:
         # Wait 10 seconds before firing the first summary notifcation, then use the config time value for future updates
         scheduler.enter(10, 1, notify_summary, (notify_conf['notify_summary_minutes'] * 60, ))
+    if notify_conf['notify_new_loans']:
+        scheduler.enter(20, 1, notify_new_loans, (60, ))
+    if not scheduler.empty():
         t = threading.Thread(target=scheduler.run)
         t.start()
 
@@ -94,8 +100,39 @@ def set_sleep_time(usable):
 
 
 def notify_summary(sleep_time):
-    log.notify(Data.stringify_total_lended(*Data.get_total_lended()), notify_conf)
+    try:
+        log.notify(Data.stringify_total_lended(*Data.get_total_lended()), notify_conf)
+    except Exception as ex:
+        ex.message = ex.message if ex.message else str(ex)
+        print("Error during summary notification: {0}".format(ex.message))
     scheduler.enter(sleep_time, 1, notify_summary, (sleep_time, ))
+
+
+def notify_new_loans(sleep_time):
+    global loans_provided
+    try:
+        new_provided = api.return_active_loans()['provided']
+        if loans_provided:
+            get_id_set = lambda loans: set([x['id'] for x in loans]) # lambda to return a set of ids from the api result
+            loans_amount = {}
+            loans_info = {}
+            for loan_id in get_id_set(new_provided) - get_id_set(loans_provided):
+                loan = [x for x in new_provided if x['id'] == loan_id][0]
+                # combine loans with the same rate
+                k = 'c'+loan['currency']+'r'+loan['rate']+'d'+str(loan['duration'])
+                loans_amount[k] = float(loan['amount']) + loans_amount[k] if k in loans_amount else 0
+                loans_info[k] = loan
+            # send notifications with the grouped info
+            for k, amount in loans_amount.iteritems():
+                loan = loans_info[k]
+                t = "{0} {1} loan filled for {2} days at a rate of {3:.4f}%"
+                text = t.format(amount, loan['currency'], loan['duration'], float(loan['rate']) * 100)
+                log.notify(text, notify_conf)
+        loans_provided = new_provided
+    except Exception as ex:
+        ex.message = ex.message if ex.message else str(ex)
+        print("Error during new loans notification: {0}".format(ex.message))
+    scheduler.enter(sleep_time, 1, notify_new_loans, (sleep_time, ))
 
 
 def get_min_loan_size(currency):
@@ -128,7 +165,7 @@ def create_lend_offer(currency, amt, rate):
                 days = str(days_remaining)
         if not dry_run:
             msg = api.create_loan_offer(currency, amt, days, 0, rate)
-            if days == xdays:
+            if days == xdays and notify_conf['notify_xday_threshold']:
                 text = "{0} {1} loan placed for {2} days at a rate of {3:.4f}%".format(amt, currency, days, rate * 100)
                 log.notify(text, notify_conf)
             log.offer(amt, currency, rate, days, msg)

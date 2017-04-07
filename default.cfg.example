@@ -127,6 +127,7 @@ hideCoins = True
 #maxtolendrate = 0
 
 [notifications]
+notify_new_loans = False
 notify_tx_coins = False
 notify_xday_threshold = False
 notify_summary_minutes = 0
