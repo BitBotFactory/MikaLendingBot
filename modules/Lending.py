@@ -3,7 +3,6 @@ from decimal import Decimal
 import sched
 import time
 import threading
-import urllib2
 Config = None
 api = None
 log = None
@@ -120,7 +119,7 @@ def notify_new_loans(sleep_time):
                 loan = [x for x in new_provided if x['id'] == loan_id][0]
                 # combine loans with the same rate
                 k = 'c'+loan['currency']+'r'+loan['rate']+'d'+str(loan['duration'])
-                loans_amount[k] = float(loan['amount']) + loans_amount[k] if k in loans_amount else 0
+                loans_amount[k] = float(loan['amount']) + (loans_amount[k] if k in loans_amount else 0)
                 loans_info[k] = loan
             # send notifications with the grouped info
             for k, amount in loans_amount.iteritems():
