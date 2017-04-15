@@ -6,6 +6,7 @@ import socket
 import time
 import urllib
 import urllib2
+import threading
 from modules.RingBuffer import RingBuffer
 
 
@@ -31,14 +32,27 @@ def post_process(before):
     return after
 
 
+def synchronized(method):
+    """ Work with instance method only !!! """
+
+    def new_method(self, *arg, **kws):
+        with self.lock:
+            return method(self, *arg, **kws)
+
+
+    return new_method
+
+
 class Poloniex:
     def __init__(self, api_key, secret):
         self.APIKey = api_key
         self.Secret = secret
         self.req_per_sec = 6
         self.req_time_log = RingBuffer(self.req_per_sec)
+        self.lock = threading.RLock()
         socket.setdefaulttimeout(30)
 
+    @synchronized
     def limit_request_rate(self):
         now = time.time()
         # start checking only when request time log is full
@@ -50,7 +64,9 @@ class Poloniex:
                 # uncomment to debug
                 # print "Waiting %s sec to keep api request rate" % str(1 - time_since_oldest_req)
                 # print "Req: %d  6th Req: %d  Diff: %f sec" %(now, self.req_time_log[0], time_since_oldest_req)
+                self.req_time_log.append(now + 1 - time_since_oldest_req)
                 time.sleep(1 - time_since_oldest_req)
+                return
             # uncomment to debug
             # else:
             #     print self.req_time_log.get()
@@ -58,6 +74,7 @@ class Poloniex:
         # append current request time to the log, pushing out the 6th request time before it
         self.req_time_log.append(now)
 
+    @synchronized
     def api_query(self, command, req=None):
         # keep the 6 request per sec limit
         self.limit_request_rate()
