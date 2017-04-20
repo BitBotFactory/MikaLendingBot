@@ -256,8 +256,8 @@ def construct_order_book(active_cur):
     return {'rates': rate_book, 'volumes': volume_book}
 
 
-def get_gap_rate(active_cur, gap_pct, order_book, cur_active_bal):
-    gap_expected = gap_pct * cur_active_bal / 100
+def get_gap_rate(active_cur, gap_pct, order_book, cur_total_balance):
+    gap_expected = gap_pct * cur_total_balance / 100
     gap_sum = 0
     i = -1
     while gap_sum < gap_expected:
@@ -281,11 +281,11 @@ def get_cur_spread(spread, cur_active_bal, active_cur):
     return int(cur_spread_lend)
 
 
-def construct_orders(cur, cur_active_bal):
+def construct_orders(cur, cur_active_bal, cur_total_balance):
     cur_spread = get_cur_spread(spread_lend, cur_active_bal, cur)
     order_book = construct_order_book(cur)
-    bottom_rate = get_gap_rate(cur, gap_bottom, order_book, cur_active_bal)
-    top_rate = get_gap_rate(cur, gap_top, order_book, cur_active_bal)
+    bottom_rate = get_gap_rate(cur, gap_bottom, order_book, cur_total_balance)
+    top_rate = get_gap_rate(cur, gap_top, order_book, cur_total_balance)
 
     gap_diff = top_rate - bottom_rate
     if cur_spread == 1:
@@ -338,7 +338,7 @@ def lend_cur(active_cur, total_lended, lending_balances):
     else:
         return 0  # Return early to end function.
 
-    orders = construct_orders(active_cur, active_bal)  # Construct all the potential orders
+    orders = construct_orders(active_cur, active_bal, active_cur_total_balance)  # Construct all the potential orders
     i = 0
     while i < len(orders['amounts']):  # Iterate through prepped orders and create them if they work
         below_min = Decimal(orders['rates'][i]) < Decimal(cur_min_daily_rate)
