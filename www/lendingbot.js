@@ -414,10 +414,21 @@ function update() {
     }
 }
 
+// https://github.com/twbs/bootstrap/issues/14040#issuecomment-253840676
+function bsNavbarBugWorkaround() {
+    var nb = $('nav.navbar-fixed-top');
+    $('.modal').on('show.bs.modal', function () {
+        nb.width(nb.width());
+    }).on('hidden.bs.modal', function () {
+        nb.width(nb.width('auto'));
+    });
+}
+
 $(document).ready(function () {
     toastr.options = {
         "positionClass": "toast-top-center"
     }
 
     update();
+    bsNavbarBugWorkaround();
 });
