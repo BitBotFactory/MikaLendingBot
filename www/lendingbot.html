@@ -60,8 +60,22 @@
             text-decoration: none;
         }
 
-        .modal-body form label {
-            margin-top:8px;
+        form h5 {
+            font-weight: 700;
+        }
+
+        form p,
+        form h5 {
+            margin-bottom: 5px;
+        }
+
+        .nav .glyphicon {
+            color: black;
+        }
+
+        #file,
+        #input-file {
+            display: none;
         }
     </style>
 
@@ -83,17 +97,23 @@
                 <img src="images/icon192.png" height="32" width="32" style="margin-top: 8px;margin-right: 8px;margin-left: -15px;vertical-align:top">
                 <div style="display:inline-block">
                     <h4 class="brand-margin">Poloniex Lending Bot</h4>
-                    <h7 class="brand-margin" id="updated">Not updated</h7>
+                    <h5 class="brand-margin" id="updated">Not updated</h5>
                 </div>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
-                    <li data-toggle="collapse" data-target=".navbar-collapse.in" >
-                        <a data-toggle="modal" data-target="#settings_modal">
-                        <i class="glyphicon glyphicon-cog" style="color: black; cursor: pointer;"></i>
-                        Settings
+                    <li id="file" data-toggle="collapse" data-target=".navbar-collapse.in">
+                        <a href="#" onclick="$('#input-file').trigger('click');">
+                            <i class="glyphicon glyphicon-file"></i>
+                            Select log
+                        </a>
+                    </li>
+                    <li data-toggle="collapse" data-target=".navbar-collapse.in">
+                        <a href="#" data-toggle="modal" data-target="#settings_modal">
+                            <i class="glyphicon glyphicon-cog"></i>
+                            Settings
                         </a>
                     </li>
                 </ul>
@@ -101,9 +121,10 @@
         </div>
     </nav>
 
+    <input type="file" id="input-file" name="file" onchange="handleLocalFile(this.files[0])" />
+
     <div class="container" style="padding-top:50px">
         <div class="row" style="overflow-x:auto">
-            <div id="file" style="margin-top:8px;display:none" >Select log file: <input type="file" name="file" style="display:inline-block" onchange="handleLocalFile(this.files[0])" /></div>
             <table class="table table-responsive">
                 <thead>
                     <tr>
@@ -140,69 +161,65 @@
                 </div>
                 <div class="modal-body">
                     <form>
-                        <label>Page Refresh interval (10-60 seconds)</label>
                         <div class="form-group">
+                            <label for="refresh_interval">Page Refresh interval (10-60 seconds)</label>
                             <input type="number" class="form-control" id="refresh_interval" placeholder="(10-60)">
                         </div>
 
-                        <label>Date ranges to display earnings for</label>
                         <div class="form-group">
-
-                            <div class="checkbox-inline" style="margin-top: 0;">
+                            <h5>Date ranges to display earnings for</h5>
+                            <label class="checkbox-inline">
                                 <input data-timespan="Hour" type="checkbox"> Hourly
-                            </div>
-                            <div class="checkbox-inline">
+                            </label>
+                            <label class="checkbox-inline">
                                 <input data-timespan="Day" type="checkbox"> Daily
-                            </div>
-                            <div class="checkbox-inline">
+                            </label>
+                            <label class="checkbox-inline">
                                 <input data-timespan="Week" type="checkbox"> Weekly
-                            </div>
-                            <div class="checkbox-inline">
+                            </label>
+                            <label class="checkbox-inline">
                                 <input data-timespan="Month" type="checkbox"> Monthly
-                            </div>
-                            <div class="checkbox-inline">
+                            </label>
+                            <label class="checkbox-inline">
                                 <input data-timespan="Year" type="checkbox"> Yearly
-                            </div>
+                            </label>
                         </div>
 
-                        <label>Bitcoin Display Unit</label>
                         <div class="form-group">
-
-                            <div class="radio-inline" style="margin-top: 0;">
+                            <h5>Bitcoin Display Unit</h5>
+                            <label class="radio-inline">
                                 <input value="BTC" type="radio" name="btcDisplayUnit"> BTC
-                            </div>
-                            <div class="radio-inline">
+                            </label>
+                            <label class="radio-inline">
                                 <input value="mBTC" type="radio" name="btcDisplayUnit"> mBTC
-                            </div>
-                            <div class="radio-inline">
+                            </label>
+                            <label class="radio-inline">
                                 <input value="Bits" type="radio" name="btcDisplayUnit"> Bits
-                            </div>
-                            <div class="radio-inline">
+                            </label>
+                            <label class="radio-inline">
                                 <input value="Satoshi" type="radio" name="btcDisplayUnit"> Satoshi
-                            </div>
+                            </label>
                         </div>
 
-                        <label>Which earnings are displayed in selected output currency</label>
                         <div class="form-group">
-
-                            <div class="radio-inline" style="margin-top: 0;">
+                            <h5>Which earnings are displayed in selected output currency</h5>
+                            <label class="radio-inline">
                                 <input value="all" type="radio" name="outputCurrencyDisplayMode"> All Coins
-                            </div>
-                            <div class="radio-inline">
+                            </label>
+                            <label class="radio-inline">
                                 <input value="summary" type="radio" name="outputCurrencyDisplayMode"> Only Summary
-                            </div>
+                            </label>
                         </div>
 
-                        <label>Effective loan rates calculation</label>
-                        <p class="small">Effective rate can either take into consideration the actual amount actively lent OR consider only Poloniex 15% fee</p>
                         <div class="form-group">
-
-                            <div class="radio-inline" style="margin-top: 0;">
+                            <h5>Effective loan rates calculation</h5>
+                            <p class="small">Effective rate can either take into consideration the actual amount actively lent OR consider only Poloniex 15% fee</p>
+                            <label class="radio-inline">
                                 <input value="lentperc" type="radio" name="effRateMode"> Fee and Effective Lent
-                            </div>
-                            <div class="radio-inline">
+                            </label>
+                            <label class="radio-inline">
                                 <input value="onlyfee" type="radio" name="effRateMode"> Fee Only
-                            </div>
+                            </label>
                         </div>
 
                     </form>
