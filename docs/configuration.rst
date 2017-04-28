@@ -34,7 +34,7 @@ HIGHLY Recommended:
 Sleeptime
 ---------
 
-- ``sleeptimeactive`` is how long the bot will "rest" (in seconds) between running while the bot has lends waiting to be filled.
+- ``sleeptimeactive`` is how long the bot will "rest" (in seconds) between running while the bot has loan offers waiting to be filled.
 
     - Default value: 60 seconds
     - Allowed range: 1 to 3600 seconds
@@ -51,11 +51,11 @@ Sleeptime
 Min and Max Rates
 -----------------
 
-- ``mindailyrate`` is the minimum rate (in percent) that the bot will allow lends to open.
+- ``mindailyrate`` is the minimum rate (in percent) that the bot will allow offer loans at.
 
     - Default value: 0.005 percent
     - Allowed range: 0.0031 to 5 percent
-    - It is not worth it to settle at a low rate, 0.0031% every day for a year comes out to about 1%. That is worse than bank interest.
+    - 0.0031% every day for a year, works out around 1%. This is less than most bank accounts and is considered not worth while.
     - The current default value is a optimistic but very viable for the more high volume currencies. Not viable for lending DOGE, for example.
 
 - ``maxdailyrate`` is the maximum rate (in percent) that the bot will allow lends to open.
@@ -69,20 +69,20 @@ Spreading your Lends
 
 If ``spreadlend = 1`` and ``gapbottom = 0``, it will behave as simple lending bot lending at lowest possible offer.
 
-- ``spreadlend`` is the amount (as an integer) of separate lends the bot will split your balance into across the order book.
+- ``spreadlend`` is the amount (as an integer) of separate loans the bot will split your balance into across the order book.
 
     - Default value: 3
     - Allowed range: 1 to 20 (1 is the same as disabling)
-    - The lends are distributed evenly between gapbottom and gaptop.
+    - The loans are distributed evenly between gapbottom and gaptop.
     - This allows the bot to benefit from spikes in lending rate but can result in loan fragmentation (not really a bad thing since the bot has to deal with it.)
 
-- ``gapbottom`` is how far into the lending book (in percent of YOUR balance for the respective coin) the bot will go to start spreading lends.
+- ``gapbottom`` is how far into the lending book (in percent of YOUR total balance for the respective coin) the bot will go, to start spreading loans.
 
     - Default value: 10 percent
     - Allowed range: 0 to <arbitrary large number> percent
     - 10% gapbottom is recommended to skip past dust at the bottom of the lending book, but if you have a VERY high volume this will cause issues as you stray to far away from the most competitive bid.
 
-- ``gaptop`` is how far into the lending book (in percent of YOUR balance for the respective coin) the bot will go to stop spreading lends.
+- ``gaptop`` is how far into the lending book (in percent of YOUR balance for the respective coin) the bot will go to stop spreading loans.
 
     - Default value: 200 percent
     - Allowed range: 0 to <arbitrary large number> percent
@@ -144,6 +144,7 @@ Very few situations require you to change these settings.
     - This hides your coins from appearing in walls.
     - Allows you to catch a higher rate if it spikes past your ``mindailyrate``.
     - Not necessarily recommended if used with ``analyseCurrencies`` with an aggressive ``lendingStyle``, as the bot may miss short-lived rate spikes.
+    - If you are using the ``analyseCurrencies`` option, you will likely see a lot of ``Not lending BTC due to rate below 0.9631%`` type messages in the logs. This is normal.
 
 - ``endDate`` Bot will try to make sure all your loans are done by this date so you can withdraw or do whatever you need.
 

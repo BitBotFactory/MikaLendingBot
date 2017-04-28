@@ -134,4 +134,4 @@ To have the bot restart itself every 24 hours, you need to have a `premium pytho
     #. The bot will start once the time comes (UTC) and run indefinitely.
   
 .. note:: If you are a free user, it will allow you to make the scheduled restart, but then it will only run for one hour and stop for 23.
- 
+.. note:: Free users are also limited to the number of output currencies they can use as blockchain.info is blocked from their servers. You can always use the pairs listed on poloniex, BTC, USDT. But will not have access to currencies such as EUR, GBP.
