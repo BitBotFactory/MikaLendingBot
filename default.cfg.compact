@@ -1,0 +1,76 @@
+# Need help configuring? View the Documentation: https://poloniexlendingbot.readthedocs.io/en/latest/configuration.html
+
+[API]
+apikey = YourAPIKey
+secret = YourSecret
+
+[BOT]
+sleeptimeactive = 60
+sleeptimeinactive = 300
+mindailyrate = 0.005
+maxdailyrate = 5
+spreadlend = 3
+gapbottom = 10
+gaptop = 200
+xdaythreshold = 0.2
+xdays = 60
+#transferableCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+minloansize = 0.01
+keepstuckorders = True
+hideCoins = True
+#endDate = 2016,12,25
+#maxtolend = 0
+#maxpercenttolend = 0
+#maxtolendrate = 0
+#analyseCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+#analyseMaxAge = 30
+#analyseUpdateInterval = 60
+#lendingStyle = 75
+#coinconfig = ["BTC:0.18:1:0:0:0","CLAM:0.6:1:0:0:0"]
+#jsonfile = www/botlog.json
+#jsonlogsize = 200
+#startWebServer = true
+#customWebServerAddress = 0.0.0.0:8000
+#outputCurrency = BTC 
+
+#[BTC]
+#minloansize = 0.01
+#mindailyrate = 0.18
+#maxactiveamount = 1
+#maxtolend = 0
+#maxpercenttolend = 0
+#maxtolendrate = 0
+
+#[CLAM]
+#minloansize = 1
+#mindailyrate = 0.6
+#maxactiveamount = 1
+#maxtolend = 0
+#maxpercenttolend = 0
+#maxtolendrate = 0
+
+[notifications]
+notify_new_loans = False
+notify_tx_coins = False
+notify_xday_threshold = False
+notify_summary_minutes = 0
+notify_caught_exception = False
+
+email = False
+email_login_address = me@gmail.com
+email_login_password = secretPassword
+email_smtp_server = smtp.gmail.com
+email_smtp_port = 465
+email_to_addresses = me@gmail.com,you@gmail.com
+
+slack = False
+slack_token = 1234567890abcdef
+slack_channels = #cryptocurrency,@someUser
+
+telegram = False
+telegram_bot_id = 1234567890abcdef
+telegram_chat_ids = @polopolo,@cryptocurrency
+
+pushbullet = False
+pushbullet_token = 1234567890abcdef
+pushbullet_deviceid = 1234567890abcdef
