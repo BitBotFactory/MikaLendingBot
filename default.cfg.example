@@ -147,3 +147,7 @@ slack_channels = #cryptocurrency,@someUser
 telegram = False
 telegram_bot_id = 1234567890abcdef
 telegram_chat_ids = @polopolo,@cryptocurrency
+
+pushbullet = False
+pushbullet_token = 1234567890abcdef
+pushbullet_deviceid = 1234567890abcdef

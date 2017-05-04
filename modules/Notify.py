@@ -71,6 +71,16 @@ def send_email(msg, email_login_address, email_login_password, email_smtp_server
         print("Cound not send email, got error {0}".format(e))
         raise NotificationException(e)
 
+def post_to_pushbullet(msg, token, deviceid):
+    post_data = {'body': msg, 'device_iden': deviceid, 'title': 'Poloniex Bot', 'type': 'note'}
+    opener = urllib2.build_opener()
+    req = urllib2.Request('https://api.pushbullet.com/v2/pushes', data=json.dumps(post_data),
+                          headers={'Content-Type': 'application/json', 'Access-Token': token})
+    try:
+        response = opener.open(req)
+    except Exception as e:
+        print("Could not send pushbullet, got error {0}".format(e))
+        raise NotificationException(e)
 
 def send_notification(msg, notify_conf):
     nc = notify_conf
@@ -81,3 +91,5 @@ def send_notification(msg, notify_conf):
         post_to_slack(msg, nc['slack_channels'], nc['slack_token'])
     if nc['telegram']:
         post_to_telegram(msg, nc['telegram_chat_ids'], nc['telegram_bot_id'])
+    if nc['pushbullet']:
+        post_to_pushbullet(msg, nc['pushbullet_token'], nc['pushbullet_deviceid'])

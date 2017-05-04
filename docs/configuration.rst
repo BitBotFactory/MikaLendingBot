@@ -402,3 +402,16 @@ Detailed
         b. Start a conversation with the BotFather and type /setjoingroups, then follow the questsions he asks.
         c. Click on the message we sent earlier from the bot, then click on the bot's name in the conversation. You should see 'Add To Group'. Click this and add it to the new group you created.
         d. Now you should be able to add the ``@nameOfChannel`` to your ``default.cfg`` file and post all the updates there too. Make sure the list is comma separated and you have the '@' infront of the channel name. This is only done for names, not Chat IDs.
+
+Pushbullet notifications
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To enable `Pushbullet <https://www.pushbullet.com/>`_ notifications, you first need to create an API key and then discover your device ID.
+
+Visit your `Account Settings <https://www.pushbullet.com/#settings/account>`_ and click 'Create Access Token'. Add this to the config file as shown below.
+
+You then need to visit this `documentation page <https://docs.pushbullet.com/#list-devices>`_ and run the example curl command for listing your devices (be sure to substitute your API token as created in the previous step). Copy the value listed for 'iden' into the config file as shown below.::
+
+    pushbullet = True
+    pushbullet_token = l.2mDDvy4RRdzcQN9LEWSy22amS7u3LJZ1
+    pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
