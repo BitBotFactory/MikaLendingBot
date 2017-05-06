@@ -302,7 +302,8 @@ def construct_orders(cur, cur_active_bal, cur_total_balance):
     # Condensing and logic'ing time
     for rate in order_rates:
         if rate > max_daily_rate:
-            order_rates[rate] = max_daily_rate
+            order_rates.remove(rate)
+            order_rates.append(max_daily_rate)
     new_order_rates = sorted(list(set(order_rates)))
     new_order_amounts = []
     i = 0
