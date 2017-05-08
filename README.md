@@ -5,7 +5,9 @@ It will automatically lend all cryptocurrencies found in your lending account.
 
 It uses an advanced lending strategy which will spread offers across the lend book to take advantage of possible spikes in lending rates. Inspired by [MarginBot](https://github.com/HFenter/MarginBot) and [BitfinexLendingBot](https://github.com/eAndrius/BitfinexLendingBot).
 
-Join the chat at [![Join the chat at https://gitter.im/Mikadily/poloniexlendingbot](https://badges.gitter.im/Mikadily/poloniexlendingbot.svg)](https://gitter.im/Mikadily/poloniexlendingbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Join the chat at:
+Gitter: [![Join the chat at https://gitter.im/Mikadily/poloniexlendingbot](https://badges.gitter.im/Mikadily/poloniexlendingbot.svg)](https://gitter.im/Mikadily/poloniexlendingbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+& Telegram: https://t.me/mikalendingbot 
 
 Workflow management with Waffle.io
 
