@@ -123,14 +123,13 @@ function updateRawValues(rawData){
 
             });
 
-
-            var effectiveRate;
+            var effRateModePerc = 1;
             if (effRateMode == 'lentperc')
-                effectiveRate = lentSum * rate * 100 / totalCoins;
-            else
-                effectiveRate = rate * 100;
-            var yearlyRate = effectiveRate * 365; // no reinvestment
-            var yearlyRateReinv = (Math.pow(effectiveRate / 100 + 1, 365) - 1) * 100; // with daily reinvestment
+                effRateModePerc = lentSum / totalCoins;
+            var effectiveRate = rate * 100 * effRateModePerc;
+            var yearlyRate = rate * 100 * 365 * effRateModePerc; // no reinvestment
+            var yearlyRateComp = (Math.pow(rate + 1, 365) - 1) * 100 * effRateModePerc; // with daily reinvestment
+
             var lentPerc = lentSum / totalCoins * 100;
             var lentPercLendable = lentSum / maxToLend * 100;
             function makeTooltip(title, text) {
@@ -142,7 +141,7 @@ function updateRawValues(rawData){
                 effRateText = makeTooltip("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff.");
             else
                 effRateText = makeTooltip("Effective loan rate, considering poloniex 15% fee.", "Eff.");
-            var compoundRateText = makeTooltip("Compound yearly rate, the result of reinvesting the interest.", "Comp.");
+            var compoundRateText = makeTooltip("Compound rate, the result of reinvesting the interest.", "Comp.");
             var lentStr = 'Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + printFloat(totalCoins * btcMultiplier, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
             if (totalCoins != maxToLend) {
@@ -158,7 +157,7 @@ function updateRawValues(rawData){
                 "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
                     + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>'
                     + "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
-                    +  printFloat(yearlyRateReinv, 2) + '% Year' + compoundRateText + "</div>" ];
+                    +  printFloat(yearlyRateComp, 2) + '% Year' + compoundRateText + "</div>" ];
 
             // print coin status
             var row = table.insertRow();
@@ -177,7 +176,7 @@ function updateRawValues(rawData){
             var row = table.insertRow();
             if (lentSum > 0) {
                 var cell1 = row.appendChild(document.createElement("td"));
-                cell1.innerHTML = "<span class='hidden-xs'>"+ displayCurrency +"<br/></span>Estimated<br/>Earnings";
+                cell1.innerHTML = "<span class='hidden-xs'>"+ displayCurrency +"<br/></span>Est. "+ compoundRateText +"<br/>Earnings";
                 var cell2 = row.appendChild(document.createElement("td"));
                 cell2.setAttribute("colspan", earningsColspan);
                 if (earningsSummaryCoin != '') {
