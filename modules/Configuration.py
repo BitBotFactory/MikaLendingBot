@@ -139,7 +139,7 @@ def get_notification_config():
 
     if notify_conf['email']:
         for conf in ['email_login_address', 'email_login_password', 'email_smtp_server', 'email_smtp_port',
-                     'email_to_addresses']:
+                     'email_to_addresses', 'email_smtp_starttls']:
             notify_conf[conf] = get('notifications', conf)
         notify_conf['email_to_addresses'] = notify_conf['email_to_addresses'].split(',')
 

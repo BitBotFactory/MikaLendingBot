@@ -358,6 +358,7 @@ To enable email you should configure the following::
     email_login_password = secretPassword
     email_smtp_server = smtp.gmail.com
     email_smtp_port = 465
+    email_smtp_starttls = False
     email_to_addresses = me@gmail.com,you@gmail.com
 
 Slack notifications

@@ -51,24 +51,29 @@ def post_to_telegram(msg, chat_ids, bot_id):
 
 
 def send_email(msg, email_login_address, email_login_password, email_smtp_server, email_smtp_port,
-               email_to_addresses):
+               email_to_addresses, email_smtp_starttls):
     subject = 'Lending bot'
 
     email_text = "\r\n".join(["From: {0}".format(email_login_address),
-                              "To: {0}".format(email_to_addresses),
+                              "To: {0}".format(", ".join(email_to_addresses)),
                               "Subject: {0}".format(subject),
                               "",
                               "{0}".format(msg)
                               ])
 
     try:
-        server = smtplib.SMTP_SSL(email_smtp_server, email_smtp_port)
+        if email_smtp_starttls:
+            server = smtplib.SMTP(email_smtp_server, email_smtp_port)
+            server.ehlo()
+            server.starttls()
+        else:
+            server = smtplib.SMTP_SSL(email_smtp_server, email_smtp_port)
         server.ehlo()
         server.login(email_login_address, email_login_password)
         server.sendmail(email_login_address, email_to_addresses, email_text)
         server.close()
     except Exception as e:
-        print("Cound not send email, got error {0}".format(e))
+        print("Could not send email, got error {0}".format(e))
         raise NotificationException(e)
 
 def post_to_pushbullet(msg, token, deviceid):
@@ -86,7 +91,7 @@ def send_notification(msg, notify_conf):
     nc = notify_conf
     if nc['email']:
         send_email(msg, nc['email_login_address'], nc['email_login_password'], nc['email_smtp_server'],
-                   nc['email_smtp_port'], nc['email_to_addresses'])
+                   nc['email_smtp_port'], nc['email_to_addresses'], nc['email_smtp_starttls'])
     if nc['slack']:
         post_to_slack(msg, nc['slack_channels'], nc['slack_token'])
     if nc['telegram']:
