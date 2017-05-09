@@ -57,6 +57,8 @@ To download the bot you can either:
     Credit to GitHub user utdrmac.
 
     Modify the ExecStart and WorkingDirectory to match your setup.
+    
+    Enable the service using ``sudo systemctl enable lendingbot.service``
 
 * OSx:
 
