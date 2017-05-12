@@ -106,7 +106,7 @@ Downloading the bot's files to Pythonanywhere
 #. Change directory to the source code ``cd poloniexlendingbot``
 #. You should now see ``~/poloniexlendingbot (master)$`` this means you are looking at the master branch and things are ok to continue.
 #. Run the command ``python2.7 lendingbot.py`` once to generate the default.cfg
-#. Modify the default.cfg with your settings (See Configuration.) You can do this with a tool called nano
+#. Modify the default.cfg with your settings (See  `Configuration <http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html>`_.) You can do this with a tool called nano
 #. Run ``nano defatul.cfg``, then use the arrow keys and backspace to change ``YourAPIKey`` and ``YourSecret``. Make sure the layout of the file stays the same as it was. They should both be on separate lines.
 #. Press ``Ctr+x`` to exit, then press ``y`` to save the file, then press enter to accept the file name as ``default.cfg``
 #. Now you can start up the bot. Run ``python2.7 lendingbot.py``
