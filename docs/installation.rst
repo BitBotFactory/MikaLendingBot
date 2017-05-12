@@ -97,14 +97,20 @@ You will need:
 
     - A pythonanywhere.com account (Free version works fine)
 
-Uploading the bot's files to Pythonanywhere
--------------------------------------------
+Downloading the bot's files to Pythonanywhere
+---------------------------------------------
 
-#. Download the bot's code from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_.
-#. Extract the files, and run ``lendingbot.py`` once to generate the default.cfg
-#. Modify the default.cfg with your settings (See Configuration.)
-#. Go to the "files" tab of the website.
-#. Create a new directory, preferably named "poloniexlendingbot" and upload all the files within the folder. (You cannot upload the .zip or a folder itself, you must do all the contents.)
+#. Start a new ``bash`` console from the "Consoles" tab.
+#. Get the source code from git GitHub by running ``git clone https://github.com/Mikadily/poloniexlendingbot``.
+#. You should see some output with couters increasing.
+#. Change directory to the source code ``cd poloniexlendingbot``
+#. You should now see ``~/poloniexlendingbot (master)$`` this means you are looking at the master branch and things are ok to continue.
+#. Run the command ``python2.7 lendingbot.py`` once to generate the default.cfg
+#. Modify the default.cfg with your settings (See  `Configuration <http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html>`_.) You can do this with a tool called nano
+#. Run ``nano defatul.cfg``, then use the arrow keys and backspace to change ``YourAPIKey`` and ``YourSecret``. Make sure the layout of the file stays the same as it was. They should both be on separate lines.
+#. Press ``Ctr+x`` to exit, then press ``y`` to save the file, then press enter to accept the file name as ``default.cfg``
+#. Now you can start up the bot. Run ``python2.7 lendingbot.py``
+#. If it's working you will see ``Welcome to Poloniex Lending Bot`` displayed in the console
 
 .. note:: If you are running out of CPU time every day: It is recommended to use a high sleeptimeinactive time for this website, as they meter your CPU usage.
 
