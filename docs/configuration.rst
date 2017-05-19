@@ -164,7 +164,7 @@ This feature group allows you to only lend a certain percentage of your total ho
     - If set to 0, same as if commented.
     - If disabled, will check if ``maxpercenttolend`` is enabled and use that if it is enabled.
     - Setting this overwrites ``maxpercenttolend``
-    - This is a global setting for the raw value of coin that will be lended if the coins lending value is under ``maxtolendrate``
+    - This is a global setting for the raw value of coin that will be lent if the coins lending value is under ``maxtolendrate``
     - Has no effect if current rate is higher than ``maxtolendrate``
     - If the remainder (after subtracting ``maxtolend``) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
 
@@ -174,7 +174,7 @@ This feature group allows you to only lend a certain percentage of your total ho
     - Allowed range: 0 (disabled) to 100 percent
     - If set to 0, same as if commented.
     - If disabled in addition to ``maxtolend``, entire feature will be disabled.
-    - This percentage is calculated per-coin, and is the percentage of the balance that will be lended if the coin's current rate is less than ``maxtolendrate``
+    - This percentage is calculated per-coin, and is the percentage of the balance that will be lent if the coin's current rate is less than ``maxtolendrate``
     - Has no effect if current rate is higher than ``maxtolendrate``
     - If the remainder (after subtracting ``maxpercenttolend``'s value) in a coin's balance is less than ``minloansize``, then the remainder will be lent anyway. Otherwise, the coins would go to waste since you can't lend under ``minloansize``
 

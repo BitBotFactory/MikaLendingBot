@@ -77,7 +77,7 @@ class JsonOutput(object):
 
 class Logger(object):
     def __init__(self, json_file='', json_log_size=-1):
-        self._lended = ''
+        self._lent = ''
         self._daysRemaining = ''
         if json_file != '' and json_log_size != -1:
             self.output = JsonOutput(json_file, json_log_size)
@@ -111,12 +111,12 @@ class Logger(object):
         self.output.printline(line)
         self.refreshStatus()
 
-    def refreshStatus(self, lended='', days_remaining=''):
-        if lended != '':
-            self._lended = lended
+    def refreshStatus(self, lent='', days_remaining=''):
+        if lent != '':
+            self._lent = lent
         if days_remaining != '':
             self._daysRemaining = days_remaining
-        self.output.status(self._lended, self.timestamp(), self._daysRemaining)
+        self.output.status(self._lent, self.timestamp(), self._daysRemaining)
 
     def updateStatusValue(self, coin, key, value):
         if hasattr(self.output, 'statusValue'):

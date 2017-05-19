@@ -100,7 +100,7 @@ def set_sleep_time(usable):
 
 def notify_summary(sleep_time):
     try:
-        log.notify(Data.stringify_total_lended(*Data.get_total_lended()), notify_conf)
+        log.notify(Data.stringify_total_lent(*Data.get_total_lent()), notify_conf)
     except Exception as ex:
         ex.message = ex.message if ex.message else str(ex)
         print("Error during summary notification: {0}".format(ex.message))
@@ -156,7 +156,7 @@ def create_lend_offer(currency, amt, rate):
             if int(days_remaining) <= 2:
                 print "endDate reached. Bot can no longer lend.\nExiting..."
                 log.log("The end date has almost been reached and the bot can no longer lend. Exiting.")
-                log.refreshStatus(Data.stringify_total_lended(*Data.get_total_lended()), Data.get_max_duration(
+                log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()), Data.get_max_duration(
                     end_date, "status"))
                 log.persistStatus()
                 exit(0)
@@ -201,20 +201,20 @@ def cancel_all():
 
 
 def lend_all():
-    total_lended = Data.get_total_lended()[0]
+    total_lent = Data.get_total_lent()[0]
     lending_balances = api.return_available_account_balances("lending")['lending']
     if dry_run:  # just fake some numbers, if dryrun (testing)
         lending_balances = Data.get_on_order_balances()
 
     # Fill the (maxToLend) balances on the botlog.json for display it on the web
-    for cur in sorted(total_lended):
+    for cur in sorted(total_lent):
         if len(lending_balances) == 0 or cur not in lending_balances:
-            MaxToLend.amount_to_lend(total_lended[cur], cur, 0, 0)
+            MaxToLend.amount_to_lend(total_lent[cur], cur, 0, 0)
     usable_currencies = 0
     global sleep_time  # We need global var to edit sleeptime
     try:
         for cur in lending_balances:
-            usable_currencies += lend_cur(cur, total_lended, lending_balances)
+            usable_currencies += lend_cur(cur, total_lent, lending_balances)
     except StopIteration:  # Restart lending if we stop to raise the request limit.
         lend_all()
     set_sleep_time(usable_currencies)
@@ -317,10 +317,10 @@ def construct_orders(cur, cur_active_bal, cur_total_balance):
     return {'amounts': new_order_amounts, 'rates': new_order_rates}
 
 
-def lend_cur(active_cur, total_lended, lending_balances):
+def lend_cur(active_cur, total_lent, lending_balances):
     active_cur_total_balance = Decimal(lending_balances[active_cur])
-    if active_cur in total_lended:
-        active_cur_total_balance += Decimal(total_lended[active_cur])
+    if active_cur in total_lent:
+        active_cur_total_balance += Decimal(total_lent[active_cur])
 
     # min daily rate can be changed per currency
     cur_min_daily_rate = get_min_daily_rate(active_cur)
@@ -362,7 +362,7 @@ def lend_cur(active_cur, total_lended, lending_balances):
                     if result:
                         min_loan_sizes[active_cur] = float(result)
                         log.log(active_cur + "'s min_loan_size has been increased to the detected min: " + result)
-                return lend_cur(active_cur, total_lended, lending_balances)  # Redo cur with new min.
+                return lend_cur(active_cur, total_lent, lending_balances)  # Redo cur with new min.
             else:
                 raise msg
 

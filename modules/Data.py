@@ -41,26 +41,26 @@ def get_max_duration(end_date, context):
         exit(1)
 
 
-def get_total_lended():
-    crypto_lended = api.return_active_loans()
-    total_lended = {}
-    rate_lended = {}
-    for item in crypto_lended["provided"]:
+def get_total_lent():
+    crypto_lent = api.return_active_loans()
+    total_lent = {}
+    rate_lent = {}
+    for item in crypto_lent["provided"]:
         item_str = item["amount"].encode("utf-8")
         item_float = Decimal(item_str)
         item_rate_str = item["rate"].encode("utf-8")
         item_rate_float = Decimal(item_rate_str)
-        if item["currency"] in total_lended:
-            crypto_lended_sum = total_lended[item["currency"]] + item_float
-            crypto_lended_rate = rate_lended[item["currency"]] + (item_rate_float * item_float)
-            total_lended[item["currency"]] = crypto_lended_sum
-            rate_lended[item["currency"]] = crypto_lended_rate
+        if item["currency"] in total_lent:
+            crypto_lent_sum = total_lent[item["currency"]] + item_float
+            crypto_lent_rate = rate_lent[item["currency"]] + (item_rate_float * item_float)
+            total_lent[item["currency"]] = crypto_lent_sum
+            rate_lent[item["currency"]] = crypto_lent_rate
         else:
-            crypto_lended_sum = item_float
-            crypto_lended_rate = item_rate_float * item_float
-            total_lended[item["currency"]] = crypto_lended_sum
-            rate_lended[item["currency"]] = crypto_lended_rate
-    return [total_lended, rate_lended]
+            crypto_lent_sum = item_float
+            crypto_lent_rate = item_rate_float * item_float
+            total_lent[item["currency"]] = crypto_lent_sum
+            rate_lent[item["currency"]] = crypto_lent_rate
+    return [total_lent, rate_lent]
 
 
 def timestamp():
@@ -68,19 +68,19 @@ def timestamp():
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
 
-def stringify_total_lended(total_lended, rate_lended):
-    result = 'Lended: '
-    for key in sorted(total_lended):
-        average_lending_rate = Decimal(rate_lended[key] * 100 / total_lended[key])
-        result += '[%.4f %s @ %.4f%%] ' % (Decimal(total_lended[key]), key, average_lending_rate)
-        log.updateStatusValue(key, "lentSum", total_lended[key])
+def stringify_total_lent(total_lent, rate_lent):
+    result = 'Lent: '
+    for key in sorted(total_lent):
+        average_lending_rate = Decimal(rate_lent[key] * 100 / total_lent[key])
+        result += '[%.4f %s @ %.4f%%] ' % (Decimal(total_lent[key]), key, average_lending_rate)
+        log.updateStatusValue(key, "lentSum", total_lent[key])
         log.updateStatusValue(key, "averageLendingRate", average_lending_rate)
     return result
 
 
 def update_conversion_rates(output_currency, json_output_enabled):
     if json_output_enabled:
-        total_lended = get_total_lended()[0]
+        total_lent = get_total_lent()[0]
         ticker_response = api.return_ticker()
         output_currency_found = False
         # Set this up now in case we get an exception later and don't have a currency to use
@@ -94,7 +94,7 @@ def update_conversion_rates(output_currency, json_output_enabled):
             currencies = couple.split('_')
             ref = currencies[0]
             currency = currencies[1]
-            if ref == 'BTC' and currency in total_lended:
+            if ref == 'BTC' and currency in total_lent:
                 log.updateStatusValue(currency, 'highestBid', ticker_response[couple]['highestBid'])
                 log.updateStatusValue(currency, 'couple', couple)
             if not output_currency_found:  # check for output currency
@@ -123,8 +123,8 @@ def update_conversion_rates(output_currency, json_output_enabled):
 
 def get_lending_currencies():
     currencies = []
-    total_lended = get_total_lended()[0]
-    for cur in total_lended:
+    total_lent = get_total_lent()[0]
+    for cur in total_lent:
         currencies.append(cur)
     lending_balances = api.return_available_account_balances("lending")['lending']
     for cur in lending_balances:
