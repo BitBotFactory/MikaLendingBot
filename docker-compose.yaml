@@ -1,0 +1,19 @@
+# change default.cfg to your own config
+# start: docker-compose up -d
+# stop: docker-compose down
+# logs: docker-compose logs
+# state: docker-compose ps
+
+version: '2'
+services:
+  bot:
+   image: python:2.7-slim
+   restart: always
+   working_dir: /usr/src/app/
+   ports:
+   - "0.0.0.0:8000:8000"
+   volumes:
+   - "./:/usr/src/app"
+   command: bash -c "pip --no-cache-dir install -r requirements.txt && python lendingbot.py"
+
+# copy complete repository and change the host port (8000 in 0.0.0.0:8000) for additional bots
