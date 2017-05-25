@@ -111,6 +111,7 @@ Downloading the bot's files to Pythonanywhere
 #. Press ``Ctr+x`` to exit, then press ``y`` to save the file, then press enter to accept the file name as ``default.cfg``.
 #. Now you can start up the bot. Run ``python2.7 lendingbot.py``
 #. If it's working you will see ``Welcome to Poloniex Lending Bot`` displayed in the console.
+#. To update the bot just enter its directory, ``cd poloniexlendingbot`` and type, ``git pull``. This will not change the ``default.cfg`` file.
 
 .. note:: If you are running out of CPU time every day: It is recommended to use a high sleeptimeinactive time for this website, as they meter your CPU usage.
 
