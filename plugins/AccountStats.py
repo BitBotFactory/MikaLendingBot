@@ -28,8 +28,12 @@ class AccountStats(Plugin):
         self.init_db()
 
     def after_lending(self):
+        if self.get_db_version() > 0 \
+                and self.last_notification != 0 \
+                and self.last_notification + DAY_IN_SEC > sqlite3.time.time():
+            return
         self.update_history()
-        self.notify_daily()
+        self.notify_stats()
 
     # noinspection PyAttributeOutsideInit
     def init_db(self):
@@ -97,12 +101,9 @@ class AccountStats(Plugin):
         cursor.close()
         return row[0]
 
-    def notify_daily(self):
+    def notify_stats(self):
         if self.get_db_version() == 0:
             self.log.log_error('AccountStats DB isn\'t ready.')
-            return
-
-        if self.last_notification != 0 and self.last_notification + DAY_IN_SEC > sqlite3.time.time():
             return
 
         cursor = self.db.execute(DB_GET_24HR_EARNED)
