@@ -7,6 +7,8 @@ import time
 import urllib
 import urllib2
 import threading
+import calendar
+
 from modules.RingBuffer import RingBuffer
 
 
@@ -15,7 +17,7 @@ class PoloniexApiError(Exception):
 
 
 def create_time_stamp(datestr, formatting="%Y-%m-%d %H:%M:%S"):
-    return time.mktime(time.strptime(datestr, formatting))
+    return calendar.timegm(time.strptime(datestr, formatting))
 
 
 def post_process(before):
@@ -174,6 +176,9 @@ class Poloniex:
 
     def return_active_loans(self):
         return self.api_query('returnActiveLoans')
+
+    def return_lending_history(self, start, stop, limit=500):
+        return self.api_query('returnLendingHistory', {'start': start, 'end': stop, 'limit': limit})
 
     # Returns your trade history for a given market, specified by the "currencyPair" POST parameter
     # Inputs:

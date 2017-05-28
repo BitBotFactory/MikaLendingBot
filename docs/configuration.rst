@@ -295,6 +295,26 @@ Advanced logging and Web Display
     - Acceptable values: BTC, USDT, Any coin with a direct Poloniex BTC trading pair (ex. DOGE, MAID, ETH), Currencies that have a BTC exchange rate on blockchain.info (i.e. EUR, USD)
     - Will be a close estimate, due to unexpected market fluctuations, trade fees, and other unforseeable factors.
 
+Plugins
+-------
+
+Plugins allow extending Bot functionality with extra features.
+To enable/disable a plugin add/remove it to the ``plugins`` list config option, example::
+
+    plugins = Plugin1, Plugin2, etc...
+
+AccountStats Plugin
+~~~~~~~~~~~~~~~~~~~
+
+The AccountStats plugin fetches all your loan history and provides statistics based on it.
+Current implementation sends a earnings summary Notification (see Notifications sections) every 24hr.
+
+To enable the plugin add ``AccountStats`` to the ``plugins`` config options, example::
+
+    plugins = AccountStats
+
+Be aware that first initialization might take longer as the bot will fetch all the history.
+
 lendingbot.html options
 -----------------------
 

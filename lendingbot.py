@@ -4,17 +4,18 @@ import os
 import sys
 import time
 import traceback
+from decimal import Decimal
 from httplib import BadStatusLine
 from urllib2 import URLError
 
-from decimal import Decimal
-
-from modules.Logger import Logger
-from modules.Poloniex import Poloniex, PoloniexApiError
 import modules.Configuration as Config
-import modules.MaxToLend as MaxToLend
 import modules.Data as Data
 import modules.Lending as Lending
+import modules.MaxToLend as MaxToLend
+from modules.Logger import Logger
+from modules.Poloniex import Poloniex, PoloniexApiError
+import modules.PluginsManager as PluginsManager
+
 
 try:
     open('lendingbot.py', 'r')
@@ -57,6 +58,8 @@ else:
     analysis = None
 Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 
+# load plugins
+PluginsManager.init(Config, api, log, notify_conf)
 
 print 'Welcome to Poloniex Lending Bot'
 # Configure web server
@@ -70,9 +73,11 @@ try:
     while True:
         try:
             Data.update_conversion_rates(output_currency, json_output_enabled)
+            PluginsManager.before_lending()
             Lending.transfer_balances()
             Lending.cancel_all()
             Lending.lend_all()
+            PluginsManager.after_lending()
             log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()),
                               Data.get_max_duration(end_date, "status"))
             log.persistStatus()
@@ -116,6 +121,7 @@ try:
 except KeyboardInterrupt:
     if web_server_enabled:
         WebServer.stop_web_server()
+    PluginsManager.on_bot_exit()
     log.log('bye')
     print 'bye'
     os._exit(0)  # Ad-hoc solution in place of 'exit(0)' TODO: Find out why non-daemon thread(s) are hanging on exit
