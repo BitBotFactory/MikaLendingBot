@@ -48,4 +48,4 @@ def before_lending():
 
 def on_bot_exit():
     for plugin in plugins:
-        plugin.on_bot_exit()
+        plugin.on_bot_stop()

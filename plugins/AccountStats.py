@@ -33,7 +33,7 @@ class AccountStats(Plugin):
 
     # noinspection PyAttributeOutsideInit
     def init_db(self):
-        self.db = sqlite3.connect(r'market_data\loan_history.sqlite3')
+        self.db = sqlite3.connect('market_data/loan_history.sqlite3')
         self.db.execute(DB_CREATE)
         self.db.commit()
 

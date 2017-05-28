@@ -299,7 +299,7 @@ Plugins
 -------
 
 Plugins allow extending Bot functionality with extra features.
-To enable/disable a plugin add/remove it to the ``plugins`` list config option, example::
+To enable/disable a plugin add/remove it to the ``plugins`` list config option under the [BOT] section, example::
 
     plugins = Plugin1, Plugin2, etc...
 
