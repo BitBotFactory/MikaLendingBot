@@ -5,8 +5,15 @@ It will automatically lend all cryptocurrencies found in your lending account.
 
 It uses an advanced lending strategy which will spread offers across the lend book to take advantage of possible spikes in lending rates. Inspired by [MarginBot](https://github.com/HFenter/MarginBot) and [BitfinexLendingBot](https://github.com/eAndrius/BitfinexLendingBot).
 
-Join the discussion at: [![Join the chat at https://gitter.im/Mikadily/poloniexlendingbot](https://badges.gitter.im/Mikadily/poloniexlendingbot.svg)](https://gitter.im/Mikadily/poloniexlendingbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[<img src='https://dokkur.com/assets/images/docs_screens/telegram.png' width='100'>](https://t.me/mikalendingbot) [<img src='https://cdn.worldvectorlogo.com/logos/slack.svg' width='90'>](https://poloniexbot.slack.com/shared_invite/MTc5OTU4MDAzNTY4LTE0OTQzMTA2MzYtZDdkYTg1NjBkYg) [<img src='https://www.redditstatic.com/spreddit1.gif'>Subreddit](https://www.reddit.com/r/poloniexlendingbot/)
+Join the discussion at: 
+
+[![Join the chat at https://gitter.im/Mikadily/poloniexlendingbot](https://badges.gitter.im/Mikadily/poloniexlendingbot.svg)](https://gitter.im/Mikadily/poloniexlendingbot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[<img src='https://dokkur.com/assets/images/docs_screens/telegram.png' width='100'>](https://t.me/mikalendingbot) 
+
+[<img src='https://cdn.worldvectorlogo.com/logos/slack.svg' width='90'>](https://poloniexbot.slack.com/shared_invite/MTc5OTU4MDAzNTY4LTE0OTQzMTA2MzYtZDdkYTg1NjBkYg) **- Recommended for communicating with Devs**
+
+[<img src='https://www.redditstatic.com/spreddit1.gif'>Subreddit](https://www.reddit.com/r/poloniexlendingbot/) **- Recommended for focused discussion**
 
 Workflow management with Waffle.io
 
@@ -28,6 +35,7 @@ Workflow management with Waffle.io
 - Select different lending strategies on a coin-by-coin basis.
 - Run multiple instances of the bot for multiple accounts easily using multiple config files.
 - Configure a date you would like your coins back, and watch the bot make sure all your coins are available to be traded or withdrawn at the beginning of that day.
+- Docker support.
 - And the best feature of all: It is absolutely free!
 
 
