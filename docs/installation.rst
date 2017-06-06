@@ -146,3 +146,20 @@ To have the bot restart itself every 24 hours, you need to have a `premium pytho
   
 .. note:: If you are a free user, it will allow you to make the scheduled restart, but then it will only run for one hour and stop for 23.
 .. note:: Free users are also limited to the number of output currencies they can use as blockchain.info is blocked from their servers. You can always use the pairs listed on poloniex, BTC, USDT. But will not have access to currencies such as EUR, GBP.
+
+Using Docker
+============
+
+There is a ``docker-compose.yaml`` file in the root of the source that can be used to start the bot via `docker <https://www.docker.com/>`_.  Compose is a tool for defining and running docker applications using a single file to configure the application’s services.
+
+To use this file:-
+
+#. Install and setup `docker <https://www.docker.com/>`_ for your platform, available on linux, mac and windows.
+#. If you are using linux or windows server, you'll need to install docker-compose separately, see `here <https://docs.docker.com/compose/install/>`_.
+#. If you don't already have a ``default.cfg`` created, then copy the example one and change the values as required using the instructions in this document.
+#. You can now start the service with ``docker-compose up -d``. It may take a minute or two on the first run as it has to download the required image and then some packages for that image when it starts.
+#. If all went well you should see something like ``Starting bitbotfactory_bot_1``.
+#. When you see that message it just means that the container was started successfully, we still need to check the application is running as expected. In the yaml file the web service in the container is mapped to localhost. So you can open your web browser at this point and see if you can connect to the serivce. It should be runnning on `<http://127.0.0.1:8000/lendingbot.html>`_.
+#. If you don't see anything when connecting to that you can check the logs of the container with ``docker-compose logs``. You should get some useful information from there. You may need to change some config vaules. 
+#. When you change the config values you need to restart the container, this can be done with ``docker-compose stop`` and then after changing configs, ``docker-compose up -d``. You should notice it's significantly quicker than the first run now.
+#. The last command to note is ``docker-compose ps`` this will give infomation on all running instances and the ports that are mapped. This can be useful if you plan on running multiple bots, or you just want to know if it's running.
