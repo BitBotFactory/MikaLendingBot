@@ -6,5 +6,6 @@ nohup.out
 error.log
 *.idea
 *.csv
+*.sqlite3
 
 docs/_build/

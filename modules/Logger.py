@@ -52,6 +52,7 @@ class JsonOutput(object):
         self.jsonOutput["last_status"] = status
 
     def printline(self, line):
+        line = line.replace("\n",' | ')
         self.jsonOutputLog.append(line)
 
     def writeJsonFile(self):

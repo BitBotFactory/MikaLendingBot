@@ -109,15 +109,18 @@ class AccountStats(Plugin):
         cursor = self.db.execute(DB_GET_24HR_EARNED)
         output = ''
         for row in cursor:
-            output += str(row[0]) + ' ' + str(row[1]) + ' in last 24hrs\n'
+            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in last 24hrs\n'
         cursor.close()
 
         cursor = self.db.execute(DB_GET_TOTAL_EARNED)
         for row in cursor:
-            output += str(row[0]) + ' ' + str(row[1]) + ' in total\n'
+            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in total\n'
         cursor.close()
         if output != '':
             self.last_notification = sqlite3.time.time()
             output = 'Earnings:\n----------\n' + output
             self.log.notify(output, self.notify_config)
             self.log.log(output)
+
+    def format_value(self,value):
+        return  '{0:0.12f}'.format(float(value)).rstrip('0').rstrip('.')
