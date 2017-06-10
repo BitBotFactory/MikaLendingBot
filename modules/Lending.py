@@ -60,7 +60,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     min_daily_rate = Decimal(Config.get("BOT", "mindailyrate", None, 0.003, 5)) / 100
     max_daily_rate = Decimal(Config.get("BOT", "maxdailyrate", None, 0.003, 5)) / 100
     spread_lend = int(Config.get("BOT", "spreadlend", None, 1, 20))
-    gap_mode_default = Config.get_gap_mode("BOT", "gapMode").lower()
+    gap_mode_default = Config.get_gap_mode("BOT", "gapMode")
     gap_bottom_default = Decimal(Config.get("BOT", "gapbottom", None, 0))
     gap_top_default = Decimal(Config.get("BOT", "gaptop", None, gap_bottom_default))
     xday_threshold = Decimal(Config.get("BOT", "xdaythreshold", None, 0.003, 5)) / 100
@@ -368,7 +368,7 @@ def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
             gap_bottom_default = 10
             gap_top_default = 200
         return construct_orders(cur, cur_active_bal, cur_total_balance, ticker)  # Start over with new defaults
-    return [top_rate, bottom_rate]
+    return [Decimal(top_rate), Decimal(bottom_rate)]
 
 
 def lend_cur(active_cur, total_lent, lending_balances, ticker):

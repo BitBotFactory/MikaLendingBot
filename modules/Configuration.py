@@ -145,7 +145,7 @@ def get_gap_mode(category, option):
             print "ERROR: Invalid entry '%s' for [%s]-gapMode. Please check your config. Allowed values are: %s" % \
                   (value, category, ", ".join(full_list))
             exit(1)
-        return value
+        return value.lower()
     else:
         return 'relative'
 
