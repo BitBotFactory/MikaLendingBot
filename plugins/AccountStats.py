@@ -23,13 +23,16 @@ DB_GET_YESTERDAY_EARNINGS = "SELECT sum(earned) as total_earned, currency FROM '
 
 class AccountStats(Plugin):
     last_notification = 0
+    earnings = {}
 
     def on_bot_init(self):
         super(AccountStats, self).on_bot_init()
         self.init_db()
 
     def before_lending(self):
-        self.update_earnings();
+        for coin in self.earnings:
+            for key in self.earnings[coin]:
+                self.log.updateStatusValue(coin, key, self.earnings[coin][key])
 
     def after_lending(self):
         if self.get_db_version() > 0 \
@@ -112,26 +115,27 @@ class AccountStats(Plugin):
                 self.log.log_error('AccountStats DB isn\'t ready.')
             return
 
-        output = self.update_earnings()
+        self.earnings = {}
+        cursor = self.db.execute(DB_GET_YESTERDAY_EARNINGS)
+        output = ''
+        for row in cursor:
+            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Yesterday\n'
+            if row[1] not in self.earnings:
+                self.earnings[row[1]] = {}
+            self.earnings[row[1]]['yesterdayEarnings'] = row[0]
+        cursor.close()
+        cursor = self.db.execute(DB_GET_TOTAL_EARNED)
+        for row in cursor:
+            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in total\n'
+            if row[1] not in self.earnings:
+                self.earnings[row[1]] = {}
+            self.earnings[row[1]]['totalEarnings'] = row[0]
+        cursor.close()
         if output != '':
             self.last_notification = sqlite3.time.time()
             output = 'Earnings:\n----------\n' + output
             self.log.notify(output, self.notify_config)
             self.log.log(output)
-
-    def update_earnings(self):
-        cursor = self.db.execute(DB_GET_YESTERDAY_EARNINGS)
-        output = ''
-        for row in cursor:
-            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Yesterday\n'
-            self.log.updateStatusValue(str(row[1]), 'yesterdayEarnings', row[0] )
-        cursor.close()
-        cursor = self.db.execute(DB_GET_TOTAL_EARNED)
-        for row in cursor:
-            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in total\n'
-            self.log.updateStatusValue(str(row[1]), 'totalEarnings', row[0] )
-        cursor.close()
-        return output
 
     @staticmethod
     def format_value(value):
