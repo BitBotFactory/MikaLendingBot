@@ -76,16 +76,38 @@ If ``spreadlend = 1`` and ``gapbottom = 0``, it will behave as simple lending bo
     - The loans are distributed evenly between gapbottom and gaptop.
     - This allows the bot to benefit from spikes in lending rate but can result in loan fragmentation (not really a bad thing since the bot has to deal with it.)
 
-- ``gapbottom`` is how far into the lending book (in percent of YOUR total balance for the respective coin) the bot will go, to start spreading loans.
+- ``gapMode`` is the "mode" you would like your gaps to be calculated in.
+
+    - Default value: Relative
+    - Allowed values: Relative, RawBTC, Raw
+    - The values are case insensitive.
+    - The purpose of spreading your lends is to skip dust offers in the lendbook, and also to take advantage of any spikes that occur.
+    - Mode descriptions:
+        - ``Relative`` - ``Gapbottom`` and ``Gaptop`` will be relative to your balance for each coin individually.
+            - This is relative to your total lending balance, both loaned and unloaned.
+            - ``gapbottom`` and ``gaptop`` will be in percents of your balance. (A setting of 100 will equal 100%)
+            - Example: You have 1BTC. If ``gapbottom = 100`` then you will skip 100% of your balance of dust offers, thus skipping 1BTC into the lendbook. If ``gaptop = 200`` then you will continue into the lendbook until you reach 200% of your balance, thus 2BTC. Then, if ``spreadlend = 5``, you will make 5 equal volume loans over that gap.
+        - ``RawBTC`` - ``Gapbottom`` and ``Gaptop`` will be in a raw BTC value, converted to each coin.
+            - Recommended when using one-size-fits-all settings.
+            - ``gapbottom`` and ``gaptop`` will be in BTC. (A setting of 3 will equal 3 BTC)
+            - Example: If ``gapbottom = 1`` and you are currently lending ETH, the bot will check the current exchange rate, say 1BTC = 10ETH. Then the bot will skip 10ETH of dust offers at the bottom of the lendbook before lending. If ``gaptop = 10``, then using the same exchange rate 10BTC will be 100ETH. The bot will then continue 100ETH into the loanbook before stopping. Then, if ``spreadlend = 5``, you will make 5 equal volume loans over that gap.
+        - ``Raw`` - ``Gapbottom`` and ``Gaptop`` will be in a raw value of the coin being lent.
+            - Recommended when used with coin-specific settings.
+            - ``gapbottom`` and ``gaptop`` will be in value of the coin. (A setting of 3 will equal 3 BTC, 3 ETH, 3 DOGE, or whatever coin is being lent.)
+            - Example: If ``gapbottom = 1`` and you are currently lending ETH, the bot will skip 1ETH of dust offers at the bottom of the lendbook before lending. If ``gaptop = 10``, the bot will then continue 10ETH into the loanbook before stopping. Then, if ``spreadlend = 5``, you will make 5 equal volume loans over that gap.
+
+
+
+- ``gapbottom`` is the lower setting for your ``gapMode`` values, and will be where you start to lend.
 
     - Default value: 10 percent
-    - Allowed range: 0 to <arbitrary large number> percent
+    - Allowed range: 0 to <arbitrary large number>
     - 10% gapbottom is recommended to skip past dust at the bottom of the lending book, but if you have a VERY high volume this will cause issues as you stray to far away from the most competitive bid.
 
-- ``gaptop`` is how far into the lending book (in percent of YOUR balance for the respective coin) the bot will go to stop spreading loans.
+- ``gaptop`` is the upper setting for your ``gapMode`` values, and will be where you finish spreading your lends.
 
     - Default value: 200 percent
-    - Allowed range: 0 to <arbitrary large number> percent
+    - Allowed range: 0 to <arbitrary large number>
     - This value should be adjusted based on your coin volume to avoid going astronomically far away from a realistic rate.
 
 Variable loan Length
@@ -255,6 +277,9 @@ Configuration should look like this::
     maxtolend = 0
     maxpercenttolend = 0
     maxtolendrate = 0
+    gapmode = raw
+    gapbottom = 10
+    gaptop = 20
 
 
 Advanced logging and Web Display
@@ -436,3 +461,4 @@ You then need to visit this `documentation page <https://docs.pushbullet.com/#li
     pushbullet = True
     pushbullet_token = l.2mDDvy4RRdzcQN9LEWSy22amS7u3LJZ1
     pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
+

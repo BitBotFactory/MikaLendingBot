@@ -44,18 +44,24 @@ def getboolean(category, option, default_value=False):
 def get(category, option, default_value=False, lower_limit=False, upper_limit=False):
     if config.has_option(category, option):
         value = config.get(category, option)
-        if lower_limit:
-            if float(value) < float(lower_limit):
-                print "ERROR: " + option + "'s value: '" + value + "' is below the minimum limit: " + str(lower_limit)
+        try:
+            if lower_limit and float(value) < float(lower_limit):
+                print "ERROR: [%s]-%s's value: '%s' is below the minimum limit: %s" % \
+                      (category, option, value, lower_limit)
                 exit(1)
-        if upper_limit:
-            if float(value) > float(upper_limit):
-                print "ERROR: " + option + "'s value: '" + value + "' is above the maximum limit: " + str(upper_limit)
+            if upper_limit and float(value) > float(upper_limit):
+                print "ERROR: [%s]-%s's value: '%s' is above the maximum limit: %s" % \
+                      (category, option, value, lower_limit)
                 exit(1)
-        return value
+            return value
+        except ValueError:
+            if default_value is None:
+                print "ERROR: [%s]-%s is not allowed to be left empty. Please check your config." % (category, option)
+                exit(1)
+            return default_value
     else:
         if default_value is None:
-            print "ERROR: " + option + " is not allowed to be left unset. Please check your config."
+            print "ERROR: [%s]-%s is not allowed to be left unset. Please check your config." % (category, option)
             exit(1)
         return default_value
 # Below: functions for returning some config values that require special treatment.
@@ -84,6 +90,10 @@ def get_coin_cfg():
                     coin_cfg[cur]['maxtolend'] = Decimal(config.get(cur, 'maxtolend'))
                     coin_cfg[cur]['maxpercenttolend'] = (Decimal(config.get(cur, 'maxpercenttolend'))) / 100
                     coin_cfg[cur]['maxtolendrate'] = (Decimal(config.get(cur, 'maxtolendrate'))) / 100
+                    coin_cfg[cur]['gapmode'] = get_gap_mode(cur, 'gapmode')
+                    coin_cfg[cur]['gapbottom'] = Decimal(get(cur, 'gapbottom', False, 0))
+                    coin_cfg[cur]['gaptop'] = Decimal(get(cur, 'gaptop', False, coin_cfg[cur]['gapbottom']))
+
                 except Exception as ex:
                     ex.message = ex.message if ex.message else str(ex)
                     print("Coinconfig for " + cur + " parsed incorrectly, please refer to the documentation. "
@@ -125,6 +135,19 @@ def get_currencies_list(option):
         return list(set(cur_list))
     else:
         return []
+
+
+def get_gap_mode(category, option):
+    if config.has_option(category, option):
+        full_list = ['raw', 'rawbtc', 'relative']
+        value = get(category, 'gapmode', False).lower().strip(" ")
+        if value not in full_list:
+            print "ERROR: Invalid entry '%s' for [%s]-gapMode. Please check your config. Allowed values are: %s" % \
+                  (value, category, ", ".join(full_list))
+            exit(1)
+        return value
+    else:
+        return False
 
 
 def get_notification_config():
