@@ -330,12 +330,13 @@ def construct_orders(cur, cur_active_bal, cur_total_balance, ticker):
 def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
     global gap_mode_default, gap_bottom_default, gap_top_default  # To be able to change them later if needed.
     gap_mode, gap_bottom, gap_top = gap_mode_default, gap_bottom_default, gap_top_default
-    gap_cfg = False
+    use_gap_cfg = False
     order_book = construct_order_book(cur)
     if cur in coin_cfg:  # Get custom values specific to coin
         cfg = coin_cfg[cur]
-        if cfg['gapmode'] and cfg['gapbottom'] and cfg['gaptop']:  # Only overwrite default if all three are set
-            gap_cfg = True
+        if cfg.get('gapmode', False) and cfg.get('gapbottom', False) and cfg.get('gaptop', False):
+            # Only overwrite default if all three are set
+            use_gap_cfg = True
             gap_mode = cfg['gapmode']
             gap_bottom = cfg['gapbottom']
             gap_top = cfg['gaptop']
@@ -357,9 +358,9 @@ def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
         bottom_rate = get_gap_rate(cur, gap_bottom, order_book, cur_total_balance)
         top_rate = get_gap_rate(cur, gap_top, order_book, cur_total_balance)
     else:
-        if gap_cfg:
+        if use_gap_cfg:
             print "WARN: Invalid setting for gapMode for [%s], using defaults..." % cur
-            coin_cfg[cur]['gapmode'] = "raw"
+            coin_cfg[cur]['gapmode'] = "rawbtc"
             coin_cfg[cur]['gapbottom'] = 10
             coin_cfg[cur]['gaptop'] = 100
         else:

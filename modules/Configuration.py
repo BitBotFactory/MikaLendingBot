@@ -147,7 +147,7 @@ def get_gap_mode(category, option):
             exit(1)
         return value.lower()
     else:
-        return 'relative'
+        return False
 
 
 def get_notification_config():
