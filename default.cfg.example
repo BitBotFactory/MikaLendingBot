@@ -12,6 +12,9 @@ sleeptimeactive = 60
 #Set to the same value as sleeptimeactive to disable
 sleeptimeinactive = 300
 
+#Timeout in seconds, the bot shall wait for a response during each request
+#timeout = 30
+
 #Minimum daily lend rate in percent (0.0031-5)
 #Setting to 0.0031 is about 1% a year, not worth it.
 mindailyrate = 0.005

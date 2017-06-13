@@ -31,7 +31,7 @@ HIGHLY Recommended:
 .. note:: If you use an API key that has been used by any other application, it will likely fail for one application or the other. This is because the API requires a `nonce <https://en.wikipedia.org/wiki/Cryptographic_nonce>`_.
 
 
-Sleeptime
+Timing
 ---------
 
 - ``sleeptimeactive`` is how long the bot will "rest" (in seconds) between running while the bot has loan offers waiting to be filled.
@@ -47,6 +47,11 @@ Sleeptime
     - Default value: 300 seconds (5 minutes)
     - Allowed range: 1 to 3600 seconds
     - If the bot finishes a cycle and has lend orders to manage, it will change to active mode.
+
+- ``timeout`` is how long the bot waits for a response of a request
+
+    - Default value: 30 seconds
+    - Allowed range: 1 to 180 seconds
 
 Min and Max Rates
 -----------------

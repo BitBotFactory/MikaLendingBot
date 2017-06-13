@@ -8,6 +8,7 @@ import urllib
 import urllib2
 import threading
 import calendar
+import modules.Configuration as Config
 
 from modules.RingBuffer import RingBuffer
 
@@ -52,7 +53,7 @@ class Poloniex:
         self.req_per_sec = 6
         self.req_time_log = RingBuffer(self.req_per_sec)
         self.lock = threading.RLock()
-        socket.setdefaulttimeout(30)
+        socket.setdefaulttimeout(int(Config.get("BOT", "timeout", 30, 1, 180)))
 
     @synchronized
     def limit_request_rate(self):
