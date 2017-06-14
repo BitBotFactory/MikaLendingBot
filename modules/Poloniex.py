@@ -125,14 +125,15 @@ class Poloniex:
                 json_ret = _read_response(ret)
                 return post_process(json_ret)
         except urllib2.HTTPError as ex:
+            raw_polo_response = ex.read()
             try:
-                data = json.loads(ex.read())
+                data = json.loads(raw_polo_response)
                 polo_error_msg = data['error']
             except:
-                polo_error_msg = None
+                polo_error_msg = raw_polo_response
             ex.message = ex.message if ex.message else str(ex)
             ex.message = "{0} Requesting {1}.  Poloniex reports: '{2}'".format(ex.message, command, polo_error_msg)
-            raise
+            raise ex
         except Exception as ex:
             ex.message = ex.message if ex.message else str(ex)
             ex.message = "{0} Requesting {1}".format(ex.message, command)
