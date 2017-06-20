@@ -349,7 +349,7 @@ def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
                     break
         bottom_depth = gap_bottom / btc_value  # Converts from BTC to altcoin's value
         bottom_rate = get_gap_rate(cur, bottom_depth, order_book, cur_total_balance, True)
-        top_depth = gap_bottom / btc_value
+        top_depth = gap_top / btc_value
         top_rate = get_gap_rate(cur, top_depth, order_book, cur_total_balance, True)
     elif gap_mode == "raw":  # Value stays in altcoin
         bottom_rate = get_gap_rate(cur, gap_bottom, order_book, cur_total_balance, True)
