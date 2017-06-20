@@ -368,7 +368,7 @@ def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
             gap_mode_default = "relative"
             gap_bottom_default = 10
             gap_top_default = 200
-        return construct_orders(cur, cur_active_bal, cur_total_balance, ticker)  # Start over with new defaults
+        return get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker)  # Start over with new defaults
     return [Decimal(top_rate), Decimal(bottom_rate)]
 
 
