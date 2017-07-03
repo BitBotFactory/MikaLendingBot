@@ -30,8 +30,8 @@ spreadlend = 3
 #If gapbottom is set to 0, the first offer will be at the lowest possible rate.
 #However some low value is recommended to skip dust offers.
 # Gap modes: Raw, RawBTC, Relative
-gapMode = Relative
-gapbottom = 10
+gapMode = RawBTC
+gapbottom = 40
 gaptop = 200
 
 #Daily lend rate threshold after which we offer lends for x days as opposed to 2.
