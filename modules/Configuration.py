@@ -51,7 +51,7 @@ def get(category, option, default_value=False, lower_limit=False, upper_limit=Fa
                 exit(1)
             if upper_limit and float(value) > float(upper_limit):
                 print "ERROR: [%s]-%s's value: '%s' is above the maximum limit: %s" % \
-                      (category, option, value, lower_limit)
+                      (category, option, value, upper_limit)
                 exit(1)
             return value
         except ValueError:
