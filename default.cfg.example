@@ -103,11 +103,15 @@ hideCoins = True
 #Enables a webserver for the www folder, in order to easily use the lendingbot.html with the .json log.
 #startWebServer = true
 
-#Customize the IP and port that the webserver is hosted on. Defaults to 0.0.0.0:8000
+#Customize the IP and port that the webserver is hosted on. Defaults respectively to 0.0.0.0 and 8000
 #0.0.0.0 will point to your default IP (Local IP on LAN as well as localhost), set to 127.0.0.1 if you want it to be only accessible by host computer.
 #Do not set to a reserved port
 #Advanced users only.
-#customWebServerAddress = 0.0.0.0:8000
+#customWebServerAddress = 0.0.0.0
+#customWebServerPort = 8000
+
+#Customize or select the desired template for the webserver. Default to 'www'.
+#customWebServerTemplate = www
 
 #The currency that the HTML Overview will present the earnings summary in.
 #Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.

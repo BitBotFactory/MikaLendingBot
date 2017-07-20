@@ -294,7 +294,7 @@ Advanced logging and Web Display
 
     - Default value: Commented out, uncomment to enable.
     - Format: ``www/botlog.json``
-    - This is the location relative to the running instance of the bot where it will store the .json file. The default location is recommended if using the webserver functionality.
+    - This is the location relative to the running instance of the bot where it will store the .json file. The default location or a path inside the ``customWebServerTemplate`` folder is recommended if using the webserver functionality.
 
 - ``jsonlogsize`` is the amount of lines the botlog will keep before deleting the oldest event.
 
@@ -308,16 +308,29 @@ Advanced logging and Web Display
     - The server page can be accessed locally, at ``http://localhost:8000/lendingbot.html`` by default.
     - You must close bot with a keyboard interrupt (CTRL-C on Windows) to properly shutdown the server and release the socket, otherwise you may have to wait several minutes for it to release itself.
 
-- ``customWebServerAddress`` is the IP address and port that the webserver can be found at.
+- ``customWebServerAddress`` is the IP address that the webserver can be found at.
 
     - Advanced users only.
-    - Default value: 0.0.0.0:8000 Uncomment to change
-    - Format: ``IP:PORT``
+    - Default value: 0.0.0.0 Uncomment to change
+    - Format: ``IP``
     - Setting the ip to ``127.0.0.1`` will ONLY allow the webpage to be accessed at localhost (``127.0.0.1``)
     - Setting the ip to ``0.0.0.0`` will allow the webpage to be accessed at localhost (``127.0.0.1``) as well as at the computer's LAN IP address within the local network. This option is the most versatile, and is default.
     - Setting the ip to ``192.168.0.<LAN IP>`` will ONLY allow the webpage to be access at the computer's LAN IP address within the local network (And not through localhost.) It is recommended to be sure the device has a static local IP.
-    - Do not set the port to a `reserved port <http://www.ingate.com/files/422/fwmanual-en/xa10285.html>`_ or you will receive an error when running the bot or attempting to connect (depending on HOW reserved a port is.)
     - You must know what you are doing when changing the IP address to anything other than the three suggested configurations above.
+
+- ``customWebServerPort`` is the IP port that the webserver can be found at
+
+    - Advanced users only.
+    - Default value: 8000 Uncomment to change
+    - Format: ``PORT``
+    - Do not set the port to a `reserved port <http://www.ingate.com/files/422/fwmanual-en/xa10285.html>`_ or you will receive an error when running the bot or attempting to connect (depending on HOW reserved a port is.)
+
+- ``customWebServerTemplate`` is the location the bot will use for WebServer HTML GUI template.
+
+    - Default value: www, uncomment to enable.
+    - Format: ``PATH``
+    - This is the location relative to the running HTML GUI instance used by the bot. Be sure the ``jsonfile`` belongs to this folder.
+
 
 - ``outputCurrency`` this is the ticker of the coin which you would like the website to report your summary earnings in.
 
