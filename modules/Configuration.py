@@ -46,13 +46,13 @@ def get(category, option, default_value=False, lower_limit=False, upper_limit=Fa
         value = config.get(category, option)
         try:
             if lower_limit and float(value) < float(lower_limit):
-                print "ERROR: [%s]-%s's value: '%s' is below the minimum limit: %s" % \
+                print "WARN: [%s]-%s's value: '%s' is below the minimum limit: %s, which will be used instead." % \
                       (category, option, value, lower_limit)
-                exit(1)
+                value = lower_limit
             if upper_limit and float(value) > float(upper_limit):
-                print "ERROR: [%s]-%s's value: '%s' is above the maximum limit: %s" % \
+                print "WARN: [%s]-%s's value: '%s' is above the maximum limit: %s, which will be used instead." % \
                       (category, option, value, upper_limit)
-                exit(1)
+                value = upper_limit
             return value
         except ValueError:
             if default_value is None:
