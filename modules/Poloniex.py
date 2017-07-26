@@ -130,7 +130,8 @@ class Poloniex:
                 data = json.loads(raw_polo_response)
                 polo_error_msg = data['error']
             except:
-                if ex.code == 502:  # 502 Bad Gateway so response is likely HTML from Cloudflare
+                if ex.code == 502 or ex.code in range(520, 526, 1):
+                    # 502 and 520-526 Bad Gateway so response is likely HTML from Cloudflare
                     polo_error_msg = ''
                 else:
                     polo_error_msg = raw_polo_response
