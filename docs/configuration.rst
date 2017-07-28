@@ -480,3 +480,23 @@ You then need to visit this `documentation page <https://docs.pushbullet.com/#li
     pushbullet_token = l.2mDDvy4RRdzcQN9LEWSy22amS7u3LJZ1
     pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
 
+IRC notifications
+~~~~~~~~~~~~~~~~~
+
+IRC is very easy to configure, if you are already interested in using it you'll understand what each of the options are. 
+
+The main thing to note is that you need to have the python module 'irc' installed. You can git it from pip like so::
+
+    pip install irc
+
+Once you have that installed you have access to the following options for configuration::
+
+    irc = True
+    irc_host = irc.freenode.net
+    irc_port = 6667
+    irc_nick = LendingBot
+    irc_ident = ledningbot
+    irc_realname = Poloniex lending bot
+    irc_target = #bitbotfactory
+
+If you want to send a message directly to a user rather than a channel, you can specify it in the irc_target without the preceeding '#'. There is currently only support for one channel or user, but we can add more if there's any interest for it.

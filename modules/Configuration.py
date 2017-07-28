@@ -153,7 +153,8 @@ def get_gap_mode(category, option):
 def get_notification_config():
     notify_conf = {'enable_notifications': config.has_section('notifications')}
 
-    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_new_loans', 'email', 'slack', 'telegram', 'pushbullet']:
+    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_new_loans', 'email', 'slack', 'telegram',
+                 'pushbullet', 'irc']:
         notify_conf[conf] = getboolean('notifications', conf)
 
     # in order not to break current config, parsing for False
@@ -175,10 +176,16 @@ def get_notification_config():
         for conf in ['telegram_bot_id', 'telegram_chat_ids']:
             notify_conf[conf] = get('notifications', conf)
         notify_conf['telegram_chat_ids'] = notify_conf['telegram_chat_ids'].split(',')
-    
+
     if notify_conf['pushbullet']:
         for conf in ['pushbullet_token', 'pushbullet_deviceid']:
             notify_conf[conf] = get('notifications', conf)
+
+    if notify_conf['irc']:
+        for conf in ['irc_host', 'irc_port', 'irc_nick', 'irc_ident', 'irc_realname', 'irc_target']:
+            notify_conf[conf] = get('notifications', conf)
+        notify_conf['irc_port'] = int(notify_conf['irc_port'])
+        notify_conf['irc_debug'] = getboolean('notifications', 'irc_debug')
 
     return notify_conf
 

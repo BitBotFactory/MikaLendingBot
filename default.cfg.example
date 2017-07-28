@@ -163,3 +163,11 @@ telegram_chat_ids = @polopolo,@cryptocurrency
 pushbullet = False
 pushbullet_token = 1234567890abcdef
 pushbullet_deviceid = 1234567890abcdef
+
+irc = False
+irc_host = irc.freenode.net
+irc_port = 6667
+irc_nick = LendingBot
+irc_ident = ledningbot
+irc_realname = Poloniex lending bot
+irc_target = #bitbotfactory
