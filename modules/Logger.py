@@ -91,11 +91,12 @@ class Logger(object):
         return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
     def log(self, msg):
-        self.output.printline(self.timestamp() + ' ' + msg)
+        log_message = "{0} {1}".format(self.timestamp(), msg)
+        self.output.printline(log_message)
         self.refreshStatus()
 
     def log_error(self, msg):
-        log_message = self.timestamp() + ' Error: ' + msg
+        log_message = "{0} Error {1}".format(self.timestamp(), msg)
         self.output.printline(log_message)
         if type(self.output) is JsonOutput:
             print log_message
