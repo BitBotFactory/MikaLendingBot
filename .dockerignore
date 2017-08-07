@@ -1,0 +1,12 @@
+*.pyc
+*.swp
+default.cfg
+www/botlog.json
+nohup.out
+error.log
+*.idea
+*.csv
+*.sqlite3
+
+docs
+market_data
