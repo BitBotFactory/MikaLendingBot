@@ -16,7 +16,7 @@ Select the exchange to use in attribute ``exchange``. Supported are ``Poloniex``
 
     ``exchange = Poloniex``
     or
-    ``exchange = Bitfinix``
+    ``exchange = Bitfinex``
 
 Create a **NEW** API key and Secret from `Poloniex <https://poloniex.com/apiKeys>`_
 or `Bitfinex <https://www.bitfinex.com/api>`_ and paste them into the respective slots in the config.
