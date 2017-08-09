@@ -12,7 +12,7 @@ all_currencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
 
 [BITFINEX]
 # Full list of supported currencies
-all_currencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS
+all_currencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS,BCH
 
 [BOT]
 #Sleeps between active iterations, time in seconds (1-3600)
