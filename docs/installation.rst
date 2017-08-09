@@ -18,16 +18,26 @@ You will need:
 Recommended for easier use:
 
     - git
-    - pip (to install Numpy)
+    - pip (to install following required Python modules)
     - Numpy (if using Analysis module)
+    - requests (HTTPS communication)
+    - pytz (Timezone calculations)
+
+It is possible to install all required Python modules **after downloading** of the bot running:
+
+``pip install -r requirements.txt``
+
+or, if you need to run it as root under Linux:
+
+``sudo pip install -r requirements.txt``
 
 Downloading
 -----------
 
 To download the bot you can either:
 
-- (Recommended) Run ``git clone https://github.com/Mikadily/poloniexlendingbot`` if you have git installed. Using this method will allow you to do ``git pull`` at any time to grab updates.
-- Download the source .zip file from the GitHub repo page or from `this link <https://github.com/Mikadily/poloniexlendingbot/archive/master.zip>`_. Extract it into an empty folder you won't accidentally delete.
+- (Recommended) Run ``git clone https://github.com/BitBotFactory/poloniexlendingbot`` if you have git installed. Using this method will allow you to do ``git pull`` at any time to grab updates.
+- Download the source .zip file from the GitHub repo page or from `this link <https://github.com/BitBotFactory/poloniexlendingbot/archive/master.zip>`_. Extract it into an empty folder you won't accidentally delete.
 
 (Optional) Automatically Run on Startup
 ---------------------------------------
@@ -57,7 +67,7 @@ To download the bot you can either:
     Credit to GitHub user utdrmac.
 
     Modify the ExecStart and WorkingDirectory to match your setup.
-    
+
     Enable the service using ``sudo systemctl enable lendingbot.service``
 
 * OSx:
@@ -66,6 +76,8 @@ To download the bot you can either:
 
 Configuring
 -----------
+
+You have to configure the bot, especially choosing the exchange  and api key/secret to use.
 
 To configure the bot with your settings:
 
@@ -131,19 +143,19 @@ Creating the Web App (Optional)
 
 Running the Bot
 ---------------
- 
+
 To run the bot continuously (Recommended for free accounts):
 
     #. Navigate to the "Consoles" tab.
     #. Add a new "Custom console," name it "Poloniexlendingbot" and set the path to ``python /home/<username>/poloniexlendingbot/lendingbot.py``
     #. Click this link whenever you want to start the bot, it will run continuously until the website goes down for maintenance or the bot experiences an unexpected error.
- 
+
 To have the bot restart itself every 24 hours, you need to have a `premium pythonanywhere account <https://www.pythonanywhere.com/pricing/>`_. This will make the bot more or less invincible to crashes and resets, but is not necessary.
 
     #. Navigate to the "Schedule" tab.
     #. Create a new task to run daily (time does not matter) set the path to: ``python /home/<username>/poloniexlendingbot/lendingbot.py``
     #. The bot will start once the time comes (UTC) and run indefinitely.
-  
+
 .. note:: If you are a free user, it will allow you to make the scheduled restart, but then it will only run for one hour and stop for 23.
 .. note:: Free users are also limited to the number of output currencies they can use as blockchain.info is blocked from their servers. You can always use the pairs listed on poloniex, BTC, USDT. But will not have access to currencies such as EUR, GBP.
 
@@ -160,6 +172,6 @@ To use this file:-
 #. You can now start the service with ``docker-compose up -d``. It may take a minute or two on the first run as it has to download the required image and then some packages for that image when it starts.
 #. If all went well you should see something like ``Starting bitbotfactory_bot_1``.
 #. When you see that message it just means that the container was started successfully, we still need to check the application is running as expected. In the yaml file the web service in the container is mapped to localhost. So you can open your web browser at this point and see if you can connect to the serivce. It should be runnning on `<http://127.0.0.1:8000/lendingbot.html>`_.
-#. If you don't see anything when connecting to that you can check the logs of the container with ``docker-compose logs``. You should get some useful information from there. You may need to change some config vaules. 
+#. If you don't see anything when connecting to that you can check the logs of the container with ``docker-compose logs``. You should get some useful information from there. You may need to change some config vaules.
 #. When you change the config values you need to restart the container, this can be done with ``docker-compose stop`` and then after changing configs, ``docker-compose up -d``. You should notice it's significantly quicker than the first run now.
 #. The last command to note is ``docker-compose ps`` this will give infomation on all running instances and the ports that are mapped. This can be useful if you plan on running multiple bots, or you just want to know if it's running.

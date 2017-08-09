@@ -32,7 +32,7 @@ def initialize_web_server(config):
     web_server_template = config.get('BOT', 'customWebServerTemplate', 'www')
 
     print('Starting WebServer at {0} on port {1} with template {2}'
-        .format(web_server_ip, web_server_port, web_server_template))
+          .format(web_server_ip, web_server_port, web_server_template))
 
     thread = threading.Thread(target=start_web_server)
     thread.deamon = True
@@ -88,7 +88,7 @@ def stop_web_server():
     '''
     try:
         print("Stopping WebServer")
-        threading.Thread(target = server.shutdown).start()
+        threading.Thread(target=server.shutdown).start()
     except Exception as ex:
         ex.message = ex.message if ex.message else str(ex)
         print("Failed to stop WebServer: {0}".format(ex.message))

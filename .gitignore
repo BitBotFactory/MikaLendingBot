@@ -1,6 +1,6 @@
 *.pyc
 *.swp
-default.cfg
+*.cfg
 www/botlog.json
 nohup.out
 error.log

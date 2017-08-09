@@ -1,10 +1,10 @@
 .. Poloniexlendingbot documentation master file, created by
    sphinx-quickstart on Tue Oct 11 16:56:46 2016.
 
-Welcome to Poloniexlendingbot's documentation!
-==============================================
+Welcome to Poloniex Lending Bot's documentation!
+================================================
 
-Poloniexlendingbot is an open-source program for automated lending on the Poloniex cryptocurrency exchange.
+Poloniex Lending Bot is an open-source program for automated lending on Poloniex and Bitfinex cryptocurrency exchange.
 
 Contents:
 
@@ -15,5 +15,3 @@ Contents:
    installation
    configuration
    contributing
-
-

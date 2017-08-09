@@ -52,8 +52,10 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     notify_conf = notify_conf1
 
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
-        gap_bottom_default, gap_top_default, xday_threshold, xdays, min_loan_size, end_date, coin_cfg, min_loan_sizes, dry_run, \
-        transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default
+        gap_bottom_default, gap_top_default, xday_threshold, xdays, min_loan_size, end_date, coin_cfg, min_loan_sizes, \
+        dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, exchange
+
+    exchange = api.__class__.__name__.upper()
 
     sleep_time_active = float(Config.get("BOT", "sleeptimeactive", None, 1, 3600))
     sleep_time_inactive = float(Config.get("BOT", "sleeptimeinactive", None, 1, 3600))
@@ -64,7 +66,10 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     gap_bottom_default = Decimal(Config.get("BOT", "gapbottom", None, 0))
     gap_top_default = Decimal(Config.get("BOT", "gaptop", None, gap_bottom_default))
     xday_threshold = Decimal(Config.get("BOT", "xdaythreshold", None, 0.003, 5)) / 100
-    xdays = str(Config.get("BOT", "xdays", None, 2, 60))
+    if exchange == 'BITFINEX':
+        xdays = str(Config.get("BOT", "xdays", None, 2, 30))
+    else:
+        xdays = str(Config.get("BOT", "xdays", None, 2, 60))
     min_loan_size = Decimal(Config.get("BOT", 'minloansize', None, 0.01))
     end_date = Config.get('BOT', 'endDate')
     coin_cfg = Config.get_coin_cfg()
@@ -114,7 +119,9 @@ def notify_new_loans(sleep_time):
     try:
         new_provided = api.return_active_loans()['provided']
         if loans_provided:
-            get_id_set = lambda loans: set([x['id'] for x in loans]) # lambda to return a set of ids from the api result
+            # function to return a set of ids from the api result
+            # get_id_set = lambda loans: set([x['id'] for x in loans])
+            def get_id_set(loans): return set([x['id'] for x in loans])
             loans_amount = {}
             loans_info = {}
             for loan_id in get_id_set(new_provided) - get_id_set(loans_provided):
@@ -144,32 +151,30 @@ def get_min_loan_size(currency):
 
 def create_lend_offer(currency, amt, rate):
     days = '2'
-    # if (min_daily_rate - 0.000001) < rate and Decimal(amt) > min_loan_size:
-    if float(amt) > get_min_loan_size(currency):
-        if float(rate) > 0.0001:
-            rate = float(rate) - 0.000001  # lend offer just bellow the competing one
-        amt = "%.8f" % Decimal(amt)
-        if float(rate) > xday_threshold:
-            days = xdays
-        if xday_threshold == 0:
-            days = '2'
-        if Config.has_option('BOT', 'endDate'):
-            days_remaining = int(Data.get_max_duration(end_date, "order"))
-            if int(days_remaining) <= 2:
-                print "endDate reached. Bot can no longer lend.\nExiting..."
-                log.log("The end date has almost been reached and the bot can no longer lend. Exiting.")
-                log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()), Data.get_max_duration(
-                    end_date, "status"))
-                log.persistStatus()
-                exit(0)
-            if int(days) > days_remaining:
-                days = str(days_remaining)
-        if not dry_run:
-            msg = api.create_loan_offer(currency, amt, days, 0, rate)
-            if days == xdays and notify_conf['notify_xday_threshold']:
-                text = "{0} {1} loan placed for {2} days at a rate of {3:.4f}%".format(amt, currency, days, rate * 100)
-                log.notify(text, notify_conf)
-            log.offer(amt, currency, rate, days, msg)
+    if float(rate) > 0.0001:
+        rate = float(rate) - 0.000001  # lend offer just bellow the competing one
+    amt = "%.8f" % Decimal(amt)
+    if float(rate) > xday_threshold:
+        days = xdays
+    if xday_threshold == 0:
+        days = '2'
+    if Config.has_option('BOT', 'endDate'):
+        days_remaining = int(Data.get_max_duration(end_date, "order"))
+        if int(days_remaining) <= 2:
+            print "endDate reached. Bot can no longer lend.\nExiting..."
+            log.log("The end date has almost been reached and the bot can no longer lend. Exiting.")
+            log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()), Data.get_max_duration(
+                end_date, "status"))
+            log.persistStatus()
+            exit(0)
+        if int(days) > days_remaining:
+            days = str(days_remaining)
+    if not dry_run:
+        msg = api.create_loan_offer(currency, amt, days, 0, rate)
+        if days == xdays and notify_conf['notify_xday_threshold']:
+            text = "{0} {1} loan placed for {2} days at a rate of {3:.4f}%".format(amt, currency, days, rate * 100)
+            log.notify(text, notify_conf)
+        log.offer(amt, currency, rate, days, msg)
 
 
 def cancel_all():
@@ -194,7 +199,7 @@ def cancel_all():
                 if not dry_run:
                     try:
                         msg = api.cancel_loan_offer(CUR, offer['id'])
-                        log.cancelOrders(CUR, msg)
+                        log.cancelOrder(CUR, msg)
                     except Exception as ex:
                         ex.message = ex.message if ex.message else str(ex)
                         log.log("Error canceling loan offer: {0}".format(ex.message))
@@ -390,7 +395,7 @@ def lend_cur(active_cur, total_lent, lending_balances, ticker):
     active_bal = MaxToLend.amount_to_lend(active_cur_total_balance, active_cur, Decimal(lending_balances[active_cur]),
                                           Decimal(order_book['rates'][0]))
 
-    if float(active_bal) > get_min_loan_size(active_cur):  # Make sure sleeptimer is set to active if any cur can lend.
+    if float(active_bal) >= get_min_loan_size(active_cur):  # Make sure sleeptimer is set to active if any cur can lend.
         currency_usable = 1
     else:
         return 0  # Return early to end function.
@@ -401,7 +406,8 @@ def lend_cur(active_cur, total_lent, lending_balances, ticker):
         below_min = Decimal(orders['rates'][i]) < Decimal(cur_min_daily_rate)
 
         if hide_coins and below_min:
-            log.log("Not lending {:s} due to rate below {:.4f}% (actual: {:.4f}%)".format(active_cur,(cur_min_daily_rate * 100),(orders['rates'][i] * 100)))
+            log.log("Not lending {:s} due to rate below {:.4f}% (actual: {:.4f}%)"
+                    .format(active_cur, (cur_min_daily_rate * 100), (orders['rates'][i] * 100)))
             return 0
         elif below_min:
             rate = str(cur_min_daily_rate)

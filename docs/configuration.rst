@@ -3,22 +3,35 @@
 Configuration
 *************
 
-Configuring the bot can be as simple as copy-pasting your API key and Secret.
+Configuring the bot can be as simple as select the exchange to use and copy-pasting your API key and Secret.
 
 New features are required to be backwards compatible with previous versions of the .cfg but it is still recommended that you update your config immediately after updating to take advantage of new features.
 
 To begin, copy ``default.cfg.example`` to ``default.cfg``. Now you can edit your settings.
 
-API key and Secret
-------------------
+Exchange selection, API key and Secret
+--------------------------------------
 
-Create a **NEW** API key and Secret from `Poloniex <https://poloniex.com/apiKeys>`_ and paste them into the respective slots in the config.
+Select the exchange to use in attribute ``exchange``. Supported are ``Poloniex`` and ``Bitfinex``. Default is Poloniex.
+
+    ``exchange = Poloniex``
+    or
+    ``exchange = Bitfinix``
+
+Create a **NEW** API key and Secret from `Poloniex <https://poloniex.com/apiKeys>`_
+or `Bitfinex <https://www.bitfinex.com/api>`_ and paste them into the respective slots in the config.
 
     ``apikey = XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX``
 
     ``secret = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...``
 
-Your API key is all capital letters and numbers in groups of 8, separated by hyphens.
+.. warning:: Do not share your API key nor secret with anyone whom you do not trust with all your Poloniex funds.
+
+.. note:: If you use an API key that has been used by any other application, it will likely fail for one application or the other. This is because the API requires a `nonce <https://en.wikipedia.org/wiki/Cryptographic_nonce>`_.
+
+**Poloniex**
+
+Your Poloniex API key is all capital letters and numbers in groups of 8, separated by hyphens.
 Your secret is 128 lowercase letters and numbers.
 
 HIGHLY Recommended:
@@ -26,10 +39,22 @@ HIGHLY Recommended:
     - Disable the "Enable Trading" checkbox. The bot does not need it to operate normally.
     - Enable IP filter to only the IP address the bot will be running from.
 
-.. warning:: Do not share your API key nor secret with anyone whom you do not trust with all your Poloniex funds.
+**Bitfinex**
 
-.. note:: If you use an API key that has been used by any other application, it will likely fail for one application or the other. This is because the API requires a `nonce <https://en.wikipedia.org/wiki/Cryptographic_nonce>`_.
+Your Bitfinex API key and secret are both 43 letters and numbers.
 
+HIGHLY Recommended:
+
+    - The lending bot needs only READ permission to "Account History", "Marging Funding", "Wallets"
+      and WRITE permission to "Margin Funding" and "Wallets". Deselect all other on key generation,
+      especially to "Withdraw".
+
+Exchange Sections
+-----------------
+There is a section for each exchange to configure exchange specific attributes.
+
+- ``all_currencies`` List of all supported currencies for funding. The list have to change only
+  when the exchange adds a new supported currency or removes one.
 
 Timing
 ---------
@@ -252,7 +277,7 @@ This feature allows you to record a currency's market and have the bot see trend
 Config per Coin
 ---------------
 
-This can be configured in one of two ways. 
+This can be configured in one of two ways.
 
 **Coincfg dictionary**
 
@@ -324,6 +349,8 @@ Advanced logging and Web Display
     - Default value: 8000 Uncomment to change
     - Format: ``PORT``
     - Do not set the port to a `reserved port <http://www.ingate.com/files/422/fwmanual-en/xa10285.html>`_ or you will receive an error when running the bot or attempting to connect (depending on HOW reserved a port is.)
+    - When you like to run more than one bot on same host (e.g. the first to lend on Poloniex and another one to lend on Bitfinex)
+      different port numbers have to defined. (e.g 8000 in Poloniex's config and 8001 in Bitfinex's config file)
 
 - ``customWebServerTemplate`` is the location the bot will use for WebServer HTML GUI template.
 
@@ -450,9 +477,9 @@ Detailed
   Messages are sent to the telegram bot API using HTTPS requests. You can read more about it `here <https://core.telegram.org/bots/api>`_.
 
   Telegram Bots are special accounts that do not require an additional phone number to set up, they do however need a unique authentication token. This is the token we need to get and add to the lendingbot's default.cfg. They are normally in the format ``123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11``.
-  
-  When we say we are creating a new telegram bot, all it means is that we are creating an account for the lendingbot to send message through. To create a bot and get a token, we must request it from the BotFather. This is telegram's tool for creating new bots. 
-  
+
+  When we say we are creating a new telegram bot, all it means is that we are creating an account for the lendingbot to send message through. To create a bot and get a token, we must request it from the BotFather. This is telegram's tool for creating new bots.
+
   These are the steps to carry out:
     1. Install the telegram desktop client from `their site <https://telegram.org/apps>`_. Then set it up with your phone number and login.
     2. Start a conversation with `The BotFather <https://telegram.me/botfather>`_. When you click the link it should open up in the telegram desktop client.
@@ -483,7 +510,7 @@ You then need to visit this `documentation page <https://docs.pushbullet.com/#li
 IRC notifications
 ~~~~~~~~~~~~~~~~~
 
-IRC is very easy to configure, if you are already interested in using it you'll understand what each of the options are. 
+IRC is very easy to configure, if you are already interested in using it you'll understand what each of the options are.
 
 The main thing to note is that you need to have the python module 'irc' installed. You can git it from pip like so::
 
@@ -500,3 +527,4 @@ Once you have that installed you have access to the following options for config
     irc_target = #bitbotfactory
 
 If you want to send a message directly to a user rather than a channel, you can specify it in the irc_target without the preceeding '#'. There is currently only support for one channel or user, but we can add more if there's any interest for it.
+=======

@@ -24,10 +24,10 @@ def amount_to_lend(active_cur_test_balance, active_cur, lending_balance, low_rat
     active_bal = Decimal(0)
     log_data = str("")
     cur_max_to_lend_rate = max_to_lend_rate
-    cur_max_to_lend =  max_to_lend
+    cur_max_to_lend = max_to_lend
     cur_max_percent_to_lend = max_percent_to_lend
     if active_cur in coin_cfg:
-        cur_max_to_lend_rate =  coin_cfg[active_cur]['maxtolendrate']
+        cur_max_to_lend_rate = coin_cfg[active_cur]['maxtolendrate']
         cur_max_to_lend = coin_cfg[active_cur]['maxtolend']
         cur_max_percent_to_lend = coin_cfg[active_cur]['maxpercenttolend']
     if cur_max_to_lend_rate == 0 and low_rate > 0 or cur_max_to_lend_rate >= low_rate > 0:

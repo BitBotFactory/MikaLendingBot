@@ -5,7 +5,7 @@ import datetime
 from cStringIO import StringIO
 
 # Bot libs
-from modules.Configuration import FULL_LIST
+import modules.Configuration as Config
 from modules.Data import timestamp, truncate
 try:
     import numpy
@@ -28,14 +28,12 @@ class MarketAnalysis(object):
 
         if len(self.currencies_to_analyse) != 0:
             for currency in self.currencies_to_analyse:
-
                 try:
-                    self.api.api_query("returnLoanOrders", {'currency': currency, 'limit': '5'})
+                    self.api.return_loan_orders(currency, 5)
                 except Exception as cur_ex:
-                    print "Error: You entered an incorrect currency: '" + currency + \
-                          "' to analyse the market of, please check your settings. Error message: " + str(cur_ex)
-                    exit(1)
-
+                    raise Exception("ERROR: You entered an incorrect currency: '" + currency +
+                                    "' to analyse the market of, please check your settings. Error message: "
+                                    + str(cur_ex))
                 else:
                     path = "market_data/" + currency + "_market_data.csv"
                     self.open_files[currency] = path
@@ -59,9 +57,10 @@ class MarketAnalysis(object):
         for cur in self.open_files:
             with open(self.open_files[cur], 'a') as f:
                 writer = csv.writer(f, lineterminator='\n')
-                raw_data = self.api.return_loan_orders(cur, 5)['offers'][0]
-                market_data = [timestamp(), raw_data['rate']]
-                writer.writerow(market_data)
+                raw_data = self.api.return_loan_orders(cur, 5)['offers']
+                if len(raw_data) > 0:
+                    market_data = [timestamp(), raw_data[0]['rate']]
+                    writer.writerow(market_data)
 
     def delete_old_data(self):
         for cur in self.open_files:
@@ -85,6 +84,7 @@ class MarketAnalysis(object):
         return diff_days
 
     def get_rate_list(self, cur):
+        FULL_LIST = Config.get_all_currencies()
         if cur not in FULL_LIST:
             raise ValueError("{0} is not a valid currency, must be one of {1}".format(cur, FULL_LIST))
         if cur not in self.open_files:

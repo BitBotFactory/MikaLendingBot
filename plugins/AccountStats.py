@@ -1,6 +1,5 @@
 # coding=utf-8
 from plugins.Plugin import Plugin
-import modules.Poloniex as Poloniex
 import sqlite3
 
 BITCOIN_GENESIS_BLOCK_DATE = "2009-01-03 18:15:05"
@@ -57,7 +56,7 @@ class AccountStats(Plugin):
             last_time_stamp = BITCOIN_GENESIS_BLOCK_DATE
             self.db.execute("PRAGMA user_version = 0")
 
-        self.fetch_history(Poloniex.create_time_stamp(last_time_stamp), sqlite3.time.time())
+        self.fetch_history(self.api.create_time_stamp(last_time_stamp), sqlite3.time.time())
 
         # As Poloniex API return a unspecified number of recent loans, but not all so we need to loop back.
         if (self.get_db_version() == 0) and (self.get_first_timestamp() is not None):
@@ -66,8 +65,8 @@ class AccountStats(Plugin):
             while loop:
                 sqlite3.time.sleep(10)  # delay a bit, try not to annoy poloniex
                 first_time_stamp = self.get_first_timestamp()
-                count = self.fetch_history(Poloniex.create_time_stamp(last_time_stamp, )
-                                           , Poloniex.create_time_stamp(first_time_stamp))
+                count = self.fetch_history(self.api.create_time_stamp(last_time_stamp),
+                                           self.api.create_time_stamp(first_time_stamp))
                 loop = count != 0
             # if we reached here without errors means we managed to fetch all the history, db is ready.
             self.set_db_version(1)

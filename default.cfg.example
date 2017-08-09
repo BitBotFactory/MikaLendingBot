@@ -1,8 +1,18 @@
 # Need help configuring? View the Documentation: https://poloniexlendingbot.readthedocs.io/en/latest/configuration.html
 
 [API]
+# Where to work? "Poloniex" or "Bitfinex". Default is "Poloniex"
+#exchange = Poloniex
 apikey = YourAPIKey
 secret = YourSecret
+
+[POLONIEX]
+# Full list of supported currencies
+all_currencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+
+[BITFINEX]
+# Full list of supported currencies
+all_currencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS
 
 [BOT]
 #Sleeps between active iterations, time in seconds (1-3600)
@@ -36,6 +46,8 @@ gaptop = 200
 
 #Daily lend rate threshold after which we offer lends for x days as opposed to 2.
 #If set to 0 all offers will be placed for a 2 day period (0.003-5)
+# Poloniex max lending period: 60 days
+# Bitfinex max lending period: 30 days
 xdaythreshold = 0.2
 xdays = 60
 
@@ -43,6 +55,7 @@ xdays = 60
 #Enter ALL to transfer all coins, enter ACTIVE to transfer any coins you have in your lending account when the bot starts, these can be mixed.
 #The currencies you enter below (comment it out to disable entirely, just leaving empty will result in an error) will be automatically transferred from your exchange balance to your lending balance whenever you deposit them.
 #transferableCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+#transferableCurrencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS
 
 #Minimum loan size, the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loan fragmentation.
 minloansize = 0.01
@@ -114,7 +127,7 @@ hideCoins = True
 #customWebServerTemplate = www
 
 #The currency that the HTML Overview will present the earnings summary in.
-#Options are BTC, USDT, ETH or anything as long as it has a direct BTC market. The default is BTC.
+#Options are BTC, USDT (USD on Bitfinex), ETH or anything as long as it has a direct BTC market. The default is BTC.
 #outputCurrency = BTC
 
 #Plugins allow extending Bot functionality with extra features.

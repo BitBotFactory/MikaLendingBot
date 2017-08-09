@@ -27,6 +27,8 @@ var btcDisplayUnitsModes = [BTC, mBTC, Bits, Satoshi];
 function updateJson(data) {
     $('#status').text(data.last_status);
     $('#updated').text(data.last_update);
+    $('#title').text(data.exchange + ' Lending Bot')
+    document.title = data.exchange + ' Lending Bot'
 
     var rowCount = data.log.length;
     var table = $('#logtable');
@@ -98,7 +100,7 @@ function updateRawValues(rawData){
             if (isNaN(totalCoins) && !isNaN(lentSum)) {
                 totalCoins = lentSum;
             }
-            var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to Poloniex fees
+            var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to exchange fees
 
             var earnings = '';
             var earningsSummaryCoin = '';
@@ -138,9 +140,9 @@ function updateRawValues(rawData){
             var avgRateText = makeTooltip("Average loan rate, simple average calculation of active loans rates.", "Avg.");
             var effRateText;
             if (effRateMode == 'lentperc')
-                effRateText = makeTooltip("Effective loan rate, considering lent precentage and poloniex 15% fee.", "Eff.");
+                effRateText = makeTooltip("Effective loan rate, considering lent precentage and exchange 15% fee.", "Eff.");
             else
-                effRateText = makeTooltip("Effective loan rate, considering poloniex 15% fee.", "Eff.");
+                effRateText = makeTooltip("Effective loan rate, considering exchange 15% fee.", "Eff.");
             var compoundRateText = makeTooltip("Compound rate, the result of reinvesting the interest.", "Comp.");
             var lentStr = 'Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + printFloat(totalCoins * btcMultiplier, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
 
@@ -388,7 +390,7 @@ function doSave() {
     if(validOutputCurrencyDisplayModes.indexOf(localStorage.outputCurrencyDisplayModeText) !== -1) {
         outputCurrencyDisplayMode = localStorage.outputCurrencyDisplayModeText;
     }
-    
+
     //Effective rate calculation
     localStorage.effRateMode = $('input[name="effRateMode"]:checked').val();
     if(validEffRateModes.indexOf(localStorage.effRateMode) !== -1) {

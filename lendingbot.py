@@ -13,8 +13,9 @@ import modules.Data as Data
 import modules.Lending as Lending
 import modules.MaxToLend as MaxToLend
 from modules.Logger import Logger
-from modules.Poloniex import Poloniex, PoloniexApiError
 import modules.PluginsManager as PluginsManager
+from modules.ExchangeApiFactory import ExchangeApiFactory
+from modules.ExchangeApi import ApiError
 
 
 try:
@@ -43,8 +44,9 @@ output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
 end_date = Config.get('BOT', 'endDate')
 json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
 
-log = Logger(Config.get('BOT', 'jsonfile', ''), Decimal(Config.get('BOT', 'jsonlogsize', -1)))
-api = Poloniex(Config.get("API", "apikey", None), Config.get("API", "secret", None))
+exchange = Config.get_exchange()
+log = Logger(Config.get('BOT', 'jsonfile', ''), Decimal(Config.get('BOT', 'jsonlogsize', -1)), exchange)
+api = ExchangeApiFactory.createApi(exchange, Config)
 MaxToLend.init(Config, log)
 Data.init(api, log)
 Config.init(config_location, Data)
@@ -61,9 +63,9 @@ Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 # load plugins
 PluginsManager.init(Config, api, log, notify_conf)
 
-print 'Welcome to Poloniex Lending Bot'
-# Configure web server
+print 'Welcome to Lending Bot on ' + exchange
 
+# Configure web server
 web_server_enabled = Config.getboolean('BOT', 'startWebServer')
 if web_server_enabled:  # Run web server
     import modules.WebServer as WebServer
@@ -107,20 +109,21 @@ try:
                 print "Caught BadStatusLine exception from Poloniex, ignoring."
             elif 'HTTP Error 429' in ex.message:
                 additional_sleep = max(130.0-Lending.get_sleep_time(), 0)
-                print "IP has been banned for 120 seconds due too many requests. Sleeping for " + str(additional_sleep+Lending.get_sleep_time()) + " seconds."
+                print "IP has been banned for 120 seconds due too many requests. Sleeping for " + \
+                    str(additional_sleep+Lending.get_sleep_time()) + " seconds."
                 time.sleep(additional_sleep)
             # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
             elif isinstance(ex, URLError):
                 print "Caught {0} from Poloniex, ignoring.".format(ex.message)
-            elif isinstance(ex, PoloniexApiError):
-                print "Caught {0} reading from Poloniex API, ignoring.".format(ex.message)
+            elif isinstance(ex, ApiError):
+                print "Caught {0} reading from exchange API, ignoring.".format(ex.message)
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
                 log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
-            pass
+
 
 except KeyboardInterrupt:
     if web_server_enabled:

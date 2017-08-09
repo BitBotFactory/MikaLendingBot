@@ -5,7 +5,6 @@ from decimal import Decimal
 
 config = SafeConfigParser()
 Data = None
-FULL_LIST = ['STR', 'BTC', 'BTS', 'CLAM', 'DOGE', 'DASH', 'LTC', 'MAID', 'XMR', 'XRP', 'ETH', 'FCT']
 # This module is the middleman between the bot and a SafeConfigParser object, so that we can add extra functionality
 # without clogging up lendingbot.py with all the config logic. For example, added a default value to get().
 
@@ -67,6 +66,13 @@ def get(category, option, default_value=False, lower_limit=False, upper_limit=Fa
 # Below: functions for returning some config values that require special treatment.
 
 
+def get_exchange():
+    '''
+    Returns used exchange
+    '''
+    return get('API', 'exchange', 'Poloniex').upper()
+
+
 def get_coin_cfg():
     coin_cfg = {}
     if config.has_option("BOT", "coinconfig"):
@@ -81,7 +87,7 @@ def get_coin_cfg():
             ex.message = ex.message if ex.message else str(ex)
             print("Coinconfig parsed incorrectly, please refer to the documentation. Error: {0}".format(ex.message))
     else:
-        for cur in FULL_LIST:
+        for cur in get_all_currencies():
             if config.has_section(cur):
                 try:
                     coin_cfg[cur] = {}
@@ -105,7 +111,7 @@ def get_coin_cfg():
 
 def get_min_loan_sizes():
     min_loan_sizes = {}
-    for cur in FULL_LIST:
+    for cur in get_all_currencies():
         if config.has_section(cur):
             try:
                 min_loan_sizes[cur] = Decimal(get(cur, 'minloansize', lower_limit=0.01))
@@ -120,7 +126,7 @@ def get_min_loan_sizes():
 
 def get_currencies_list(option):
     if config.has_option("BOT", option):
-        full_list = ['STR', 'BTC', 'BTS', 'CLAM', 'DOGE', 'DASH', 'LTC', 'MAID', 'XMR', 'XRP', 'ETH', 'FCT']
+        full_list = get_all_currencies()
         cur_list = []
         raw_cur_list = config.get("BOT", option).split(",")
         for raw_cur in raw_cur_list:
@@ -148,6 +154,25 @@ def get_gap_mode(category, option):
         return value.lower()
     else:
         return False
+
+
+def get_all_currencies():
+    '''
+    Get list of all supported currencies by exchange
+    '''
+    exchange = get_exchange()
+    if config.has_option(exchange, 'all_currencies'):
+        cur_list = []
+        raw_cur_list = config.get(exchange, 'all_currencies').split(',')
+        for raw_cur in raw_cur_list:
+            cur = raw_cur.strip(' ').upper()
+            cur_list.append(cur)
+        return cur_list
+    elif exchange == 'POLONIEX':
+        # default, compatibility to old 'Poloniex only' config
+        return ['STR', 'BTC', 'BTS', 'CLAM', 'DOGE', 'DASH', 'LTC', 'MAID', 'XMR', 'XRP', 'ETH', 'FCT']
+    else:
+        raise Exception('ERROR: List of supported currencies must defined in [' + exchange + '] all_currencies.')
 
 
 def get_notification_config():

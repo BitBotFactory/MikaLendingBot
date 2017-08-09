@@ -1,5 +1,4 @@
 from plugins import *
-import plugins.Plugin as Plugin
 
 config = None
 api = None
