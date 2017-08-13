@@ -21,6 +21,7 @@ class Bitfinex(ExchangeApi):
         self.ticker = {}
         self.tickerTime = 0
         self.usedCurrencies = []
+        self.timeout = int(self.cfg.get("BOT", "timeout", 30, 1, 180))
 
     @property
     def _nonce(self):
@@ -46,9 +47,9 @@ class Bitfinex(ExchangeApi):
         try:
             r = {}
             if (request == 'get'):
-                r = requests.get(self.url + command)
+                r = requests.get(self.url + command, timeout=self.timeout)
             else:
-                r = requests.post(self.url + command, headers=payload, verify=verify)
+                r = requests.post(self.url + command, headers=payload, verify=verify, timeout=self.timeout)
 
             if r.status_code != 200:
                 if (r.status_code in [502, 504, 522]):
