@@ -52,7 +52,7 @@ class Bitfinex(ExchangeApi):
                 r = requests.post(self.url + command, headers=payload, verify=verify, timeout=self.timeout)
 
             if r.status_code != 200:
-                if (r.status_code in [502, 504, 522]):
+                if (r.status_code == 502 or r.status_code in range(520, 527, 1)):
                     raise ApiError('API Error ' + str(r.status_code) +
                                    ': The web server reported a bad gateway or gateway timeout error.')
                 else:
