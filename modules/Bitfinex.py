@@ -178,7 +178,8 @@ class Bitfinex(ExchangeApi):
         })
 
         bfxResp = self._post("balances", signed_payload)
-        balances = Bitfinex2Poloniex.convertAccountBalances(bfxResp, account)
+        filtered_response = [x for x in bfxResp if x['type'] != 'conversion']
+        balances = Bitfinex2Poloniex.convertAccountBalances(filtered_response, account)
 
         if 'lending' in balances:
             self.usedCurrencies = []
