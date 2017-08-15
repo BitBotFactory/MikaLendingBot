@@ -15,6 +15,9 @@ all_currencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
 all_currencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS,BCH
 
 [BOT]
+#Custom name of the bot, that will be displayed in html page
+label = Lending Bot
+
 #Sleeps between active iterations, time in seconds (1-3600)
 sleeptimeactive = 60
 

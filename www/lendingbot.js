@@ -27,8 +27,8 @@ var btcDisplayUnitsModes = [BTC, mBTC, Bits, Satoshi];
 function updateJson(data) {
     $('#status').text(data.last_status);
     $('#updated').text(data.last_update);
-    $('#title').text(data.exchange + ' Lending Bot')
-    document.title = data.exchange + ' Lending Bot'
+    $('#title').text(data.exchange + ' ' + data.label)
+    document.title = data.exchange + ' ' + data.label
 
     var rowCount = data.log.length;
     var table = $('#logtable');

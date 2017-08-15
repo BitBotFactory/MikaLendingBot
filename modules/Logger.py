@@ -7,6 +7,7 @@ import sys
 import time
 
 import ConsoleUtils
+import modules.Configuration as Config
 from RingBuffer import RingBuffer
 from Notify import send_notification
 
@@ -47,6 +48,7 @@ class JsonOutput(object):
         self.clearStatusValues()
         self.jsonOutputLog = RingBuffer(logLimit)
         self.jsonOutput['exchange'] = exchange
+        self.jsonOutput['label'] = Config.get("BOT", "label", "Lending Bot")
 
     def status(self, status, time, days_remaining_msg):
         self.jsonOutput["last_update"] = time + days_remaining_msg

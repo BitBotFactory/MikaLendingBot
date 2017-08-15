@@ -63,7 +63,7 @@ Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 # load plugins
 PluginsManager.init(Config, api, log, notify_conf)
 
-print 'Welcome to Lending Bot on ' + exchange
+print 'Welcome to ' + Config.get("BOT", "label", "Lending Bot") + ' on ' + exchange
 
 # Configure web server
 web_server_enabled = Config.getboolean('BOT', 'startWebServer')
