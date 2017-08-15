@@ -383,6 +383,11 @@ To enable the plugin add ``AccountStats`` to the ``plugins`` config options, exa
 
     plugins = AccountStats
 
+There is an optional setting to change how frequently this plugin reports. By default, once per day. Example::
+
+    [ACCOUNTSTATS]
+    ReportInterval = 1800
+
 Be aware that first initialization might take longer as the bot will fetch all the history.
 
 lendingbot.html options
