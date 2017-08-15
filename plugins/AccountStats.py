@@ -3,7 +3,6 @@ from plugins.Plugin import Plugin
 import sqlite3
 
 BITCOIN_GENESIS_BLOCK_DATE = "2009-01-03 18:15:05"
-DAY_IN_SEC = 86400
 DB_DROP = "DROP TABLE IF EXISTS history"
 DB_CREATE = "CREATE TABLE IF NOT EXISTS history(" \
             "id INTEGER UNIQUE, open TIMESTAMP, close TIMESTAMP," \
@@ -18,15 +17,19 @@ DB_GET_TOTAL_EARNED = "SELECT sum(earned) as total_earned, currency FROM 'histor
 DB_GET_YESTERDAY_EARNINGS = "SELECT sum(earned) as total_earned, currency FROM 'history' " \
                      "WHERE close BETWEEN datetime('now', 'start of day', '-1 day') " \
                      "AND datetime('now','start of day') GROUP BY currency"
+DB_GET_TODAYS_EARNINGS = "SELECT sum(earned) as total_earned, currency FROM 'history' " \
+                     "WHERE close > datetime('now','start of day') GROUP BY currency"
 
 
 class AccountStats(Plugin):
     last_notification = 0
     earnings = {}
+    report_interval = 86400
 
     def on_bot_init(self):
         super(AccountStats, self).on_bot_init()
         self.init_db()
+        self.report_interval = int(self.config.get("ACCOUNTSTATS", "ReportInterval", 86400))
 
     def before_lending(self):
         for coin in self.earnings:
@@ -36,7 +39,7 @@ class AccountStats(Plugin):
     def after_lending(self):
         if self.get_db_version() > 0 \
                 and self.last_notification != 0 \
-                and self.last_notification + DAY_IN_SEC > sqlite3.time.time():
+                and self.last_notification + self.report_interval > sqlite3.time.time():
             return
         self.update_history()
         self.notify_stats()
@@ -58,16 +61,17 @@ class AccountStats(Plugin):
 
         self.fetch_history(self.api.create_time_stamp(last_time_stamp), sqlite3.time.time())
 
-        # As Poloniex API return a unspecified number of recent loans, but not all so we need to loop back.
+        # Fetch history in batches, loop to make sure we got everything
         if (self.get_db_version() == 0) and (self.get_first_timestamp() is not None):
             last_time_stamp = BITCOIN_GENESIS_BLOCK_DATE
             loop = True
             while loop:
-                sqlite3.time.sleep(10)  # delay a bit, try not to annoy poloniex
+                sqlite3.time.sleep(10)  # delay a bit, try not to annoy exchange
                 first_time_stamp = self.get_first_timestamp()
                 count = self.fetch_history(self.api.create_time_stamp(last_time_stamp),
                                            self.api.create_time_stamp(first_time_stamp))
                 loop = count != 0
+
             # if we reached here without errors means we managed to fetch all the history, db is ready.
             self.set_db_version(1)
 
@@ -78,9 +82,9 @@ class AccountStats(Plugin):
         return self.db.execute("PRAGMA user_version").fetchone()[0]
 
     def fetch_history(self, first_time_stamp, last_time_stamp):
-        history = self.api.return_lending_history(first_time_stamp, last_time_stamp - 1, 50000)
+        history = self.api.return_lending_history(first_time_stamp, last_time_stamp - 1, 5000)
         loans = []
-        for loan in reversed(history):
+        for loan in history:
             loans.append(
                 [loan['id'], loan['open'], loan['close'], loan['duration'], loan['interest'],
                  loan['rate'], loan['currency'], loan['amount'], loan['earned'], loan['fee']])
@@ -108,21 +112,36 @@ class AccountStats(Plugin):
         return row[0]
 
     def notify_stats(self):
-        if self.get_db_version() == 0:
-            if self.get_first_timestamp() is not None:
-                # only log an error if there are actually loans in DB
-                self.log.log_error('AccountStats DB isn\'t ready.')
+        if (self.get_db_version() == 0) and (self.get_first_timestamp() is not None):
+            # only log an error if there are actually loans in DB
+            self.log.log_error('AccountStats DB isn\'t ready.')
             return
 
         self.earnings = {}
-        cursor = self.db.execute(DB_GET_YESTERDAY_EARNINGS)
+
+        # Today's earnings
+        cursor = self.db.execute(DB_GET_TODAYS_EARNINGS)
         output = ''
+        if cursor.rowcount > 0:
+            for row in cursor:
+                output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Today\n'
+                if row[1] not in self.earnings:
+                    self.earnings[row[1]] = {}
+                self.earnings[row[1]]['todayEarnings'] = row[0]
+        else:
+            output += 'None Today\n'
+        cursor.close()
+
+        # Yesterday's earnings
+        cursor = self.db.execute(DB_GET_YESTERDAY_EARNINGS)
         for row in cursor:
             output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Yesterday\n'
             if row[1] not in self.earnings:
                 self.earnings[row[1]] = {}
             self.earnings[row[1]]['yesterdayEarnings'] = row[0]
         cursor.close()
+
+        # Total Earnings
         cursor = self.db.execute(DB_GET_TOTAL_EARNED)
         for row in cursor:
             output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in total\n'
@@ -130,6 +149,7 @@ class AccountStats(Plugin):
                 self.earnings[row[1]] = {}
             self.earnings[row[1]]['totalEarnings'] = row[0]
         cursor.close()
+
         if output != '':
             self.last_notification = sqlite3.time.time()
             output = 'Earnings:\n----------\n' + output
