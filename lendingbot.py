@@ -27,6 +27,7 @@ parser = argparse.ArgumentParser()  # Start args.
 parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
 parser.add_argument("-dry", "--dryrun", help="Make pretend orders", action="store_true")
 args = parser.parse_args()  # End args.
+
 # Start handling args.
 dry_run = bool(args.dryrun)
 if args.config:
@@ -35,17 +36,35 @@ else:
     config_location = 'default.cfg'
 # End handling args.
 
-Config.init(config_location)
 # Config format: Config.get(category, option, default_value=False, lower_limit=False, upper_limit=False)
 # A default_value "None" means that the option is required and the bot will not run without it.
 # Do not use lower or upper limit on any config options which are not numbers.
 # Define the variable from the option in the module where you use it.
+
+Config.init(config_location)
+
 output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
 end_date = Config.get('BOT', 'endDate')
-json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
-
 exchange = Config.get_exchange()
-log = Logger(Config.get('BOT', 'jsonfile', ''), Decimal(Config.get('BOT', 'jsonlogsize', -1)), exchange)
+
+json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
+jsonfile = Config.get('BOT', 'jsonfile', '')
+
+# Configure web server
+web_server_enabled = Config.getboolean('BOT', 'startWebServer')
+if web_server_enabled:
+    if json_output_enabled == False:
+        # User wants webserver enabled. Must have JSON enabled. Force logging with defaults.
+        json_output_enabled = True
+        jsonfile = Config.get('BOT', 'jsonfile', 'www/botlog.json')
+
+    import modules.WebServer as WebServer
+    WebServer.initialize_web_server(Config)
+
+# Configure logging
+log = Logger(jsonfile, Decimal(Config.get('BOT', 'jsonlogsize', 200)), exchange)
+
+# initialize the remaining stuff
 api = ExchangeApiFactory.createApi(exchange, Config)
 MaxToLend.init(Config, log)
 Data.init(api, log)
@@ -64,12 +83,6 @@ Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 PluginsManager.init(Config, api, log, notify_conf)
 
 print 'Welcome to ' + Config.get("BOT", "label", "Lending Bot") + ' on ' + exchange
-
-# Configure web server
-web_server_enabled = Config.getboolean('BOT', 'startWebServer')
-if web_server_enabled:  # Run web server
-    import modules.WebServer as WebServer
-    WebServer.initialize_web_server(Config)
 
 try:
     while True:

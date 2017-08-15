@@ -331,6 +331,7 @@ Advanced logging and Web Display
 
     - Default value: Commented out, uncomment to enable.
     - The server page can be accessed locally, at ``http://localhost:8000/lendingbot.html`` by default.
+    - Forces ``jsonfile`` to be set using ``www/botlog.json`` (unless otherwise configured)
     - You must close bot with a keyboard interrupt (CTRL-C on Windows) to properly shutdown the server and release the socket, otherwise you may have to wait several minutes for it to release itself.
 
 - ``customWebServerAddress`` is the IP address that the webserver can be found at.
