@@ -277,9 +277,8 @@ def get_gap_rate(active_cur, gap, order_book, cur_total_balance, raw=False):
     else:
         gap_expected = gap * cur_total_balance / Decimal(100.0)
     gap_sum = 0
-    i = -1
+    i = 0
     while gap_sum < gap_expected:
-        i += 1
         if i == len(order_book['volumes']) and len(order_book['volumes']) == loanOrdersRequestLimit[active_cur]:
             loanOrdersRequestLimit[active_cur] += defaultLoanOrdersRequestLimit
             log.log(active_cur + ': Not enough offers in response, adjusting request limit to ' + str(
@@ -288,6 +287,7 @@ def get_gap_rate(active_cur, gap, order_book, cur_total_balance, raw=False):
         elif i == len(order_book['volumes']):
             return max_daily_rate
         gap_sum += float(order_book['volumes'][i])
+        i += 1
     return Decimal(order_book['rates'][i])
 
 
