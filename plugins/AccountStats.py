@@ -118,36 +118,48 @@ class AccountStats(Plugin):
             return
 
         self.earnings = {}
+        output = ''
 
         # Today's earnings
         cursor = self.db.execute(DB_GET_TODAYS_EARNINGS)
-        output = ''
-        if cursor.rowcount > 0:
-            for row in cursor:
+        row = cursor.fetchone()
+        if row is not None:
+            while row is not None:
                 output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Today\n'
                 if row[1] not in self.earnings:
                     self.earnings[row[1]] = {}
                 self.earnings[row[1]]['todayEarnings'] = row[0]
+                row = cursor.fetchone()
         else:
             output += 'None Today\n'
         cursor.close()
 
         # Yesterday's earnings
         cursor = self.db.execute(DB_GET_YESTERDAY_EARNINGS)
-        for row in cursor:
-            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Yesterday\n'
-            if row[1] not in self.earnings:
-                self.earnings[row[1]] = {}
-            self.earnings[row[1]]['yesterdayEarnings'] = row[0]
+        row = cursor.fetchone()
+        if row is not None:
+            while row is not None:
+                output += self.format_value(row[0]) + ' ' + str(row[1]) + ' Yesterday\n'
+                if row[1] not in self.earnings:
+                    self.earnings[row[1]] = {}
+                self.earnings[row[1]]['yesterdayEarnings'] = row[0]
+                row = cursor.fetchone()
+        else:
+            output += 'None Yesterday\n'
         cursor.close()
 
         # Total Earnings
         cursor = self.db.execute(DB_GET_TOTAL_EARNED)
-        for row in cursor:
-            output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in total\n'
-            if row[1] not in self.earnings:
-                self.earnings[row[1]] = {}
-            self.earnings[row[1]]['totalEarnings'] = row[0]
+        row = cursor.fetchone()
+        if row is not None:
+            while row is not None:
+                output += self.format_value(row[0]) + ' ' + str(row[1]) + ' in total\n'
+                if row[1] not in self.earnings:
+                    self.earnings[row[1]] = {}
+                self.earnings[row[1]]['totalEarnings'] = row[0]
+                row = cursor.fetchone()
+        else:
+            output += 'Unknown total earnings.\n'
         cursor.close()
 
         if output != '':
