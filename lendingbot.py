@@ -133,7 +133,8 @@ try:
             else:
                 print traceback.format_exc()
                 print "Unhandled error, please open a Github issue so we can fix it!"
-                log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
+                if notify_conf['notify_caught_exception']:
+                    log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
 
