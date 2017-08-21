@@ -178,7 +178,7 @@ def get_all_currencies():
 def get_notification_config():
     notify_conf = {'enable_notifications': config.has_section('notifications')}
 
-    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_new_loans', 'email', 'slack', 'telegram',
+    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_new_loans', 'notify_caught_exception', 'email', 'slack', 'telegram',
                  'pushbullet', 'irc']:
         notify_conf[conf] = getboolean('notifications', conf)
 
