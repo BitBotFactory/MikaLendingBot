@@ -12,7 +12,7 @@ all_currencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
 
 [BITFINEX]
 # Full list of supported currencies
-all_currencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS,BCH
+all_currencies = USD,BTC,BCH,ETH,XRP,IOT,XMR,LTC,OMG,ETC,EOS,DSH,ZEC
 
 [BOT]
 #Custom name of the bot, that will be displayed in html page
@@ -58,7 +58,7 @@ xdays = 60
 #Enter ALL to transfer all coins, enter ACTIVE to transfer any coins you have in your lending account when the bot starts, these can be mixed.
 #The currencies you enter below (comment it out to disable entirely, just leaving empty will result in an error) will be automatically transferred from your exchange balance to your lending balance whenever you deposit them.
 #transferableCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
-#transferableCurrencies = USD,BTC,ETH,ETC,ZEC,XMR,LTC,DSH,IOT,EOS
+#transferableCurrencies = USD,BTC,BCH,ETH,XRP,IOT,XMR,LTC,OMG,ETC,EOS,DSH,ZEC
 
 #Minimum loan size, the minimum size of offers to make, bigger values prevent the bot from loaning small available amounts but reduce loan fragmentation.
 minloansize = 0.01
