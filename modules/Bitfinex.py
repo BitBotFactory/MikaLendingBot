@@ -294,7 +294,6 @@ class Bitfinex(ExchangeApi):
         https://bitfinex.readme.io/v1/reference#rest-auth-balance-history
         '''
         history = []
-        idInc = 0
         allCurrencies = self.cfg.get_all_currencies()
         for curr in allCurrencies:
             signed_payload = self._sign_payload({
@@ -311,7 +310,7 @@ class Bitfinex(ExchangeApi):
                 if 'Margin Funding Payment' in entry['description']:
                     amount = float(entry['amount'])
                     history.append({
-                        "id": int(float(entry['timestamp'])) + idInc,
+                        "id": int(float(entry['timestamp'])),
                         "currency": curr,
                         "rate": "0.0",
                         "amount": "0.0",
@@ -322,6 +321,5 @@ class Bitfinex(ExchangeApi):
                         "open": Bitfinex2Poloniex.convertTimestamp(entry['timestamp']),
                         "close": Bitfinex2Poloniex.convertTimestamp(entry['timestamp'])
                     })
-                    idInc += 1
 
         return history
