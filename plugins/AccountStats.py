@@ -2,12 +2,14 @@
 from plugins.Plugin import Plugin
 import sqlite3
 
+DB_VERSION = 2
 BITCOIN_GENESIS_BLOCK_DATE = "2009-01-03 18:15:05"
 DB_DROP = "DROP TABLE IF EXISTS history"
 DB_CREATE = "CREATE TABLE IF NOT EXISTS history(" \
-            "id INTEGER UNIQUE, open TIMESTAMP, close TIMESTAMP," \
+            "id INTEGER NOT NULL, open TIMESTAMP, close TIMESTAMP," \
             " duration NUMBER, interest NUMBER, rate NUMBER," \
-            " currency TEXT, amount NUMBER, earned NUMBER, fee NUMBER )"
+            " currency TEXT NOT NULL, amount NUMBER, earned NUMBER, fee NUMBER," \
+            " UNIQUE(id, currency) ON CONFLICT REPLACE )"
 DB_INSERT = "INSERT OR REPLACE INTO 'history'" \
             "('id','open','close','duration','interest','rate','currency','amount','earned','fee')" \
             " VALUES (?,?,?,?,?,?,?,?,?,?);"
@@ -15,10 +17,10 @@ DB_GET_LAST_TIMESTAMP = "SELECT max(close) as last_timestamp FROM 'history'"
 DB_GET_FIRST_TIMESTAMP = "SELECT min(close) as first_timestamp FROM 'history'"
 DB_GET_TOTAL_EARNED = "SELECT sum(earned) as total_earned, currency FROM 'history' GROUP BY currency"
 DB_GET_YESTERDAY_EARNINGS = "SELECT sum(earned) as total_earned, currency FROM 'history' " \
-                     "WHERE close BETWEEN datetime('now', 'start of day', '-1 day') " \
-                     "AND datetime('now','start of day') GROUP BY currency"
+                            "WHERE close BETWEEN datetime('now', 'start of day', '-1 day') " \
+                            "AND datetime('now','start of day') GROUP BY currency"
 DB_GET_TODAYS_EARNINGS = "SELECT sum(earned) as total_earned, currency FROM 'history' " \
-                     "WHERE close > datetime('now','start of day') GROUP BY currency"
+                         "WHERE close > datetime('now','start of day') GROUP BY currency"
 
 
 class AccountStats(Plugin):
@@ -29,6 +31,7 @@ class AccountStats(Plugin):
     def on_bot_init(self):
         super(AccountStats, self).on_bot_init()
         self.init_db()
+        self.check_upgrade()
         self.report_interval = int(self.config.get("ACCOUNTSTATS", "ReportInterval", 86400))
 
     def before_lending(self):
@@ -49,6 +52,16 @@ class AccountStats(Plugin):
         self.db = sqlite3.connect('market_data/loan_history.sqlite3')
         self.db.execute(DB_CREATE)
         self.db.commit()
+
+    def check_upgrade(self):
+        if 0 < self.get_db_version() < DB_VERSION:
+            # drop table and set version to 0 to reinitialize db to new version.
+            self.db.execute(DB_DROP)
+            self.set_db_version(0)
+            self.db.commit()
+            self.db.execute(DB_CREATE)
+            self.db.commit()
+            self.log.log('Upgraded AccountStats DB  to version ' + str(DB_VERSION))
 
     def update_history(self):
         # timestamps are in UTC
@@ -73,7 +86,7 @@ class AccountStats(Plugin):
                 loop = count != 0
 
             # if we reached here without errors means we managed to fetch all the history, db is ready.
-            self.set_db_version(1)
+            self.set_db_version(DB_VERSION)
 
     def set_db_version(self, version):
         self.db.execute("PRAGMA user_version = " + str(version))
