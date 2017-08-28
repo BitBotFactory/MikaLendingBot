@@ -137,7 +137,7 @@ hideCoins = True
 #plugins = AccountStats
 
 #[ACCOUNTSTATS]
-#ReportInterval = 1800
+#ReportInterval = 86400
 
 # Currencies can be configured here, or in the coinconfig. Coinconfig takes precedence.
 #[BTC]
