@@ -34,6 +34,8 @@ def init(cfg, api1, log1, notify_conf1):
     for plugin_name in plugin_names:
         plugins.append(init_plugin(plugin_name))
 
+    log.addSectionLog("plugins", "enabled", plugin_names)
+
 
 def after_lending():
     for plugin in plugins:

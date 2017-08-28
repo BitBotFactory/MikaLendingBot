@@ -64,6 +64,9 @@ class JsonOutput(object):
             f.write(unicode(json.dumps(self.jsonOutput, ensure_ascii=False, sort_keys=True)))
             f.close()
 
+    def addSectionLog(self, section, key, value):
+        self.jsonOutput[section] = {key: value}
+
     def statusValue(self, coin, key, value):
         if coin not in self.jsonOutputCoins:
             self.jsonOutputCoins[coin] = {}
@@ -122,6 +125,10 @@ class Logger(object):
         if days_remaining != '':
             self._daysRemaining = days_remaining
         self.output.status(self._lent, self.timestamp(), self._daysRemaining)
+
+    def addSectionLog(self, section, key, value):
+        if hasattr(self.output, 'addSectionLog'):
+            self.output.addSectionLog(section, key, value)
 
     def updateStatusValue(self, coin, key, value):
         if hasattr(self.output, 'statusValue'):
