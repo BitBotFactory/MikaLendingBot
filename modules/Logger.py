@@ -65,7 +65,11 @@ class JsonOutput(object):
             f.close()
 
     def addSectionLog(self, section, key, value):
-        self.jsonOutput[section] = {key: value}
+        if section not in self.jsonOutput:
+            self.jsonOutput[section] = {}
+        if key not in self.jsonOutput[section]:
+            self.jsonOutput[section][key] = {}
+        self.jsonOutput[section][key] = value
 
     def statusValue(self, coin, key, value):
         if coin not in self.jsonOutputCoins:
