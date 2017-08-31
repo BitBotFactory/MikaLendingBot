@@ -380,6 +380,9 @@ To enable/disable a plugin add/remove it to the ``plugins`` list config option u
 
     plugins = Plugin1, Plugin2, etc...
 
+Plugins can add their own HTML pages by calling ``self.log.addSectionlog('plugins', '<pluginName>', 'navbar', True);`` within their init code.
+This will add a navbar element on the main lendingbot.html page linking to <pluginName>.html
+
 AccountStats Plugin
 ~~~~~~~~~~~~~~~~~~~
 

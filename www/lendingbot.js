@@ -39,6 +39,41 @@ function updateJson(data) {
 
     updateOutputCurrency(data.outputCurrency);
     updateRawValues(data.raw_data);
+    updateNavbar(data.plugins);
+}
+
+function updateNavbar(plugins) {
+
+    // No plugins enabled. Nothing to do.
+    if (plugins == undefined || plugins.enabled == undefined)
+        return;
+
+    var enabled = plugins.enabled
+    var navbar = $('#navbar-menu')
+    var navbarItems = Array()
+
+    // Build list of navbar items
+    $.each($('#navbar-menu li'), function() {
+        if ($(this).attr('id') != undefined) {
+            navbarItems.push($(this).attr('id').toLowerCase())
+        }
+    });
+
+    // iterate through enabled plugins; look for 'navbar': true
+    $.each(enabled, function(i, val) {
+        var v = val.toLowerCase()
+        if ((v in plugins) && ('navbar' in plugins[v]) && (plugins[v]['navbar'])) {
+
+            // this plugin wants a link in the navbar.
+            // Search current navbar and add if needed
+            var newId = v + "-navbar"
+            if (navbarItems.indexOf(newId) < 0) {
+                var newItem = '<li id="' + newId + '" data-toggle="collapse" data-target=".navbar-collapse.in">'
+                newItem += '<a href="' + v + '.html">' + val + '</a></li>'
+                navbar.prepend(newItem);
+            }
+        }
+    });
 }
 
 function updateOutputCurrency(outputCurrency){
