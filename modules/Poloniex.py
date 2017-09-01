@@ -39,8 +39,9 @@ def synchronized(method):
 
 
 class Poloniex(ExchangeApi):
-    def __init__(self, cfg):
+    def __init__(self, cfg, log):
         self.cfg = cfg
+        self.log = log
         self.APIKey = self.cfg.get("API", "apikey", None)
         self.Secret = self.cfg.get("API", "secret", None)
         self.req_per_sec = 6

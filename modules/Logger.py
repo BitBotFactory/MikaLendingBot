@@ -96,7 +96,8 @@ class Logger(object):
             self.output = ConsoleOutput()
         self.refreshStatus()
 
-    def timestamp(self):
+    @staticmethod
+    def timestamp():
         ts = time.time()
         return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -108,7 +109,7 @@ class Logger(object):
     def log_error(self, msg):
         log_message = "{0} Error {1}".format(self.timestamp(), msg)
         self.output.printline(log_message)
-        if type(self.output) is JsonOutput:
+        if isinstance(self.output, JsonOutput):
             print log_message
         self.refreshStatus()
 
@@ -148,7 +149,8 @@ class Logger(object):
         if hasattr(self.output, 'clearStatusValues'):
             self.output.clearStatusValues()
 
-    def digestApiMsg(self, msg):
+    @staticmethod
+    def digestApiMsg(msg):
         m = ""
         try:
             m = (msg['message'])

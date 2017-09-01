@@ -25,7 +25,7 @@ class Bitfinex2Poloniex(object):
             if offer['currency'] not in plxOffers:
                 plxOffers[offer['currency']] = []
 
-            if offer['direction'] == 'lend' and offer['remaining_amount'] != '0.0':
+            if offer['direction'] == 'lend' and float(offer['remaining_amount']) > 0:
                 plxOffers[offer['currency']].append({
                     "id": offer['id'],
                     "rate": str(float(offer['rate'])/36500),
@@ -40,7 +40,7 @@ class Bitfinex2Poloniex(object):
     @staticmethod
     def convertActiveLoans(bfxOffers):
         '''
-        Convert from "credits" to "returnActivLoans"
+        Convert from "credits" to "returnActiveLoans"
         '''
 
         plxOffers = {}
@@ -50,7 +50,7 @@ class Bitfinex2Poloniex(object):
             plxOffers['provided'].append({
                 "id": offer['id'],
                 "currency": offer['currency'],
-                "rate": str(float(offer['rate'])/36500),
+                "rate": str(float(offer['rate']) / 36500),
                 "amount": offer['amount'],
                 "duration": offer['period'],
                 "autoRenew": 0,
@@ -71,7 +71,7 @@ class Bitfinex2Poloniex(object):
 
         for bid in bfxLendbook['bids']:
             plxOrders['demands'].append({
-                'rate': '{0:0.8f}'.format(float(bid['rate'])/36500),
+                'rate': '{0:0.8f}'.format(float(bid['rate']) / 36500),
                 'amount': bid['amount'],
                 'rangeMin': '2',
                 'rangeMax': bid['period']
@@ -79,7 +79,7 @@ class Bitfinex2Poloniex(object):
 
         for ask in bfxLendbook['asks']:
             plxOrders['offers'].append({
-                'rate': '{0:0.8f}'.format(float(ask['rate'])/36500),
+                'rate': '{0:0.8f}'.format(float(ask['rate']) / 36500),
                 'amount': ask['amount'],
                 'rangeMin': '2',
                 'rangeMax': ask['period']
@@ -106,8 +106,9 @@ class Bitfinex2Poloniex(object):
             balances[account] = {}
 
         for balance in bfxBalances:
-            if ((account == '' or account == accountMap[balance['type']])
-                    and float(balance['available']) > 0.0):
+            if balance['type'] == 'conversion':
+                continue
+            if (account == '' or account == accountMap[balance['type']]) and float(balance['amount']) > 0:
                 curr = balance['currency'].upper()
                 balances[account][curr] = balance['available']
 

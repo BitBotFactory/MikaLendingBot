@@ -12,16 +12,20 @@ from modules.Bitfinex2Poloniex import Bitfinex2Poloniex
 
 
 class Bitfinex(ExchangeApi):
-    def __init__(self, cfg):
+    def __init__(self, cfg, log):
         self.cfg = cfg
-        self.url = 'https://api.bitfinex.com/v1/'
+        self.log = log
+        self.url = 'https://api.bitfinex.com'
         self.key = self.cfg.get("API", "apikey", None)
         self.secret = self.cfg.get("API", "secret", None)
+        self.apiVersion = 'v1'
         self.symbols = []
         self.ticker = {}
         self.tickerTime = 0
         self.usedCurrencies = []
         self.timeout = int(self.cfg.get("BOT", "timeout", 30, 1, 180))
+        # Initialize usedCurrencies
+        _ = self.return_available_account_balances("lending")
 
     @property
     def _nonce(self):
@@ -43,13 +47,14 @@ class Bitfinex(ExchangeApi):
             "X-BFX-PAYLOAD": data
         }
 
-    def _request(self, request, command, payload=None, verify=True):
+    def _request(self, method, request, payload=None, verify=True):
         try:
             r = {}
-            if (request == 'get'):
-                r = requests.get(self.url + command, timeout=self.timeout)
+            url = '{}{}'.format(self.url, request)
+            if (method == 'get'):
+                r = requests.get(url, timeout=self.timeout)
             else:
-                r = requests.post(self.url + command, headers=payload, verify=verify, timeout=self.timeout)
+                r = requests.post(url, headers=payload, verify=verify, timeout=self.timeout)
 
             if r.status_code != 200:
                 if (r.status_code == 502 or r.status_code in range(520, 527, 1)):
@@ -62,14 +67,19 @@ class Bitfinex(ExchangeApi):
 
         except Exception as ex:
             ex.message = ex.message if ex.message else str(ex)
-            ex.message = "{0} Requesting {1}".format(ex.message, self.url + command)
+            ex.message = "{0} Requesting {1}".format(ex.message, self.url + request)
             raise ex
 
-    def _post(self, command, payload, verify=True):
-        return self._request('post', command, payload, verify)
+    def _post(self, command, payload=None, verify=True):
+        payload = payload or {}
+        payload['request'] = '/{}/{}'.format(self.apiVersion, command)
+        payload['nonce'] = self._nonce
+        signed_payload = self._sign_payload(payload)
+        return self._request('post', payload['request'], signed_payload, verify)
 
     def _get(self, command):
-        return self._request('get', command)
+        request = '/{}/{}'.format(self.apiVersion, command)
+        return self._request('get', request)
 
     def _getSymbols(self):
         '''
@@ -92,12 +102,7 @@ class Bitfinex(ExchangeApi):
         Returns active loan offers
         https://bitfinex.readme.io/v1/reference#rest-auth-offers
         '''
-        signed_payload = self._sign_payload({
-            "request": "/v1/offers",
-            "nonce": self._nonce
-        })
-
-        bfxResp = self._post("offers", signed_payload)
+        bfxResp = self._post('offers')
         resp = Bitfinex2Poloniex.convertOpenLoanOffers(bfxResp)
 
         return resp
@@ -114,12 +119,7 @@ class Bitfinex(ExchangeApi):
         Returns own active loan offers
         https://bitfinex.readme.io/v1/reference#rest-auth-offers
         '''
-        signed_payload = self._sign_payload({
-            "request": "/v1/credits",
-            "nonce": self._nonce
-        })
-
-        bfxResp = self._post("credits", signed_payload)
+        bfxResp = self._post('credits')
         resp = Bitfinex2Poloniex.convertActiveLoans(bfxResp)
 
         return resp
@@ -133,6 +133,8 @@ class Bitfinex(ExchangeApi):
         if (t - self.tickerTime < 60):
             return self.ticker
 
+        setTickerTime = True
+
         for symbol in self._getSymbols():
             base = symbol[3:].upper()
             curr = symbol[:3].upper()
@@ -141,29 +143,33 @@ class Bitfinex(ExchangeApi):
                 coupleReverse = (curr + '_' + base)
 
                 try:
-                    ticker = self._get('pubticker/'+symbol)
-                except ApiError as e:
-                    if not self.ticker[couple]:
-                        raise e
+                    ticker = self._get('pubticker/' + symbol)
 
-                if 'message' in ticker:
-                    raise ApiError("Error: %s (%s)".format(ticker['message'], symbol))
+                    if 'message' in ticker:
+                        raise ApiError("Error: {} ({})".format(ticker['message'], symbol))
 
-                self.ticker[couple] = {
-                    "last": ticker['last_price'],
-                    "lowestAsk": ticker['ask'],
-                    "highestBid": ticker['bid'],
-                    "percentChange": "",
-                    "baseVolume": str(float(ticker['volume'])*float(ticker['mid'])),
-                    "quoteVolume": ticker['volume']
-                }
-                self.ticker[coupleReverse] = {
-                    "last": 1 / float(self.ticker[couple]['last']),
-                    "lowestAsk": 1 / float(self.ticker[couple]['lowestAsk']),
-                    "highestBid": 1 / float(self.ticker[couple]['highestBid'])
-                }
+                    self.ticker[couple] = {
+                        "last": ticker['last_price'],
+                        "lowestAsk": ticker['ask'],
+                        "highestBid": ticker['bid'],
+                        "percentChange": "",
+                        "baseVolume": str(float(ticker['volume']) * float(ticker['mid'])),
+                        "quoteVolume": ticker['volume']
+                    }
+                    self.ticker[coupleReverse] = {
+                        "last": 1 / float(self.ticker[couple]['last']),
+                        "lowestAsk": 1 / float(self.ticker[couple]['lowestAsk']),
+                        "highestBid": 1 / float(self.ticker[couple]['highestBid'])
+                    }
 
-        self.tickerTime = t
+                except Exception as ex:
+                    self.log.log_error('Error retrieving ticker for {}: {}. Continue with next currency.'
+                                       .format(symbol, ex.message))
+                    setTickerTime = False
+                    continue
+
+        if setTickerTime and len(self.ticker) > 2:  # USD_BTC and BTC_USD are always in
+            self.tickerTime = t
 
         return self.ticker
 
@@ -172,19 +178,13 @@ class Bitfinex(ExchangeApi):
         Returns own balances sorted by account
         https://bitfinex.readme.io/v1/reference#rest-auth-wallet-balances
         '''
-        signed_payload = self._sign_payload({
-            "request": "/v1/balances",
-            "nonce": self._nonce
-        })
-
-        bfxResp = self._post("balances", signed_payload)
-        filtered_response = [x for x in bfxResp if x['type'] != 'conversion']
-        balances = Bitfinex2Poloniex.convertAccountBalances(filtered_response, account)
+        bfxResp = self._post('balances')
+        balances = Bitfinex2Poloniex.convertAccountBalances(bfxResp, account)
 
         if 'lending' in balances:
-            self.usedCurrencies = []
             for curr in balances['lending']:
-                self.usedCurrencies.append(curr)
+                if curr not in self.usedCurrencies:
+                    self.usedCurrencies.append(curr)
 
         return balances
 
@@ -193,13 +193,11 @@ class Bitfinex(ExchangeApi):
         Cancels an offer
         https://bitfinex.readme.io/v1/reference#rest-auth-cancel-offer
         '''
-        signed_payload = self._sign_payload({
-            "request": "/v1/offer/cancel",
+        payload = {
             "offer_id": order_number,
-            "nonce": self._nonce
-        })
+        }
 
-        bfxResp = self._post("offer/cancel", signed_payload)
+        bfxResp = self._post('offer/cancel', payload)
 
         success = 0
         message = ''
@@ -207,7 +205,7 @@ class Bitfinex(ExchangeApi):
             if bfxResp['id'] == order_number:
                 success = 1
                 message = "Loan offer canceled ({:.4f} @ {:.4f}%).".format(float(bfxResp['remaining_amount']),
-                                                                           float(bfxResp['rate'])/365)
+                                                                           float(bfxResp['rate']) / 365)
         except Exception as e:
             message = "Error canceling offer: ", str(e)
             success = 0
@@ -220,18 +218,16 @@ class Bitfinex(ExchangeApi):
         https://bitfinex.readme.io/v1/reference#rest-auth-new-offer
         '''
 
-        signed_payload = self._sign_payload({
-            "request": "/v1/offer/new",
+        payload = {
             "currency": currency,
             "amount": str(amount),
             "rate": str(lending_rate * 36500),
             "period": int(duration),
-            "direction": "lend",
-            "nonce": self._nonce
-        })
+            "direction": "lend"
+        }
 
         try:
-            bfxResp = self._post("offer/new", signed_payload)
+            bfxResp = self._post('offer/new', payload)
             plxResp = {"success": 0, "message": "Error", "orderID": 0}
             if bfxResp['id']:
                 plxResp['orderId'] = bfxResp['id']
@@ -246,7 +242,7 @@ class Bitfinex(ExchangeApi):
                     usd_min = 50
                     cur_min = usd_min
                     if currency != 'USD':
-                        cur_min = usd_min / float(self.return_ticker()['USD_'+currency]['lowestAsk'])
+                        cur_min = usd_min / float(self.return_ticker()['USD_' + currency]['lowestAsk'])
 
                     raise Exception("Error create_loan_offer: Amount must be at least " + str(cur_min) + " " + currency)
                 else:
@@ -270,16 +266,14 @@ class Bitfinex(ExchangeApi):
             'lending': 'deposit',
             'exchange': 'exchange'
         }
-        signed_payload = self._sign_payload({
-            "request": "/v1/transfer",
+        payload = {
             "currency": currency,
             "amount": amount,
             "walletfrom": accountMap[from_account],
-            "walletto": accountMap[to_account],
-            "nonce": self._nonce
-        })
+            "walletto": accountMap[to_account]
+        }
 
-        bfxResp = self._post("transfer", signed_payload)
+        bfxResp = self._post('transfer', payload)
         plxResp = {
             "status":  1 if bfxResp[0]['status'] == "success" else 0,
             "message": bfxResp[0]['message']
@@ -296,16 +290,14 @@ class Bitfinex(ExchangeApi):
         history = []
         allCurrencies = self.cfg.get_all_currencies()
         for curr in allCurrencies:
-            signed_payload = self._sign_payload({
-                "request": "/v1/history",
+            payload = {
                 "currency": curr,
                 "since": str(start),
                 "until": str(stop),
                 "limit": limit,
-                "wallet": "deposit",
-                "nonce": self._nonce
-            })
-            bfxResp = self._post('history', signed_payload)
+                "wallet": "deposit"
+            }
+            bfxResp = self._post('history', payload)
             for entry in bfxResp:
                 if 'Margin Funding Payment' in entry['description']:
                     amount = float(entry['amount'])
@@ -315,8 +307,8 @@ class Bitfinex(ExchangeApi):
                         "rate": "0.0",
                         "amount": "0.0",
                         "duration": "0.0",
-                        "interest": str(amount/0.85),
-                        "fee": str(amount-amount/0.85),
+                        "interest": str(amount / 0.85),
+                        "fee": str(amount-amount / 0.85),
                         "earned": str(amount),
                         "open": Bitfinex2Poloniex.convertTimestamp(entry['timestamp']),
                         "close": Bitfinex2Poloniex.convertTimestamp(entry['timestamp'])

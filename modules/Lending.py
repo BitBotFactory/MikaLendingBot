@@ -35,6 +35,8 @@ max_active_alerted = {}
 notify_conf = {}
 loans_provided = {}
 gap_mode_default = ""
+scheduler = None
+exchange = None
 
 # limit of orders to request
 loanOrdersRequestLimit = {}
@@ -56,7 +58,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
         dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, exchange, \
         analysis_method
 
-    exchange = api.__class__.__name__.upper()
+    exchange = Config.get_exchange()
 
     sleep_time_active = float(Config.get("BOT", "sleeptimeactive", None, 1, 3600))
     sleep_time_inactive = float(Config.get("BOT", "sleeptimeinactive", None, 1, 3600))

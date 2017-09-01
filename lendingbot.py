@@ -53,7 +53,7 @@ jsonfile = Config.get('BOT', 'jsonfile', '')
 # Configure web server
 web_server_enabled = Config.getboolean('BOT', 'startWebServer')
 if web_server_enabled:
-    if json_output_enabled == False:
+    if json_output_enabled is False:
         # User wants webserver enabled. Must have JSON enabled. Force logging with defaults.
         json_output_enabled = True
         jsonfile = Config.get('BOT', 'jsonfile', 'www/botlog.json')
@@ -65,7 +65,7 @@ if web_server_enabled:
 log = Logger(jsonfile, Decimal(Config.get('BOT', 'jsonlogsize', 200)), exchange)
 
 # initialize the remaining stuff
-api = ExchangeApiFactory.createApi(exchange, Config)
+api = ExchangeApiFactory.createApi(exchange, Config, log)
 MaxToLend.init(Config, log)
 Data.init(api, log)
 Config.init(config_location, Data)
@@ -120,14 +120,14 @@ try:
                 print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
             elif isinstance(ex, BadStatusLine):
                 print "Caught BadStatusLine exception from Poloniex, ignoring."
-            elif 'HTTP Error 429' in ex.message:
+            elif 'Error 429' in ex.message:
                 additional_sleep = max(130.0-Lending.get_sleep_time(), 0)
-                print "IP has been banned for 120 seconds due too many requests. Sleeping for " + \
-                    str(additional_sleep+Lending.get_sleep_time()) + " seconds."
+                sum_sleep = additional_sleep + Lending.get_sleep_time()
+                log.log_error('IP has been banned due to many requests. Sleeping for {} seconds'.format(sum_sleep))
                 time.sleep(additional_sleep)
             # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
             elif isinstance(ex, URLError):
-                print "Caught {0} from Poloniex, ignoring.".format(ex.message)
+                print "Caught {0} from exchange, ignoring.".format(ex.message)
             elif isinstance(ex, ApiError):
                 print "Caught {0} reading from exchange API, ignoring.".format(ex.message)
             else:

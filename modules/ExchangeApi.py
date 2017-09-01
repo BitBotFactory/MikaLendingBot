@@ -7,15 +7,21 @@ import calendar
 import time
 
 
-class ExchangeApi():
+class ExchangeApi(object):
     __metaclass__ = abc.ABCMeta
+
+    def __str__(self):
+        return self.__class__.__name__.upper()
+
+    def __repr__(self):
+        return self.__str__()
 
     @staticmethod
     def create_time_stamp(datestr, formatting="%Y-%m-%d %H:%M:%S"):
         return calendar.timegm(time.strptime(datestr, formatting))
 
     @abc.abstractmethod
-    def __init__(self, cfg):
+    def __init__(self, cfg, log):
         '''
         Constructor
         '''
