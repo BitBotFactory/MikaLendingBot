@@ -70,7 +70,7 @@ MaxToLend.init(Config, log)
 Data.init(api, log)
 Config.init(config_location, Data)
 notify_conf = Config.get_notification_config()
-if Config.has_option('BOT', 'analyseCurrencies'):
+if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
     from modules.MarketAnalysis import MarketAnalysis
     # Analysis.init(Config, api, Data)
     analysis = MarketAnalysis(Config, api)

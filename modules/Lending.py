@@ -53,7 +53,8 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
 
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom_default, gap_top_default, xday_threshold, xdays, min_loan_size, end_date, coin_cfg, min_loan_sizes, \
-        dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, exchange
+        dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, exchange, \
+        analysis_method
 
     exchange = api.__class__.__name__.upper()
 
@@ -78,6 +79,9 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     transferable_currencies = Config.get_currencies_list('transferableCurrencies')
     keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
     hide_coins = Config.getboolean('BOT', 'hideCoins', True)
+    analysis_method = Config.get('Daily_min', 'method', 'percentile')
+    if analysis_method not in ['percentile', 'MACD']:
+        raise ValueError("analysis_method: \"{0}\" is not valid, must be percentile or MACD".format(analysis_method))
 
     sleep_time = sleep_time_active  # Start with active mode
 
@@ -248,7 +252,7 @@ def get_min_daily_rate(cur):
             coin_cfg_alerted[cur] = True
             log.log('Using custom mindailyrate ' + str(coin_cfg[cur]['minrate'] * 100) + '% for ' + cur)
     if Analysis:
-        recommended_min = Analysis.get_rate_suggestion(cur)
+        recommended_min = Analysis.get_rate_suggestion(cur, method=analysis_method)
         if cur_min_daily_rate < recommended_min:
             cur_min_daily_rate = recommended_min
     return Decimal(cur_min_daily_rate)

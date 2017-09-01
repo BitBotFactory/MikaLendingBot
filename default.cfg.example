@@ -88,17 +88,6 @@ hideCoins = True
 #If set to 0 or commented: the bot will use the maxtolend or maxpercenttolend all the time. (0.0031-5)
 #maxtolendrate = 0
 
-# Local Market Analysis: Choose which coins to record the market of in order to analyse them and compute a recommended lending rate.
-# Enter ALL to analyse all coins, enter ACTIVE to analyse the markets of any coins you have in your lending account when the bot starts, these can be mixed.
-#analyseCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
-# Choose how long to keep market data. (In days) (1-365)
-#analyseMaxAge = 30
-# Choose how often to record a market's rate. (In seconds.) (10-3600)
-#analyseUpdateInterval = 60
-# Choose how aggressive to lend at based on a market's performance. (As a percentile of the market's rate.) (1-99)
-# Recommendations: Conservative = 50, Moderate = 75, Aggressive = 90, Very Aggressive = 99
-#lendingStyle = 75
-
 #Syntax: ["COIN:mindailyrate:maxactiveamount:maxtolend:maxpercenttolend:maxtolendrate",...]
 #If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lent.
 #If maxtolend is 0: check for maxpercenttolend.
@@ -190,3 +179,25 @@ irc_nick = LendingBot
 irc_ident = ledningbot
 irc_realname = Poloniex lending bot
 irc_target = #bitbotfactory
+
+#[MarketAnalysis]
+# PLEASE refer to the docs before attempting to use any of this. There are a lot of things here that will not work
+# correctly unless you understand what you are doing.
+analyseCurrencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+lendingStyle = 75
+MACD_long_win_seconds = 1800
+#MACD_short_win_seconds = 150
+# 3 days = 60 * 60 * 24 * 3 = 259200
+percentile_seconds = 259200
+# keep_history_seconds > (greater of (percentile_seconds, MACD_long_win_seconds) * 1.1)
+#keep_history_seconds = 285120
+#recorded_levels = 10
+# 15 %  means we need one data point every 9 seconds. You probably don't need to change this.
+#data_tolerance = 15
+#delete_thread_sleep = 60
+#ma_debug_log = False
+
+[Daily_min]
+# This defaults to percentile, MACD is the moving average calc and should give better rates
+#method = MACD
+multiplier = 1.05

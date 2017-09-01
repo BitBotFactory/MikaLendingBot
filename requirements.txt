@@ -1,4 +1,5 @@
 numpy
+pandas
 hypothesis
 requests
 pytz

@@ -239,41 +239,6 @@ This feature group allows you to only lend a certain percentage of your total ho
     - When an indiviaual coin's lending rate passes this threshold, all of the coin will be lent instead of the limits ``maxtolend`` or ``maxpercenttolend``
 
 
-Market Analysis
----------------
-
-This feature allows you to record a currency's market and have the bot see trends. With this data, we can compute a recommended minimum lending rate per currency to avoid lending at times when the rate dips.
-
-- ``analyseCurrencies`` is the list of currencies to analyse.
-
-    - Format: ``CURRENCY_TICKER,STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT,ALL,ACTIVE``
-    - Commenting it out will disable the entire feature.
-    - Entering ``ACTIVE`` within the list will analyse any currencies that are found in your lending account, as well as any other currencies alongside it. Example: ``ACTIVE, BTC, CLAM`` will do BTC, CLAM, and any coins you are already lending.
-    - Entering ``ALL`` will simply analyse all coins on the lending market, whether or not you are using them.
-    - Do not worry about duplicates when using ``ACTIVE``, they are handled.
-
-
-- ``analyseMaxAge`` is the maximum duration to store market data.
-
-    - Default value: 30 days
-    - Allowed range: 1-365 days
-
-- ``analyseUpdateInterval`` is how often (asynchronous to the bot) to record each market's data.
-
-     - Default value: 60 seconds
-     - Allowed range: 10-3600 seconds
-
- .. note:: Storage usage caused by the above two settings can be calculated by: ``<amountOfCurrencies> * 30 * analyseMaxAge * (86,400 / analyseUpdateInterval)`` bytes. Default settings with ``ALL`` currencies enabled will result in using ``15.552 MegaBytes`` maximum.
-
-- ``lendingStyle`` lets you choose the percentile of each currency's market to lend at.
-
-    - Default value: 75
-    - Allowed range: 1-99
-    - Recommendations: Conservative = 50, Moderate = 75, Aggressive = 90, Very Aggressive = 99
-    - This is a percentile, so choosing 75 would mean that your minimum will be the value that the market is above 25% of the recorded time.
-    - This will stop the bot from lending during a large dip in rate, but will still allow you to take advantage of any spikes in rate.
-
-
 Config per Coin
 ---------------
 
