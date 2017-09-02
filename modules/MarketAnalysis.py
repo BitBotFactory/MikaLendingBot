@@ -38,7 +38,6 @@ class MarketDataException(Exception):
 class MarketAnalysis(object):
     def __init__(self, config, api):
         self.currencies_to_analyse = config.get_currencies_list('analyseCurrencies', 'MarketAnalysis')
-        self.update_interval = int(config.get('MarketAnalysis', 'analyseUpdateInterval', 10, 1, 3600))
         self.api = api
         self.lending_style = int(config.get('MarketAnalysis', 'lendingStyle', 75, 1, 99))
         self.recorded_levels = 10
@@ -341,9 +340,6 @@ class MarketAnalysis(object):
 
         short_rate = rates_df.rate0.tail(self.MACD_short_win_seconds).mean()
         long_rate = rates_df.rate0.tail(self.MACD_long_win_seconds).mean()
-
-        if self.ma_debug_log:
-            sys.stdout.write("Short higher: ") if short_rate > long_rate else sys.stdout.write("Long  higher: ")
 
         if short_rate > long_rate:
             if rates_df.rate0.iloc[-1] < short_rate:
