@@ -233,7 +233,7 @@ MACD_short_win_seconds
 configuration
 ~~~~~~~~~~~~~
 =============  ========================================================================================================
-Default value  150 (2.5 minutes)
+Default value  ``MACD_long_win_seconds`` / 12 (2.5 min if MACD_long_win_seconds is default)
 Allowed range  25 - ``MACD_long_win_seconds``
 =============  ========================================================================================================
 
