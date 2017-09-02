@@ -113,8 +113,10 @@ def post_to_irc(msg, host, port, nick, ident, realname, target):
     IRC_SERVER.privmsg(target, msg)
 
 
-def send_notification(msg, notify_conf):
+def send_notification(_msg, notify_conf):
     nc = notify_conf
+    msg = _msg if ('notify_prefix' not in nc) else "{} {}".format(nc['notify_prefix'], _msg)
+
     if nc['email']:
         send_email(msg, nc['email_login_address'], nc['email_login_password'], nc['email_smtp_server'],
                    nc['email_smtp_port'], nc['email_to_addresses'], nc['email_smtp_starttls'])

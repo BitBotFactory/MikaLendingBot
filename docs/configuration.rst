@@ -404,8 +404,8 @@ Notifications
 -------------
 The bot supports sending notifications for serveral different events on several different platforms. To enable notifications, you must first have a section in your config called ``[notifications]``, inside which you should enable at least one of the following events and also at least one notification platfom. The list of events you can notify about are:
 
-Notification events
-~~~~~~~~~~~~~~~~~~~
+Global Notification Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - ``notify_new_loans``
 
@@ -426,6 +426,10 @@ Notification events
 - ``notify_caught_exception``
 
     - This is more useful for developers and people wanting to help out by raising issues on github. This will send a notification every time there is an exception thrown in the bot that we don't handle. To enable add ``notify_caught_exception = True``.
+
+- ``notify_prefix``
+
+    - This string, if set, will be prepended to any notifications. Useful if you are running multiple bots and need to differentiate the source.
 
 Once you have decided which notifications you want to recive, you can then go about configuring platforms to send them on. Currently the bot supports:
 
