@@ -7,5 +7,6 @@ error.log
 *.idea
 *.csv
 *.sqlite3
+*.db*
 
 docs/_build/

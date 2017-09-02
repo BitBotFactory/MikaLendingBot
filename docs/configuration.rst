@@ -155,6 +155,18 @@ These values allow you to lock in a better rate for a longer period of time, as 
     - Default value: 60 days
     - Allowed range: 2 to 60 days
 
+- ``xdayspread`` will spread the lending days by incrementing linear from 2 days at (xdaythreshold/xdayspread) rate to xdays days at xdaythreshold rate
+
+    - Default value: 0 (disabled)
+    - Allowed range: 0 to 10 as float
+
+    - Example: Using values: xdaythreshold = 0.2, xdays = 60, xdayspread = 2,
+      the bot will lending:
+      - rates < 0.1% (=xdaythreshold/xdayspread) for 2 days
+      - rates between 0.1% and 0.2%: days will be incremented from 2 to 60 days
+        (e.g. 0.1%/2d, 0.11%/8d, 0.12%/14d, 0.13%/20d, 0.14%/26d, 0.15%/32d, 0.16%/38d, 0.17%/44d, 0.18%/50d, 0.19%/56d, 0.20%/60d)
+      - rates > 0.2% for 60 days
+
 Auto-transfer from Exchange Balance
 -----------------------------------
 
