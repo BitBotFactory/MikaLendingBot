@@ -100,7 +100,9 @@ To run, either:
 Installing on Pythonanywhere.com
 ================================
 
-`Pythonanywhere.com <https://www.pythonanywhere.com>`_ is a useful website that will host and run Python code for you. This is perfect for our bot.
+`Pythonanywhere.com <https://www.pythonanywhere.com>`_ is a useful website that will host and run Python code for you. 
+
+WARNING: While you should be able to setup the bot on pythonanywhere, there are limitations on running the bot.
 
 Prerequisites
 -------------
