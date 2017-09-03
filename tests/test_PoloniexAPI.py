@@ -10,25 +10,26 @@ sys.path.insert(0, parentdir)
 from modules.Poloniex import Poloniex
 import modules.Configuration as Config
 import modules.Data as Data
+from modules.Logger import Logger
 import threading
 
 Config.init('default.cfg', Data)
-api = Poloniex(Config.get("API", "apikey", None), Config.get("API", "secret", None))
+api = Poloniex(Config, Logger())
 
 
-def multiple_api_queries(n):
-    try:
-        for i in xrange(n):
-            # print 'api_query ' + str(i + 1)
-            thread1 = threading.Thread(target=api.return_open_loan_offers)
-            thread1.start()
-    except Exception as e:
-        assert False, 'api_query ' + str(i + 1) + ':' + e.message
-
-
-# Test fast api calls
+# def multiple_api_queries(n):
+#     try:
+#         for i in xrange(n):
+#             print 'api_query ' + str(i + 1) + '\n'
+#             thread1 = threading.Thread(target=api.return_open_loan_offers)
+#             thread1.start()
+#     except Exception as e:
+#         assert False, 'api_query ' + str(i + 1) + ':' + e.message
+# 
+#
+# # Test fast api calls
 # def test_multiple_calls():
-    # multiple_api_queries(9)
+#     multiple_api_queries(9)
 
 
 def api_rate_limit(n, start):
