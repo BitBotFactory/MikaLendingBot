@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <title>Lending Bot - Profit Charts</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- jQuery Version 1.12.2 -->
+    <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        $.getJSON("history.json", function(jsonHistory) {
+
+          // loop over each coin and make the data array for each chart
+          $.each(jsonHistory, function(coin, coinData) {
+
+              // First array is series headers
+              myData = Array(["Date", coin, "Total"])
+
+              // Add remaining data
+              $.each(coinData, function(i, j) {
+                  myData.push([new Date(j[0]*1000), parseFloat(j[1]), parseFloat(j[2])])
+              });
+
+              var options = {
+                  'title': coin + ' Daily Lending Earnings',
+                  'vAxes': { 
+                      0: { 'title': 'Daily' },
+                      1: { 'title': 'Totals' }
+                  },
+                  'series': [ {'targetAxisIndex': 0}, {'targetAxisIndex': 1} ],
+                  'explorer': { keepInBounds: true },
+                  'chartArea': { 'left': 75, 'top': 75 }
+              };
+
+              var data = google.visualization.arrayToDataTable(myData)
+
+              var chartContainer = $('#chart-container')
+              var chartDiv = "chart_div_" + coin
+              chartContainer.prepend('<div class="row"><div class="col-md-offset-1 col-md-11"><div id="' + chartDiv + '" style="width: 100%; height: 420px"></div></div></div>');
+
+              var chart = new google.visualization.LineChart(document.getElementById(chartDiv));
+              chart.draw(data, options);
+
+          });
+
+        });
+
+      }
+    </script>
+
+</head>
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header" style="margin-left:8px">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="lendingbot.html"><img src="images/icon192.png" height="32" width="32" style="margin-top: 8px;margin-right: 8px;margin-left: -15px;vertical-align:top"></a>
+                <div style="display:inline-block">
+                    <h4 class="brand-margin" id="title">Lending Bot - Profit Charts</h4>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top:50px" id="chart-container">
+      <div class="row">
+        <div class="col-md-3 col-md-offset-3"><a href="lendingbot.html">Dashboard</a></div>
+        <div class="col-md-4 col-md-pull-2">
+          <p class="text-center small">*Profits are displayed as the currency in which they were lent.</p>
+        </div>
+      </div>
+    </div>
+
+</body>
+</html>

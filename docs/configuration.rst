@@ -377,6 +377,26 @@ There is an optional setting to change how frequently this plugin reports. By de
 
 Be aware that first initialization might take longer as the bot will fetch all the history.
 
+Profit Charts Plugin
+~~~~~~~~~~~~~~~~~~~~
+
+The Charts plugin dumps out the historical lending data to a JSON structure which is read by the new charts.html page.
+This page reads this dump data and constructs a Google Chart showing daily profit over time.
+
+The AccountStats plugin must be enabled for the Charts plugin to function correctly.
+
+To enable the plugin add ``Charts`` to the ``plugins`` config options, example::
+
+    plugins = AccountStats,Charts
+
+There is an optional setting to change how frequently this plugin dumps data. By default, four times per day. Example::
+
+    [CHARTS]
+    DumpInterval = 21600
+
+On a new installation, the AccountStats database may not be up to date on first iteration of the Charts plugin and no data will get dumped. Simply wait for the next interval or restart the bot after the AccountStats plugin is finished.
+
+
 lendingbot.html options
 -----------------------
 
