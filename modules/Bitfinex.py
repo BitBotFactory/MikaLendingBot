@@ -221,7 +221,7 @@ class Bitfinex(ExchangeApi):
         payload = {
             "currency": currency,
             "amount": str(amount),
-            "rate": str(lending_rate * 36500),
+            "rate": str(round(float(lending_rate),10) * 36500),
             "period": int(duration),
             "direction": "lend"
         }
