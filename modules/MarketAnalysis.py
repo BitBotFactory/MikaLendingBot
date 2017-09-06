@@ -45,7 +45,7 @@ class MarketAnalysis(object):
         self.modules_dir = os.path.dirname(os.path.realpath(__file__))
         self.top_dir = os.path.dirname(self.modules_dir)
         self.db_dir = os.path.join(self.top_dir, 'market_data')
-        self.recorded_levels = int(config.get('MarketAnalysis', 'recorded_levels', 10, 1, 100))
+        self.recorded_levels = int(config.get('MarketAnalysis', 'recorded_levels', 3, 1, 100))
         self.data_tolerance = float(config.get('MarketAnalysis', 'data_tolerance', 15, 10, 90))
         self.ma_debug_log = config.getboolean('MarketAnalysis', 'ma_debug_log')
         self.MACD_long_win_seconds = int(config.get('MarketAnalysis', 'MACD_long_win_seconds',
@@ -147,7 +147,7 @@ class MarketAnalysis(object):
     def update_market_thread(self, cur, levels=None):
         """
         This is where the main work is done for recording the market data. The loop will not exit and continuously
-        polls Poloniex for the current loans in the book.
+        polls exchange for the current loans in the book.
 
         :param cur: The currency (database) to remove data from
         :param levels: The depth of offered rates to store
@@ -159,7 +159,7 @@ class MarketAnalysis(object):
             try:
                 raw_data = self.api.return_loan_orders(cur, levels)['offers']
             except Exception as ex:
-                self.print_traceback(ex, "Error in returning data from Poloniex")
+                self.print_traceback(ex, "Error in returning data from exchange")
             market_data = []
             for i in xrange(levels):
                 market_data.append(str(raw_data[i]['rate']))
@@ -174,9 +174,6 @@ class MarketAnalysis(object):
                     db_con.execute(insert_sql)
                 except Exception as ex:
                     self.print_traceback(ex, "Error inserting market data into DB")
-            if Config.get_exchange() == 'BITFINEX':
-                # We don't have a coach for bitfinex, so sleep here
-                time.sleep(5)
 
     def delete_old_data(self, db_con, seconds):
         """
@@ -225,9 +222,16 @@ class MarketAnalysis(object):
         price_levels = ['rate0']
         rates = self.get_rates_from_db(db_con, from_date=time.time() - request_seconds, price_levels=price_levels)
         df = pd.DataFrame(rates)
+
         columns = ['time']
         columns.extend(price_levels)
-        df.columns = columns
+        try:
+            df.columns = columns
+        except:
+            if self.ma_debug_log:
+                print("DEBUG:get_rate_list: cols: {0} rates:{1} db:{2}".format(columns, rates, db_con))
+            raise
+
         # convert unixtimes to datetimes so we can resample
         df.time = pd.to_datetime(df.time, unit='s')
         # If we don't have enough data return df, otherwise the resample will fill out all values with the same data.
@@ -268,7 +272,7 @@ class MarketAnalysis(object):
             if len(rates) == 0:
                 print("Rate list not populated")
                 if self.ma_debug_log:
-                    print("DEBUG: cur: {0} method:{1} rates:{2}")
+                    print("DEBUG:get_analysis_seconds: cur: {0} method:{1} rates:{2}".format(cur, method, rates))
                 return 0
             if self.ma_debug_log:
                 print("Cur:{0}, MACD:{1:.6f}, Perc:{2:.6f}, Best:{3:.6f}".format(cur, truncate(self.get_MACD_rate(cur, rates), 6),
@@ -363,7 +367,8 @@ class MarketAnalysis(object):
         :return: Connection object or None
         """
         if db_dir is None:
-            db_path = os.path.join(self.db_dir, '{0}.db'.format(cur))
+            prefix = Config.get_exchange()
+            db_path = os.path.join(self.db_dir, '{0}-{1}.db'.format(prefix, cur))
         try:
             con = lite.connect(db_path)
             return con
