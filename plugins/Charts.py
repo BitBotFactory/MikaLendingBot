@@ -53,7 +53,7 @@ class Charts(Plugin):
         for coin in data:
             runningTotal = 0.0
 
-            cursor.execute("SELECT strftime('%%s', strftime('%%Y-%%m-%%d 00:00:00', close)) ts, printf('%%.8f', SUM(interest)) i " \
+            cursor.execute("SELECT strftime('%%s', strftime('%%Y-%%m-%%d 00:00:00', close)) ts, round(SUM(interest), 8) i " \
                            "FROM history WHERE currency = '%s' GROUP BY ts ORDER BY ts" % (coin));
             for row in cursor:
                 runningTotal += float(row[1])
