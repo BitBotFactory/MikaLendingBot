@@ -35,7 +35,9 @@
 
               // Add remaining data
               $.each(coinData, function(i, j) {
-                  myData.push([new Date(j[0]*1000), parseFloat(j[1]), parseFloat(j[2])])
+                  _v = parseFloat(j[1])
+                  _w = parseFloat(j[2])
+                  myData.push([ new Date(j[0]*1000), { v: _v, f: _v.toFixed(8) }, { v: _w, f: _w.toFixed(8) } ])
               });
 
               var options = {
@@ -45,15 +47,14 @@
                       1: { 'title': 'Totals' }
                   },
                   'series': [ {'targetAxisIndex': 0}, {'targetAxisIndex': 1} ],
-                  'explorer': { keepInBounds: true },
-                  'chartArea': { 'left': 75, 'top': 75 }
+                  'explorer': { keepInBounds: true }
               };
 
               var data = google.visualization.arrayToDataTable(myData)
 
               var chartContainer = $('#chart-container')
               var chartDiv = "chart_div_" + coin
-              chartContainer.prepend('<div class="row"><div class="col-md-offset-1 col-md-11"><div id="' + chartDiv + '" style="width: 100%; height: 420px"></div></div></div>');
+              chartContainer.prepend('<div class="row"><div class="col-md-12"><div id="' + chartDiv + '" style="width: 100%; height: 420px"></div></div></div>');
 
               var chart = new google.visualization.LineChart(document.getElementById(chartDiv));
               chart.draw(data, options);
