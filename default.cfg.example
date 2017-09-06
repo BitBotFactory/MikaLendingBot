@@ -126,10 +126,13 @@ hideCoins = True
 #outputCurrency = BTC
 
 #Plugins allow extending Bot functionality with extra features.
-#plugins = AccountStats
+#plugins = AccountStats,Charts
 
 #[ACCOUNTSTATS]
 #ReportInterval = 86400
+
+#[CHARTS]
+#DumpInterval=21600
 
 # Currencies can be configured here, or in the coinconfig. Coinconfig takes precedence.
 #[BTC]
