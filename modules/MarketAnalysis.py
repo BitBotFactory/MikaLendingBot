@@ -158,7 +158,7 @@ class MarketAnalysis(object):
             try:
                 raw_data = self.api.return_loan_orders(cur, levels)['offers']
             except Exception as ex:
-                self.print_traceback(ex, "Error in returning data from Poloniex")
+                self.print_traceback(ex, "Error in returning data from exchange")
             market_data = []
             for i in xrange(levels):
                 market_data.append(str(raw_data[i]['rate']))
