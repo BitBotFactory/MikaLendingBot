@@ -53,6 +53,9 @@ gaptop = 200
 # Bitfinex max lending period: 30 days
 xdaythreshold = 0.2
 xdays = 60
+#When xdayspread is set, lending days will be incremented linear from 2 days at (xdaythreshold/xdayspread) lent rate
+#to (xdays) days at (xdaythreshold) lent rate. (0-10)
+#xdayspread = 2
 
 #Auto-transfer of funds from exchange to lending balance.
 #Enter ALL to transfer all coins, enter ACTIVE to transfer any coins you have in your lending account when the bot starts, these can be mixed.
@@ -151,6 +154,7 @@ notify_tx_coins = False
 notify_xday_threshold = False
 notify_summary_minutes = 0
 notify_caught_exception = False
+#notify_prefix = [Polo]
 
 email = False
 email_login_address = me@gmail.com

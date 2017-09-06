@@ -15,7 +15,7 @@ class Plugin(object):
 
     # override this to run plugin init code
     def on_bot_init(self):
-        self.log.log(self.__class__.__name__ + ' plugin started.')
+        self.log.log(self.__class__.__name__ + ' plugin initializing...')
 
     # override this to run plugin loop code before lending
     def before_lending(self):

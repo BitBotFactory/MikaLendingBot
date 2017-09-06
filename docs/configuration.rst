@@ -155,6 +155,18 @@ These values allow you to lock in a better rate for a longer period of time, as 
     - Default value: 60 days
     - Allowed range: 2 to 60 days
 
+- ``xdayspread`` will spread the lending days by incrementing linear from 2 days at (xdaythreshold/xdayspread) rate to xdays days at xdaythreshold rate
+
+    - Default value: 0 (disabled)
+    - Allowed range: 0 to 10 as float
+
+    - Example: Using values: xdaythreshold = 0.2, xdays = 60, xdayspread = 2,
+      the bot will lending:
+      - rates < 0.1% (=xdaythreshold/xdayspread) for 2 days
+      - rates between 0.1% and 0.2%: days will be incremented from 2 to 60 days
+        (e.g. 0.1%/2d, 0.11%/8d, 0.12%/14d, 0.13%/20d, 0.14%/26d, 0.15%/32d, 0.16%/38d, 0.17%/44d, 0.18%/50d, 0.19%/56d, 0.20%/60d)
+      - rates > 0.2% for 60 days
+
 Auto-transfer from Exchange Balance
 -----------------------------------
 
@@ -392,8 +404,8 @@ Notifications
 -------------
 The bot supports sending notifications for serveral different events on several different platforms. To enable notifications, you must first have a section in your config called ``[notifications]``, inside which you should enable at least one of the following events and also at least one notification platfom. The list of events you can notify about are:
 
-Notification events
-~~~~~~~~~~~~~~~~~~~
+Global Notification Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - ``notify_new_loans``
 
@@ -414,6 +426,10 @@ Notification events
 - ``notify_caught_exception``
 
     - This is more useful for developers and people wanting to help out by raising issues on github. This will send a notification every time there is an exception thrown in the bot that we don't handle. To enable add ``notify_caught_exception = True``.
+
+- ``notify_prefix``
+
+    - This string, if set, will be prepended to any notifications. Useful if you are running multiple bots and need to differentiate the source.
 
 Once you have decided which notifications you want to recive, you can then go about configuring platforms to send them on. Currently the bot supports:
 
