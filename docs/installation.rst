@@ -1,5 +1,3 @@
-.. highlight:: javascript
-
 Installation
 ************
 
@@ -49,7 +47,9 @@ To download the bot you can either:
 
 * Linux using systemd:
 
-    Create the file ``/lib/systemd/system/lendingbot.service`` which contains the following text::
+    Create the file ``/lib/systemd/system/lendingbot.service`` which contains the following text
+
+    .. code-block:: text
 
         [Unit]
         Description=LendingBot service
@@ -64,6 +64,7 @@ To download the bot you can either:
 
         [Install]
         WantedBy=multi-user.target
+
     Credit to GitHub user utdrmac.
 
     Modify the ExecStart and WorkingDirectory to match your setup.
@@ -161,19 +162,56 @@ To have the bot restart itself every 24 hours, you need to have a `premium pytho
 .. note:: If you are a free user, it will allow you to make the scheduled restart, but then it will only run for one hour and stop for 23.
 .. note:: Free users are also limited to the number of output currencies they can use as blockchain.info is blocked from their servers. You can always use the pairs listed on poloniex, BTC, USDT. But will not have access to currencies such as EUR, GBP.
 
-Using Docker
-============
+Using Docker Compose
+====================
 
 There is a ``docker-compose.yaml`` file in the root of the source that can be used to start the bot via `docker <https://www.docker.com/>`_.  Compose is a tool for defining and running docker applications using a single file to configure the application’s services.
 
+By default this file will start 3 containers:
+
+  - An nginx reverse proxy
+    This allows you to have the nginx web server as the main access point for the other bot's web pages.
+    It uses `jwilder/nginx-proxy <https://github.com/jwilder/nginx-proxy>`_
+  - A python container running the bot on poloniex. 
+    This starts a bot running that connects to poloniex and exposes a web interface. 
+    It uses `python:2.7-slim <https://hub.docker.com/r/library/python/tags/>`_
+  - A python container running the bot on bitfinex. 
+    This starts a bot running that connects to bitfinex and exposes a web interface. 
+    It uses `python:2.7-slim <https://hub.docker.com/r/library/python/tags/>`_
+
+This allows for simple deployments on a VPS or dedicated server. Each bot will be dynamically assinged a subdomain. 
+You can also use it to run the bots locally using subdomains.
+
 To use this file:-
 
-#. Install and setup `docker <https://www.docker.com/>`_ for your platform, available on linux, mac and windows.
-#. If you are using linux or windows server, you'll need to install docker-compose separately, see `here <https://docs.docker.com/compose/install/>`_.
-#. If you don't already have a ``default.cfg`` created, then copy the example one and change the values as required using the instructions in this document.
-#. You can now start the service with ``docker-compose up -d``. It may take a minute or two on the first run as it has to download the required image and then some packages for that image when it starts.
-#. If all went well you should see something like ``Starting bitbotfactory_bot_1``.
-#. When you see that message it just means that the container was started successfully, we still need to check the application is running as expected. In the yaml file the web service in the container is mapped to localhost. So you can open your web browser at this point and see if you can connect to the serivce. It should be runnning on `<http://127.0.0.1:8000/lendingbot.html>`_.
-#. If you don't see anything when connecting to that you can check the logs of the container with ``docker-compose logs``. You should get some useful information from there. You may need to change some config vaules.
-#. When you change the config values you need to restart the container, this can be done with ``docker-compose stop`` and then after changing configs, ``docker-compose up -d``. You should notice it's significantly quicker than the first run now.
-#. The last command to note is ``docker-compose ps`` this will give infomation on all running instances and the ports that are mapped. This can be useful if you plan on running multiple bots, or you just want to know if it's running.
+  #. Install and setup `docker <https://www.docker.com/>`_ for your platform, available on linux, mac and windows.
+  #. If you are using linux or windows server, you'll need to install docker-compose separately, see `here <https://docs.docker.com/compose/install/>`_.
+  #. If you don't already have a ``default.cfg`` created, then copy the example one and change the values as required using the instructions in this document.
+  #. Edit the ``docker-compose.yaml`` file and add your ``API_apikey`` and ``API_apisecret`` for each exchange. If you wish to use only one exchange, you can comment out all the lines for the one you don't need.
+  #. If you are running locally, you can leave the ``VIRTUAL_HOST`` variable as it is. If you are running on a web server with your won domain, you can set it to something like ``poloniex.mydomain.com``.
+  #. If you don't have a domain name, you can use a service such as `duckdns <http://duckdns.org>`_ to get one for free.
+  #. You can now start the service with ``docker-compose up -d``. It may take a minute or two on the first run as it has to download the required image and then some packages for that image when it starts.
+  #. If all went well you should see something like ``Starting bitbotfactory_bot_1``.
+  #. When you see that message it just means that the container was started successfully, we still need to check the application is running as expected. In the yaml file the web service in the container is mapped to localhost. So you can open your web browser at this point and see if you can connect to the serivce. It should be runnning on `<http://127.0.0.1/>`_. You should see an nginx welcome page.
+  #. If you don't see anything when connecting to that you can check the logs of the container with ``docker-compose logs``. You should get some useful information from there. Ask on Slack if you're stuck.
+  #. If you are running locally you will need to add the subdomains to your hosts file to make sure they are resolved by DNS. You can ignore this step if you're running on a web server. On linux (and recent OSx) you can add these lines to ``/etc/hosts``, on windows you shoud follow this `guide <https://support.rackspace.com/how-to/modify-your-hosts-file/>`_
+
+       .. code-block:: text
+
+          127.0.0.1 poloniex.localhost
+          127.0.0.1 bitfinex.localhost
+
+  #. You should now be able to point your browser at `<http://poloniex.localhost>`_ and `<http://bitfinex.localhost/>`_ to see the web pages for each bot.
+
+Extending the file:-
+
+    - Most config values from default.cfg can be overridden in the docker-compose file. You should add them in the enviroment section in the same format as the ones listed. i.e. ``Category_Option``
+    - You can add as many extra bots as you want. Each one will need to have a new ``VIRTUAL_HOST`` entry.
+    - If you prefer to have everything in config files rather than enviroment variables, you can create a new cfg file for each bot and modify the ``command`` line to use that cfg file instead.
+
+Other info:-
+
+  - Each bot will create a log file in the root of your git checkout.
+  - If you are using market analysis, you only need one bot per exchange. Extra bots will be able to share the database.
+  - When you change the config values you need to restart the container, this can be done with ``docker-compose stop`` and then after changing configs, ``docker-compose up -d``. You should notice it's significantly quicker than the first run now.
+  - The last command to note is ``docker-compose ps`` this will give infomation on all running instances and the ports that are mapped. This can be useful if you plan on running multiple bots, or you just want to know if it's running.

@@ -1,7 +1,7 @@
 .. _configuration-section:
 
 Configuration
-*************
+=============
 
 Configuring the bot can be as simple as select the exchange to use and copy-pasting your API key and Secret.
 
@@ -160,11 +160,16 @@ These values allow you to lock in a better rate for a longer period of time, as 
     - Default value: 0 (disabled)
     - Allowed range: 0 to 10 as float
 
-    - Example: Using values: xdaythreshold = 0.2, xdays = 60, xdayspread = 2,
-      the bot will lending:
+    - Example: Using values: xdaythreshold = 0.2, xdays = 60, xdayspread = 2, the bot will lend:
+
       - rates < 0.1% (=xdaythreshold/xdayspread) for 2 days
       - rates between 0.1% and 0.2%: days will be incremented from 2 to 60 days
-        (e.g. 0.1%/2d, 0.11%/8d, 0.12%/14d, 0.13%/20d, 0.14%/26d, 0.15%/32d, 0.16%/38d, 0.17%/44d, 0.18%/50d, 0.19%/56d, 0.20%/60d)
+
+      .. code-block:: text
+
+         (e.g. 0.1%/2d, 0.11%/8d, 0.12%/14d, 0.13%/20d, 0.14%/26d, 0.15%/32d, 0.16%/38d,
+         0.17%/44d, 0.18%/50d, 0.19%/56d, 0.20%/60d)
+
       - rates > 0.2% for 60 days
 
 Auto-transfer from Exchange Balance
@@ -543,4 +548,3 @@ Once you have that installed you have access to the following options for config
     irc_target = #bitbotfactory
 
 If you want to send a message directly to a user rather than a channel, you can specify it in the irc_target without the preceeding '#'. There is currently only support for one channel or user, but we can add more if there's any interest for it.
-=======

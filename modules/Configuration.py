@@ -1,6 +1,7 @@
 # coding=utf-8
 from ConfigParser import SafeConfigParser
 import json
+import os
 from decimal import Decimal
 
 config = SafeConfigParser()
@@ -30,19 +31,28 @@ def init(file_location, data=None):
 
 
 def has_option(category, option):
-    return config.has_option(category, option)
+    try:
+        return True if os.environ["{0}_{1}".format(category, option)] else _
+    except (KeyError, NameError): # KeyError for no env var, NameError for _ (empty var) and then to continue
+        return config.has_option(category, option)
 
 
 def getboolean(category, option, default_value=False):
-    if config.has_option(category, option):
-        return config.getboolean(category, option)
+    if has_option(category, option):
+        try:
+            return bool(os.environ["{0}_{1}".format(category, option)])
+        except KeyError:
+            return config.getboolean(category, option)
     else:
         return default_value
 
 
 def get(category, option, default_value=False, lower_limit=False, upper_limit=False):
-    if config.has_option(category, option):
-        value = config.get(category, option)
+    if has_option(category, option):
+        try:
+            value = os.environ["{0}_{1}".format(category, option)]
+        except KeyError:
+            value = config.get(category, option)
         try:
             if lower_limit and float(value) < float(lower_limit):
                 print "WARN: [%s]-%s's value: '%s' is below the minimum limit: %s, which will be used instead." % \
@@ -63,6 +73,7 @@ def get(category, option, default_value=False, lower_limit=False, upper_limit=Fa
             print "ERROR: [%s]-%s is not allowed to be left unset. Please check your config." % (category, option)
             exit(1)
         return default_value
+
 # Below: functions for returning some config values that require special treatment.
 
 
@@ -70,7 +81,10 @@ def get_exchange():
     '''
     Returns used exchange
     '''
-    return get('API', 'exchange', 'Poloniex').upper()
+    try:
+        return os.environ['API_exchange'].upper()
+    except KeyError:
+        return get('API', 'exchange', 'Poloniex').upper()
 
 
 def get_coin_cfg():

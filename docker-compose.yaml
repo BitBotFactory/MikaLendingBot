@@ -1,19 +1,75 @@
-# change default.cfg to your own config
 # start: docker-compose up -d
 # stop: docker-compose down
 # logs: docker-compose logs
 # state: docker-compose ps
 
+# This docker-compose file starts 3 docker containers. One for nginx and one for a bot on each exchange. 
+# You can start as many bots as you want using the same config style and they will all have their web
+# interface accessible via the name you set of VIRTUAL_HOST
+
+# VIRTUAL_HOST can be changed to poloniex.yourdomain.com if you want it to be accessible via the internet
+
+# The environment variables included are the minimum required to get it working, you can change a lot of bot
+# configurations with them using the same naming convention, i.e. CATEGORY_OPTION. 
+
+# Environment variables take precedence over the config file
+
+# If you have a more complicated setup, you can create a new config file from default.cfg and then use that in
+# the command line for each container.
+
+# If you want to use this on your local machine, without a domain name, you can add lines like this to /etc/hosts
+# 127.0.0.1 poloniex.localhost
+# 127.0.0.1 bitfinex.localhost
+
 version: '2'
 services:
-  bot:
-   image: python:2.7-slim
-   restart: always
-   working_dir: /usr/src/app/
-   ports:
-   - "0.0.0.0:8000:8000"
-   volumes:
-   - "./:/usr/src/app"
-   command: bash -c "pip --no-cache-dir install -r requirements.txt && python lendingbot.py"
+  nginx:
+    image: jwilder/nginx-proxy
+    environment:
+      - VIRTUAL_PORT=8000
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+      - "80:80"
 
-# copy complete repository and change the host port (8000 in 0.0.0.0:8000) for additional bots
+  poloniex:
+    depends_on:
+      - nginx
+    image: python:2.7-slim
+    restart: always
+    working_dir: /usr/src/app/
+    environment:
+      - API_exchange=poloniex
+      - API_apikey=
+      - API_secret=
+      - VIRTUAL_HOST=poloniex.localhost
+      - VIRTUAL_PROTO=http
+      - BOT_jsonfile=www/botlog.json
+      - BOT_jsonlogsize=200
+      - BOT_startWebServer=true
+    expose:
+    - "8000"
+    volumes:
+    - "./:/usr/git-src/"
+    command: bash -c "/usr/git-src/setup-container.sh && pip install -r requirements.txt && python lendingbot.py -cfg default.cfg"
+
+  bitfinex:
+    depends_on:
+      - nginx
+    image: python:2.7-slim
+    restart: always
+    working_dir: /usr/src/app/
+    environment:
+      - API_exchange=bitfinex
+      - API_apikey=
+      - API_secret=
+      - VIRTUAL_HOST=bitfinex.localhost
+      - VIRTUAL_PROTO=http
+      - BOT_jsonfile=www/botlog.json
+      - BOT_jsonlogsize=200
+      - BOT_startWebServer=true
+    expose:
+    - "8000"
+    volumes:
+    - "./:/usr/git-src/"
+    command: bash -c "/usr/git-src/setup-container.sh && pip install -r requirements.txt && python lendingbot.py -cfg default.cfg"
