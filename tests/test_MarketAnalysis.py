@@ -4,8 +4,11 @@ from hypothesis.extra.datetime import datetimes
 
 import csv
 import datetime
-from pytz import timezone
-import tempfile
+import time
+import pytest
+import sqlite3 as sqlite
+from random import randint
+import pandas as pd
 
 # Hack to get relative imports - probably need to fix the dir structure instead but we need this at the minute for
 # pytest to work
@@ -15,92 +18,102 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from modules.MarketAnalysis import MarketAnalysis
-from modules.Configuration import FULL_LIST
+from modules.Configuration import get_all_currencies
 from modules.Poloniex import Poloniex
 import modules.Configuration as Config
 import modules.Data as Data
 
 Config.init('default.cfg', Data)
-api = Poloniex(Config.get("API", "apikey", None), Config.get("API", "secret", None))
+api = Poloniex(Config, None)
 Data.init(api, None)
 MA = MarketAnalysis(Config, api)
 
 
-def create_dummy_rate_file(rate_file):
-    rates = lists(floats(min_value=0.00001, allow_nan=False, allow_infinity=False), min_size=0, max_size=100).example()
+def new_db():
+    db_con = MA.create_connection(None, ':memory:')
+    MA.create_rate_table(db_con, 3)
+    return db_con
+
+
+def random_rates():
+    return lists(floats(min_value=0.00001, max_value=100, allow_nan=False, allow_infinity=False), min_size=0, max_size=100).example()
+
+
+def random_dates(min_len, max_len):
     max_year = datetime.datetime.now().year
-    date_times = lists(datetimes(min_year=2016, max_year=max_year), min_size=len(rates),
-                       max_size=len(rates)).map(sorted).example()
-    with open(rate_file, 'a') as f:
-        for date_time, rate in zip(date_times, rates):
-            writer = csv.writer(f, lineterminator='\n')
-            market_data = [float(date_time.strftime("%s")), rate]
-            writer.writerow(market_data)
-    return rates, date_times
+    return lists(datetimes(min_year=2016, max_year=max_year), min_size=min_len, max_size=max_len).map(sorted).example()
 
 
-def add_test_files_to_MA_obj(MA_obj):
-    test_rates = {}
-    date_times = {}
-    # TODO - These need deleted at the end of testing
-    for cur in FULL_LIST:
-        MA_obj.open_files[cur] = tempfile.NamedTemporaryFile(delete=False).name
-        test_rates[cur], date_times[cur] = create_dummy_rate_file(MA_obj.open_files[cur])
-    return test_rates, date_times
+@pytest.fixture
+def populated_db():
+    price_levels = 3
+    db_con = new_db()
+    rates = random_rates()
+    inserted_rates = []
+    for rate in rates:
+        market_data = []
+        for level in range(price_levels):
+            market_data.append("{0:.8f}".format(rate))
+            market_data.append("{0:.2f}".format(rate))
+        percentile = "{0:.8f}".format(rate)
+        market_data.append(percentile)
+        MA.insert_into_db(db_con, market_data)
+        market_data = [float(x) for x in market_data]
+        inserted_rates.append(market_data)
+    return db_con, inserted_rates
 
 
-def test_get_rate_list():
-    test_rates, _ = add_test_files_to_MA_obj(MA)
-    for cur in FULL_LIST:
-        rates = MA.get_rate_list(cur)
-        assert rates == test_rates[cur]
+def test_new_db():
+    assert(isinstance(new_db(), sqlite.Connection))
 
 
-@given(lists(floats(min_value=0.00001, allow_nan=False, allow_infinity=False)))
-def test_get_rate_suggestion(rates):
-    for cur in FULL_LIST:
-        rate = MA.get_rate_suggestion(cur, method='percentile')
-        assert(rate >= 0)
+def test_insert_into_db(populated_db):
+    db_con, rates = populated_db
+    query = "SELECT rate0, amnt0, rate1, amnt1, rate2, amnt2, percentile FROM loans;"
+    db_rates = db_con.cursor().execute(query).fetchall()
+    assert(len(rates) == len(db_rates))
+    for db_rate, rate in zip(db_rates, rates):
+        assert(len(rate) == len(db_rate))
+        assert(len(rate) > 1)
+        for level in range(len(rate)):
+            assert(db_rate[level] == float(rate[level]))
 
-    for cur in FULL_LIST:
-        rate = MA.get_rate_suggestion(cur, rates, 'percentile')
-        assert(rate >= 0)
+
+def test_get_rates_from_db(populated_db):
+    db_con, rates = populated_db
+    db_rates = MA.get_rates_from_db(db_con, from_date=time.time() - 10, price_levels=['rate0'])
+    for db_rate, rate in zip(db_rates, rates):
+        assert(len(db_rate) == 2)
+        assert(db_rate[1] == float(rate[0]))
+
+
+def test_get_rate_list(populated_db):
+    db_con, rates = populated_db
+    db_rates = MA.get_rate_list(db_con, 1)
+    assert(len(db_rates) == 1)
+
+
+def test_get_rate_suggestion(populated_db):
+    db_con, rates = populated_db
+    MA = MarketAnalysis(Config, api)
+    MA.data_tolerance = 1
+
+    rate_db = MA.get_rate_suggestion(db_con, method='percentile')
+    assert(rate_db >= 0)
+
+    df = pd.DataFrame(rates)
+    df.columns = ['rate0', 'a0', 'r1', 'a1', 'r2', 'a2', 'p']
+    df.time = [time.time()] * len(df)
+    rate_args = MA.get_rate_suggestion(db_con, df, 'percentile')
+    assert(rate_args >= 0)
+
+    rate = MA.get_rate_suggestion(db_con, method='MACD')
+    assert(rate >= 0)
 
 
 @given(lists(floats(min_value=0, allow_nan=False, allow_infinity=False), min_size=3, max_size=100),
        integers(min_value=1, max_value=99))
 def test_get_percentile(rates, lending_style):
-    np_perc = MA.get_percentile(rates, lending_style, True)
-    math_perc = MA.get_percentile(rates, lending_style, False)
+    np_perc = MA.get_percentile(rates, lending_style, use_numpy=True)
+    math_perc = MA.get_percentile(rates, lending_style, use_numpy=False)
     assert(np_perc == math_perc)
-
-
-def get_file_len(filename):
-    i = -1
-    with open(filename) as f:
-        for i, _ in enumerate(f):
-            pass
-    return i + 1
-
-
-def test_update_market():
-    add_test_files_to_MA_obj(MA)
-    file_lens = {}
-    for cur in FULL_LIST:
-        file_lens[cur] = get_file_len(MA.open_files[cur])
-    for cur in FULL_LIST:
-        MA.update_market(cur)
-        assert(file_lens[cur] + 1 == get_file_len(MA.open_files[cur]))
-
-
-@given(integers(min_value=0))
-@settings(max_examples=50)
-def test_delete_old_data(max_age):
-    add_test_files_to_MA_obj(MA)
-    MA.max_age = max_age
-    for cur, rate_file in MA.open_files.items():
-        MA.delete_old_data(cur)
-        with open(rate_file) as f:
-            reader = csv.reader(f)
-            for row in reader:
-                assert(MA.get_day_difference(row[0]) < max_age)
