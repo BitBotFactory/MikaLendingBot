@@ -5,7 +5,6 @@ import json
 import sqlite3
 
 DB_PATH = "market_data/loan_history.sqlite3"
-HISTORY_DUMP = "www/history.json"
 
 class Charts(Plugin):
 
@@ -22,6 +21,7 @@ class Charts(Plugin):
         self.db = sqlite3.connect('market_data/loan_history.sqlite3')
         self.last_dump = 0
         self.dump_interval = int(self.config.get("CHARTS", "DumpInterval", 21600))
+        self.history_file = self.config.get("CHARTS", "HistoryFile", "www/history.json")
 
 
     def before_lending(self):
@@ -60,7 +60,7 @@ class Charts(Plugin):
                 data[coin].append([ int(row[0]), float(row[1]), float(runningTotal) ])
 
         # Dump data to file
-        with open(HISTORY_DUMP, "w") as hist:
+        with open(self.history_file, "w") as hist:
             hist.write(json.dumps(data))
 
         self.log.log("Charts Plugin: History dumped. You can open charts.html.")

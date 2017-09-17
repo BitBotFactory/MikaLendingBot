@@ -394,10 +394,11 @@ To enable the plugin add ``Charts`` to the ``plugins`` config options, example::
 
     plugins = AccountStats,Charts
 
-There is an optional setting to change how frequently this plugin dumps data. By default, four times per day. Example::
+There is an optional setting to change how frequently this plugin dumps data and where that data file is located. By default, four times per day. Example::
 
     [CHARTS]
     DumpInterval = 21600
+    HistoryFile = www/history.json
 
 On a new installation, the AccountStats database may not be up to date on first iteration of the Charts plugin and no data will get dumped. Simply wait for the next interval or restart the bot after the AccountStats plugin is finished.
 
