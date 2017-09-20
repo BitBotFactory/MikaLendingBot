@@ -41,7 +41,7 @@ class Bitfinex(ExchangeApi):
         Returns a nonce
         Used in authentication
         """
-        return str(int(round(time.time() * 1000)))
+        return str(int(time.time() * 100000))
 
     @ExchangeApi.synchronized
     def limit_request_rate(self):
