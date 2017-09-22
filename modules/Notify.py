@@ -1,8 +1,15 @@
 # coding=utf-8
-import urllib
-import urllib2
 import json
 import smtplib
+try:
+    # Python 3
+    from urllib.parse import urlencode
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
+except ImportError:
+    # Python 2
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError
 try:
     from irc import client
     IRC_LOADED = True
@@ -41,9 +48,9 @@ def check_urlib_response(response, platform):
 def post_to_slack(msg, channels, token):
     for channel in channels:
         post_data = {'text': msg, 'channel': channel, 'token': token}
-        enc_post_data = urllib.urlencode(encoded_dict(post_data))
+        enc_post_data = urlencode(encoded_dict(post_data))
         url = 'https://{}/api/{}'.format('slack.com', 'chat.postMessage')
-        response = urllib2.urlopen(url, enc_post_data)
+        response = urlopen(url, enc_post_data)
         check_urlib_response(response, 'slack')
 
 
@@ -52,9 +59,9 @@ def post_to_telegram(msg, chat_ids, bot_id):
         post_data = {"chat_id": chat_id, "text": msg}
         url = "https://api.telegram.org/bot" + bot_id + "/sendMessage"
         try:
-            response = urllib2.urlopen(url, urllib.urlencode(post_data))
+            response = urlopen(url, urlencode(post_data))
             check_urlib_response(response, 'telegram')
-        except urllib2.HTTPError as e:
+        except HTTPError as e:
             msg = "Your bot id is probably configured incorrectly"
             raise NotificationException("{0}\n{1}".format(e, msg))
 
@@ -89,8 +96,8 @@ def send_email(msg, email_login_address, email_login_password, email_smtp_server
 def post_to_pushbullet(msg, token, deviceid):
     post_data = {'body': msg, 'device_iden': deviceid, 'title': 'Poloniex Bot', 'type': 'note'}
     opener = urllib2.build_opener()
-    req = urllib2.Request('https://api.pushbullet.com/v2/pushes', data=json.dumps(post_data),
-                          headers={'Content-Type': 'application/json', 'Access-Token': token})
+    req = Request('https://api.pushbullet.com/v2/pushes', data=json.dumps(post_data),
+                  headers={'Content-Type': 'application/json', 'Access-Token': token})
     try:
         opener.open(req)
     except Exception as e:

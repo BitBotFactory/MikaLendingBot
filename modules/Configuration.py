@@ -1,5 +1,10 @@
 # coding=utf-8
-from ConfigParser import SafeConfigParser
+try:
+    from ConfigParser import SafeConfigParser
+    from builtins import input
+except ImportError:
+    # Python 3
+    from configparser import SafeConfigParser
 import json
 import os
 from decimal import Decimal
@@ -19,9 +24,9 @@ def init(file_location, data=None):
         # Copy default config file if not found
         try:
             shutil.copy('default.cfg.example', file_location)
-            print '\ndefault.cfg.example has been copied to ' + file_location + '\n' \
-                  'Edit it with your API key and custom settings.\n'
-            raw_input("Press Enter to acknowledge and exit...")
+            print("\ndefault.cfg.example has been copied to ".format(file_location))
+            print("Edit it with your API key and custom settings.\n")
+            input("Press Enter to acknowledge and exit...")
             exit(1)
         except Exception as ex:
             ex.message = ex.message if ex.message else str(ex)
@@ -33,7 +38,7 @@ def init(file_location, data=None):
 def has_option(category, option):
     try:
         return True if os.environ["{0}_{1}".format(category, option)] else _
-    except (KeyError, NameError): # KeyError for no env var, NameError for _ (empty var) and then to continue
+    except (KeyError, NameError):  # KeyError for no env var, NameError for _ (empty var) and then to continue
         return config.has_option(category, option)
 
 
@@ -55,22 +60,24 @@ def get(category, option, default_value=False, lower_limit=False, upper_limit=Fa
             value = config.get(category, option)
         try:
             if lower_limit and float(value) < float(lower_limit):
-                print "WARN: [%s]-%s's value: '%s' is below the minimum limit: %s, which will be used instead." % \
-                      (category, option, value, lower_limit)
+                print("WARN: [{0}]-{1}'s value: '{2}' is below the minimum limit: {3}, which will be used instead."
+                      .format(category, option, value, lower_limit))
                 value = lower_limit
             if upper_limit and float(value) > float(upper_limit):
-                print "WARN: [%s]-%s's value: '%s' is above the maximum limit: %s, which will be used instead." % \
-                      (category, option, value, upper_limit)
+                print("WARN: [{0}]-{1}'s value: '{2}' is above the maximum limit: {3}, which will be used instead."
+                      .format(category, option, value, upper_limit))
                 value = upper_limit
             return value
         except ValueError:
             if default_value is None:
-                print "ERROR: [%s]-%s is not allowed to be left empty. Please check your config." % (category, option)
+                print("ERROR: [{0}]-{1} is not allowed to be left empty. Please check your config."
+                      .format(category, option))
                 exit(1)
             return default_value
     else:
         if default_value is None:
-            print "ERROR: [%s]-%s is not allowed to be left unset. Please check your config." % (category, option)
+            print("ERROR: [{0}]-{1} is not allowed to be left unset. Please check your config."
+                  .format(category, option))
             exit(1)
         return default_value
 
@@ -162,8 +169,8 @@ def get_gap_mode(category, option):
         full_list = ['raw', 'rawbtc', 'relative']
         value = get(category, 'gapmode', False).lower().strip(" ")
         if value not in full_list:
-            print "ERROR: Invalid entry '%s' for [%s]-gapMode. Please check your config. Allowed values are: %s" % \
-                  (value, category, ", ".join(full_list))
+            print("ERROR: Invalid entry '{0}' for [{1}]-gapMode. Please check your config. Allowed values are: {2}"
+                  .format(value, category, ", ".join(full_list)))
             exit(1)
         return value.lower()
     else:
@@ -193,8 +200,8 @@ def get_notification_config():
     notify_conf = {'enable_notifications': config.has_section('notifications')}
 
     # For boolean parameters
-    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_new_loans', 'notify_caught_exception', 'email', 'slack', 'telegram',
-                 'pushbullet', 'irc']:
+    for conf in ['notify_tx_coins', 'notify_xday_threshold', 'notify_new_loans', 'notify_caught_exception', 'email',
+                 'slack', 'telegram', 'pushbullet', 'irc']:
         notify_conf[conf] = getboolean('notifications', conf)
 
     # For string-based parameters

@@ -1,6 +1,11 @@
 import datetime
 from decimal import Decimal
-from urllib import urlopen
+try:
+    from urllib import urlopen
+except ImportError:
+    # Python 3
+    from urllib.request import urlopen
+
 import json
 
 api = None

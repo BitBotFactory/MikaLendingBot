@@ -5,8 +5,13 @@ import sys
 import time
 import traceback
 from decimal import Decimal
-from httplib import BadStatusLine
-from urllib2 import URLError
+try:
+    from httplib import BadStatusLine
+    from urllib2 import URLError
+except ImportError:
+    # Python 3
+    from http.client import BadStatusLine
+    from urllib.error import URLError
 
 import modules.Configuration as Config
 import modules.Data as Data
@@ -82,7 +87,7 @@ Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 # load plugins
 PluginsManager.init(Config, api, log, notify_conf)
 
-print 'Welcome to ' + Config.get("BOT", "label", "Lending Bot") + ' on ' + exchange
+print("Welcome to {0} on {1}".format(Config.get("BOT", "label", "Lending Bot"), exchange))
 
 try:
     while True:
@@ -105,34 +110,34 @@ try:
             log.log_error(ex.message)
             log.persistStatus()
             if 'Invalid API key' in ex.message:
-                print "!!! Troubleshooting !!!"
-                print "Are your API keys correct? No quotation. Just plain keys."
+                print("!!! Troubleshooting !!!")
+                print("Are your API keys correct? No quotation. Just plain keys.")
                 exit(1)
             elif 'Nonce must be greater' in ex.message:
-                print "!!! Troubleshooting !!!"
-                print "Are you reusing the API key in multiple applications? Use a unique key for every application."
+                print("!!! Troubleshooting !!!")
+                print("Are you reusing the API key in multiple applications? Use a unique key for every application.")
                 exit(1)
             elif 'Permission denied' in ex.message:
-                print "!!! Troubleshooting !!!"
-                print "Are you using IP filter on the key? Maybe your IP changed?"
+                print("!!! Troubleshooting !!!")
+                print("Are you using IP filter on the key? Maybe your IP changed?")
                 exit(1)
             elif 'timed out' in ex.message:
-                print "Timed out, will retry in " + str(Lending.get_sleep_time()) + "sec"
+                print("Timed out, will retry in {0} sec".format(Lending.get_sleep_time()))
             elif isinstance(ex, BadStatusLine):
-                print "Caught BadStatusLine exception from Poloniex, ignoring."
+                print("Caught BadStatusLine exception from Poloniex, ignoring.")
             elif 'Error 429' in ex.message:
-                additional_sleep = max(130.0-Lending.get_sleep_time(), 0)
+                additional_sleep = max(130.0 - Lending.get_sleep_time(), 0)
                 sum_sleep = additional_sleep + Lending.get_sleep_time()
                 log.log_error('IP has been banned due to many requests. Sleeping for {} seconds'.format(sum_sleep))
                 time.sleep(additional_sleep)
             # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
             elif isinstance(ex, URLError):
-                print "Caught {0} from exchange, ignoring.".format(ex.message)
+                print("Caught {0} from exchange, ignoring.".format(ex.message))
             elif isinstance(ex, ApiError):
-                print "Caught {0} reading from exchange API, ignoring.".format(ex.message)
+                print("Caught {0} reading from exchange API, ignoring.".format(ex.message))
             else:
-                print traceback.format_exc()
-                print "Unhandled error, please open a Github issue so we can fix it!"
+                print(traceback.format_exc())
+                print("Unhandled error, please open a Github issue so we can fix it!")
                 if notify_conf['notify_caught_exception']:
                     log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
             sys.stdout.flush()
@@ -144,5 +149,5 @@ except KeyboardInterrupt:
         WebServer.stop_web_server()
     PluginsManager.on_bot_exit()
     log.log('bye')
-    print 'bye'
+    print('bye')
     os._exit(0)  # Ad-hoc solution in place of 'exit(0)' TODO: Find out why non-daemon thread(s) are hanging on exit

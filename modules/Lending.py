@@ -58,7 +58,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom_default, gap_top_default, xday_threshold, xday_spread, xdays, min_loan_size, end_date, coin_cfg, \
         min_loan_sizes, dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, \
-        exchange, analysis_method, currencies_to_analyse 
+        exchange, analysis_method, currencies_to_analyse
 
     exchange = Config.get_exchange()
 
@@ -131,13 +131,14 @@ def notify_new_loans(sleep_time):
         if loans_provided:
             # function to return a set of ids from the api result
             # get_id_set = lambda loans: set([x['id'] for x in loans])
-            def get_id_set(loans): return set([x['id'] for x in loans])
+            def get_id_set(loans):
+                return set([x['id'] for x in loans])
             loans_amount = {}
             loans_info = {}
             for loan_id in get_id_set(new_provided) - get_id_set(loans_provided):
                 loan = [x for x in new_provided if x['id'] == loan_id][0]
                 # combine loans with the same rate
-                k = 'c'+loan['currency']+'r'+loan['rate']+'d'+str(loan['duration'])
+                k = 'c' + loan['currency'] + 'r' + loan['rate'] + 'd' + str(loan['duration'])
                 loans_amount[k] = float(loan['amount']) + (loans_amount[k] if k in loans_amount else 0)
                 loans_info[k] = loan
             # send notifications with the grouped info
@@ -175,7 +176,7 @@ def create_lend_offer(currency, amt, rate):
     if Config.has_option('BOT', 'endDate'):
         days_remaining = int(Data.get_max_duration(end_date, "order"))
         if int(days_remaining) <= 2:
-            print "endDate reached. Bot can no longer lend.\nExiting..."
+            print("endDate reached. Bot can no longer lend.\nExiting...")
             log.log("The end date has almost been reached and the bot can no longer lend. Exiting.")
             log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()), Data.get_max_duration(
                 end_date, "status"))
@@ -218,7 +219,7 @@ def cancel_all():
                         ex.message = ex.message if ex.message else str(ex)
                         log.log("Error canceling loan offer: {0}".format(ex.message))
         else:
-            print "Not enough " + CUR + " to lend if bot canceled open orders. Not cancelling."
+            print("Not enough {0} to lend if bot canceled open orders. Not cancelling.".format(CUR))
 
 
 def lend_all():
@@ -378,12 +379,12 @@ def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
         top_rate = get_gap_rate(cur, gap_top, order_book, cur_total_balance)
     else:
         if use_gap_cfg:
-            print "WARN: Invalid setting for gapMode for [%s], using defaults..." % cur
+            print("WARN: Invalid setting for gapMode for [{0}], using defaults...".format(cur))
             coin_cfg[cur]['gapmode'] = "rawbtc"
             coin_cfg[cur]['gapbottom'] = 10
             coin_cfg[cur]['gaptop'] = 100
         else:
-            print "WARN: Invalid setting for gapMode, using defaults..."
+            print("WARN: Invalid setting for gapMode, using defaults...")
             gap_mode_default = "relative"
             gap_bottom_default = 10
             gap_top_default = 200
@@ -457,5 +458,5 @@ def transfer_balances():
                 log.log(log.digestApiMsg(msg))
                 log.notify(log.digestApiMsg(msg), notify_conf)
             if coin not in exchange_balances:
-                print "WARN: Incorrect coin entered for transferCurrencies: " + coin
+                print("WARN: Incorrect coin entered for transferCurrencies: ".format(coin))
                 transferable_currencies.remove(coin)
