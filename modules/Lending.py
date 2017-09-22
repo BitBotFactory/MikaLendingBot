@@ -29,6 +29,7 @@ end_date = None
 coin_cfg = {}
 dry_run = 0
 transferable_currencies = []
+currencies_to_analyse = []
 keep_stuck_orders = True
 hide_coins = True
 coin_cfg_alerted = {}
@@ -57,7 +58,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom_default, gap_top_default, xday_threshold, xday_spread, xdays, min_loan_size, end_date, coin_cfg, \
         min_loan_sizes, dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, \
-        exchange, analysis_method
+        exchange, analysis_method, currencies_to_analyse 
 
     exchange = Config.get_exchange()
 
@@ -81,6 +82,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     min_loan_sizes = Config.get_min_loan_sizes()
     dry_run = dry_run1
     transferable_currencies = Config.get_currencies_list('transferableCurrencies')
+    currencies_to_analyse = Config.get_currencies_list('analyseCurrencies', 'MarketAnalysis')
     keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
     hide_coins = Config.getboolean('BOT', 'hideCoins', True)
     analysis_method = Config.get('Daily_min', 'method', 'percentile')
@@ -259,7 +261,7 @@ def get_min_daily_rate(cur):
         if cur not in coin_cfg_alerted:  # Only alert once per coin.
             coin_cfg_alerted[cur] = True
             log.log('Using custom mindailyrate ' + str(coin_cfg[cur]['minrate'] * 100) + '% for ' + cur)
-    if Analysis:
+    if Analysis and cur in currencies_to_analyse:
         recommended_min = Analysis.get_rate_suggestion(cur, method=analysis_method)
         if cur_min_daily_rate < recommended_min:
             cur_min_daily_rate = recommended_min
