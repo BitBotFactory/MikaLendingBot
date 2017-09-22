@@ -103,6 +103,9 @@ class Bitfinex(ExchangeApi):
 
             return r.json()
 
+        except ApiError as ex:
+            ex.message = "{0} Requesting {1}".format(str(ex), self.url + request)
+            raise ex
         except Exception as ex:
             ex.message = ex.message if ex.message else str(ex)
             ex.message = "{0} Requesting {1}".format(ex.message, self.url + request)
