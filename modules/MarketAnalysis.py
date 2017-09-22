@@ -7,6 +7,7 @@ import datetime
 import pandas as pd
 import sqlite3 as sqlite
 from sqlite3 import Error
+from builtins import range
 
 # Bot libs
 import modules.Configuration as Config
@@ -161,7 +162,7 @@ class MarketAnalysis(object):
             except Exception as ex:
                 self.print_traceback(ex, "Error in returning data from exchange")
             market_data = []
-            for i in xrange(levels):
+            for i in range(levels):
                 market_data.append(str(raw_data[i]['rate']))
                 market_data.append(str(raw_data[i]['amount']))
             market_data.append('0')  # Percentile field not being filled yet.
@@ -171,7 +172,7 @@ class MarketAnalysis(object):
             if levels is None:
                 levels = self.recorded_levels
             insert_sql = "INSERT INTO loans ("
-            for level in xrange(levels):
+            for level in range(levels):
                 insert_sql += "rate{0}, amnt{0}, ".format(level)
             insert_sql += "percentile) VALUES ({0});".format(','.join(market_data))  # percentile = 0
             with db_con:
@@ -405,7 +406,7 @@ class MarketAnalysis(object):
             cursor = db_con.cursor()
             create_table_sql = "CREATE TABLE IF NOT EXISTS loans (id INTEGER PRIMARY KEY AUTOINCREMENT," + \
                                "unixtime integer(4) not null default (strftime('%s','now')),"
-            for level in xrange(levels):
+            for level in range(levels):
                 create_table_sql += "rate{0} FLOAT, ".format(level)
                 create_table_sql += "amnt{0} FLOAT, ".format(level)
             create_table_sql += "percentile FLOAT);"
