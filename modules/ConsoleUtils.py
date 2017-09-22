@@ -5,6 +5,7 @@ import struct
 import platform
 import subprocess
 
+
 def get_terminal_size():
     """ getTerminalSize()
      - get width and height of console
@@ -44,6 +45,7 @@ def _get_terminal_size_windows():
             return sizex, sizey
     except:
         pass
+
 
 def _get_terminal_size_tput():
     # get terminal width

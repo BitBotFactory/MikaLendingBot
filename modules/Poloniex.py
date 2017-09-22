@@ -32,7 +32,8 @@ def post_process(before):
             for x in range(0, len(after['return'])):
                 if isinstance(after['return'][x], dict):
                     if 'datetime' in after['return'][x] and 'timestamp' not in after['return'][x]:
-                        after['return'][x]['timestamp'] = float(ExchangeApi.create_time_stamp(after['return'][x]['datetime']))
+                        after['return'][x]['timestamp'] \
+                            = float(ExchangeApi.create_time_stamp(after['return'][x]['datetime']))
 
     return after
 

@@ -28,7 +28,7 @@ class Bitfinex2Poloniex(object):
             if offer['direction'] == 'lend' and float(offer['remaining_amount']) > 0:
                 plxOffers[offer['currency']].append({
                     "id": offer['id'],
-                    "rate": str(float(offer['rate'])/36500),
+                    "rate": str(float(offer['rate']) / 36500),
                     "amount": offer['remaining_amount'],
                     "duration": offer['period'],
                     "autoRenew": 0,

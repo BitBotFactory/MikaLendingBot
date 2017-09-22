@@ -20,8 +20,8 @@ class Bitfinex(ExchangeApi):
         self.log = log
         self.lock = threading.RLock()
         self.req_per_min = 60
-        self.req_period = 15 # seconds
-        self.req_per_period = int(self.req_per_min / ( 60.0 / self.req_period))
+        self.req_period = 15  # seconds
+        self.req_per_period = int(self.req_per_min / (60.0 / self.req_period))
         self.req_time_log = RingBuffer(self.req_per_period)
         self.url = 'https://api.bitfinex.com'
         self.key = self.cfg.get("API", "apikey", None)
@@ -259,7 +259,7 @@ class Bitfinex(ExchangeApi):
         payload = {
             "currency": currency,
             "amount": str(amount),
-            "rate": str(round(float(lending_rate),10) * 36500), 
+            "rate": str(round(float(lending_rate),10) * 36500),
             "period": int(duration),
             "direction": "lend"
         }
@@ -346,7 +346,7 @@ class Bitfinex(ExchangeApi):
                         "amount": "0.0",
                         "duration": "0.0",
                         "interest": str(amount / 0.85),
-                        "fee": str(amount-amount / 0.85),
+                        "fee": str(amount - amount / 0.85),
                         "earned": str(amount),
                         "open": Bitfinex2Poloniex.convertTimestamp(entry['timestamp']),
                         "close": Bitfinex2Poloniex.convertTimestamp(entry['timestamp'])
