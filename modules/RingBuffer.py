@@ -37,7 +37,7 @@ if __name__ == '__main__':
     ring = RingBuffer(size)
     for x in range(9):
         ring.append(x)
-        print ring.get()  # test
+        print(ring.get())  # test
 
 """
 notice that the left most item is popped to make room
