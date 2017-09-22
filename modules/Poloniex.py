@@ -17,10 +17,12 @@ try:
     from urllib.parse import urlencode
     from urllib.request import urlopen, Request
     from urllib.error import HTTPError
+    PYVER = 3
 except ImportError:
     # Python 2
     from urllib import urlencode
     from urllib2 import urlopen, Request, HTTPError
+    PYVER = 2
 
 
 def post_process(before):
@@ -45,6 +47,8 @@ class Poloniex(ExchangeApi):
         self.log = log
         self.APIKey = self.cfg.get("API", "apikey", None)
         self.Secret = self.cfg.get("API", "secret", None)
+        if PYVER == 3:
+            self.Secret = bytes(self.Secret, 'latin-1')
         self.req_per_sec = 6
         self.req_time_log = RingBuffer(self.req_per_sec)
         self.lock = threading.RLock()
@@ -58,17 +62,17 @@ class Poloniex(ExchangeApi):
             time_since_oldest_req = now - self.req_time_log[0]
             # check if oldest request is more than 1sec ago
             if time_since_oldest_req < 1:
-                # print self.req_time_log.get()
+                # print(self.req_time_log.get())
                 # uncomment to debug
-                # print "Waiting %s sec to keep api request rate" % str(1 - time_since_oldest_req)
-                # print "Req: %d  6th Req: %d  Diff: %f sec" %(now, self.req_time_log[0], time_since_oldest_req)
+                # print("Waiting %s sec to keep api request rate" % str(1 - time_since_oldest_req))
+                # print("Req: %d  6th Req: %d  Diff: %f sec" %(now, self.req_time_log[0], time_since_oldest_req))
                 self.req_time_log.append(now + 1 - time_since_oldest_req)
                 time.sleep(1 - time_since_oldest_req)
                 return
             # uncomment to debug
             # else:
-            #     print self.req_time_log.get()
-            #     print "Req: %d  6th Req: %d  Diff: %f sec" % (now, self.req_time_log[0], time_since_oldest_req)
+            #     print(self.req_time_log.get())
+            #     print("Req: %d  6th Req: %d  Diff: %f sec" % (now, self.req_time_log[0], time_since_oldest_req))
         # append current request time to the log, pushing out the 6th request time before it
         self.req_time_log.append(now)
 
@@ -110,6 +114,8 @@ class Poloniex(ExchangeApi):
                 req['command'] = command
                 req['nonce'] = int(time.time() * 1000)
                 post_data = urlencode(req)
+                if PYVER == 3:
+                    post_data = bytes(post_data, 'latin-1')
 
                 sign = hmac.new(self.Secret, post_data, hashlib.sha512).hexdigest()
                 headers = {

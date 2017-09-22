@@ -51,7 +51,7 @@ class Bitfinex(ExchangeApi):
             time_since_oldest_req = now - self.req_time_log[0]
             # check if oldest request is more than self.req_period ago
             if time_since_oldest_req < self.req_period:
-                # print self.req_time_log.get()
+                # print(self.req_time_log.get())
                 # uncomment to debug
                 # print("Waiting {0} sec, {1} to keep api request rate".format(self.req_period - time_since_oldest_req,
                 #       threading.current_thread()))
@@ -61,7 +61,7 @@ class Bitfinex(ExchangeApi):
                 return
             # uncomment to debug
             # else:
-            #     print self.req_time_log.get()
+            #     print(self.req_time_log.get())
             #     print("Not Waiting {0}".format(threading.current_thread()))
             #     print("Req:{0} Oldest req:{1}  Diff:{2} sec".format(now, self.req_time_log[0], time_since_oldest_req))
         # append current request time to the log, pushing out the 60th request time before it

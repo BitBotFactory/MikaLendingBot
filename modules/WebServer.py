@@ -43,9 +43,14 @@ def start_web_server():
     '''
     Start the web server
     '''
-    import SimpleHTTPServer
-    import SocketServer
     import socket
+    try:
+        import SimpleHTTPServer
+        import SocketServer
+    except ImportError:
+        # Python 3 (this isn't a nice way to do it, but the nicer way involves installing future from pip for py2)
+        import http.server as SimpleHTTPServer
+        import socketserver as SocketServer
 
     try:
         port = int(web_server_port)
