@@ -159,11 +159,19 @@ class MarketAnalysis(object):
             try:
                 raw_data = self.api.return_loan_orders(cur, levels)['offers']
             except Exception as ex:
-                self.print_traceback(ex, "Error in returning data from exchange")
+                if self.ma_debug_log:
+                    self.print_traceback(ex, "Error in returning data from exchange")
+                else:
+                    print("Error in returning data from exchange, ignoring")
+
             market_data = []
             for i in xrange(levels):
-                market_data.append(str(raw_data[i]['rate']))
-                market_data.append(str(raw_data[i]['amount']))
+                try:
+                    market_data.append(str(raw_data[i]['rate']))
+                    market_data.append(str(raw_data[i]['amount']))
+                except IndexError:
+                    market_data.append("5")
+                    market_data.append("0.1")
             market_data.append('0')  # Percentile field not being filled yet.
             self.insert_into_db(db_con, market_data)
 
