@@ -107,6 +107,8 @@ try:
             # allow existing the main bot loop
             raise
         except Exception as ex:
+            if not hasattr(ex, 'message'):
+                ex.message = str(ex)
             log.log_error(ex.message)
             log.persistStatus()
             if 'Invalid API key' in ex.message:

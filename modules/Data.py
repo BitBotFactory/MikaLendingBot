@@ -40,7 +40,7 @@ def get_max_duration(end_date, context):
         if context == "status":
             return " - Days Remaining: " + str(diff_days)  # Status needs string
     except Exception as ex:
-        ex.message = ex.message if ex.message else str(ex)
+        ex.message = ex.message if hasattr(ex, 'message') and ex.message else str(ex)
         print("ERROR: There is something wrong with your endDate option. Error: {0}".format(ex.message))
         exit(1)
 
