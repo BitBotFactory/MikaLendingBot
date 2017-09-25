@@ -45,7 +45,9 @@ def has_option(category, option):
 def getboolean(category, option, default_value=False):
     if has_option(category, option):
         try:
-            return bool(os.environ["{0}_{1}".format(category, option)])
+            v = os.environ["{0}_{1}".format(category, option)]
+            return v.lower() in ['true', '1', 't', 'y', 'yes']
+
         except KeyError:
             return config.getboolean(category, option)
     else:
