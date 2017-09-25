@@ -1,13 +1,13 @@
 # coding=utf-8
 try:
     from ConfigParser import SafeConfigParser
-    from builtins import input
 except ImportError:
     # Python 3
     from configparser import SafeConfigParser
 import json
 import os
 from decimal import Decimal
+from builtins import input
 
 config = SafeConfigParser()
 Data = None
@@ -246,5 +246,5 @@ def get_notification_config():
 def get_plugins_config():
     active_plugins = []
     if config.has_option("BOT", "plugins"):
-        active_plugins = map(str.strip, config.get("BOT", "plugins").split(','))
+        active_plugins = list(map(str.strip, config.get("BOT", "plugins").split(',')))
     return active_plugins

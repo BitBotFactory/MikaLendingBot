@@ -3,13 +3,13 @@ Exchange API Base class
 """
 
 import abc
+import six
 import calendar
 import time
 
 
+@six.add_metaclass(abc.ABCMeta)
 class ExchangeApi(object):
-    __metaclass__ = abc.ABCMeta
-
     def __str__(self):
         return self.__class__.__name__.upper()
 

@@ -32,7 +32,7 @@ def get_max_duration(end_date, context):
         return ""
     try:
         now_time = datetime.date.today()
-        config_date = map(int, end_date.split(','))
+        config_date = list(map(int, end_date.split(',')))
         end_time = datetime.date(*config_date)  # format YEAR,MONTH,DAY all ints, also used splat operator
         diff_days = (end_time - now_time).days
         if context == "order":
