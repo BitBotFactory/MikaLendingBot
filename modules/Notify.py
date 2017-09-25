@@ -1,11 +1,13 @@
 # coding=utf-8
 import json
 import smtplib
+from six import iteritems
 try:
     # Python 3
     from urllib.parse import urlencode
     from urllib.request import urlopen, Request
     from urllib.error import HTTPError
+    unicode = str
 except ImportError:
     # Python 2
     from urllib import urlencode
@@ -23,7 +25,7 @@ IRC_SERVER = None
 # Slack post data needs to be encoded in UTF-8
 def encoded_dict(in_dict):
     out_dict = {}
-    for k, v in in_dict.iteritems():
+    for k, v in iteritems(in_dict):
         if isinstance(v, unicode):
             v = v.encode('utf8')
         elif isinstance(v, str):

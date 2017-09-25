@@ -1,5 +1,6 @@
 # coding=utf-8
 from decimal import Decimal
+from six import iteritems
 import sched
 import time
 import threading
@@ -142,7 +143,7 @@ def notify_new_loans(sleep_time):
                 loans_amount[k] = float(loan['amount']) + (loans_amount[k] if k in loans_amount else 0)
                 loans_info[k] = loan
             # send notifications with the grouped info
-            for k, amount in loans_amount.iteritems():
+            for k, amount in iteritems(loans_amount):
                 loan = loans_info[k]
                 t = "{0} {1} loan filled for {2} days at a rate of {3:.4f}%"
                 text = t.format(amount, loan['currency'], loan['duration'], float(loan['rate']) * 100)
