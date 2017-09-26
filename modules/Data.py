@@ -50,10 +50,8 @@ def get_total_lent():
     total_lent = {}
     rate_lent = {}
     for item in crypto_lent["provided"]:
-        item_str = item["amount"].encode("utf-8")
-        item_float = Decimal(item_str)
-        item_rate_str = item["rate"].encode("utf-8")
-        item_rate_float = Decimal(item_rate_str)
+        item_float = Decimal(item["amount"])
+        item_rate_float = Decimal(item["rate"])
         if item["currency"] in total_lent:
             crypto_lent_sum = total_lent[item["currency"]] + item_float
             crypto_lent_rate = rate_lent[item["currency"]] + (item_rate_float * item_float)

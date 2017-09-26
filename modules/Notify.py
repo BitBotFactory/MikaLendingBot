@@ -61,7 +61,7 @@ def post_to_telegram(msg, chat_ids, bot_id):
         post_data = {"chat_id": chat_id, "text": msg}
         url = "https://api.telegram.org/bot" + bot_id + "/sendMessage"
         try:
-            response = urlopen(url, urlencode(post_data))
+            response = urlopen(url, urlencode(post_data).encode('utf8'))
             check_urlib_response(response, 'telegram')
         except HTTPError as e:
             msg = "Your bot id is probably configured incorrectly"
