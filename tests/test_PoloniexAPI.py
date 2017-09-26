@@ -44,7 +44,7 @@ def api_rate_limit(n, start):
 # Test rate limiter
 def test_rate_limiter():
     start = time.time()
-    for i in range(40):
+    for i in range(20):
         thread = threading.Thread(target=api_rate_limit, args=(i, start))
         thread.start()
         thread.join()

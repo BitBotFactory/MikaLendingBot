@@ -88,8 +88,12 @@ class TestClass(object):
         with pytest.raises(SystemExit):
             assert(config.get('ENVVAR', 'NO_NUM', None))
 
-    def test_get_exchange(self, config):
+    def test_get_exchange_poloniex(self, config):
+        write_skeleton_exchange(config.filename, 'Poloniex')
+        config.init(config.filename)
         assert(config.get_exchange() == 'POLONIEX')
+
+    def test_get_exchange_bitfinex(self, config):
         write_skeleton_exchange(config.filename, 'Bitfinex')
         config.init(config.filename)
         assert(config.get_exchange() == 'BITFINEX')
