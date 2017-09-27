@@ -292,7 +292,9 @@ class Bitfinex(ExchangeApi):
         https://bitfinex.readme.io/v1/reference#rest-auth-wallet-balances
         """
         balances = self.return_available_account_balances('exchange')
-        return balances['exchange']
+        return_dict = {cur: u'0.00000000' for cur in self.cfg.get_all_currencies()}
+        return_dict.update(balances['exchange'])
+        return return_dict
 
     def transfer_balance(self, currency, amount, from_account, to_account):
         """
