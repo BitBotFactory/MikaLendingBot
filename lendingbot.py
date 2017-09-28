@@ -132,7 +132,7 @@ try:
                 print "Caught {0} reading from exchange API, ignoring.".format(ex.message)
             else:
                 print traceback.format_exc()
-                print "Unhandled error, please open a Github issue so we can fix it!"
+                print "v{0} Unhandled error, please open a Github issue so we can fix it!".format(Data.get_bot_version())
                 if notify_conf['notify_caught_exception']:
                     log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
             sys.stdout.flush()

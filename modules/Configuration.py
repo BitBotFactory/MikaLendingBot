@@ -1,7 +1,7 @@
 # coding=utf-8
-from ConfigParser import SafeConfigParser
 import json
 import os
+from ConfigParser import SafeConfigParser
 from decimal import Decimal
 
 config = SafeConfigParser()
@@ -241,3 +241,5 @@ def get_plugins_config():
     if config.has_option("BOT", "plugins"):
         active_plugins = map(str.strip, config.get("BOT", "plugins").split(','))
     return active_plugins
+
+

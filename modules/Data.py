@@ -141,3 +141,14 @@ def truncate(f, n):
         return float('{0:.{1}f}'.format(f, n))
     i, p, d = s.partition('.')
     return float('.'.join([i, (d + '0' * n)[:n]]))
+
+
+# gets the git commit count as version for master.
+def get_bot_version():
+    import subprocess
+    try:
+        output = subprocess.check_output(["git", "rev-list","--count", "HEAD"])
+        int(output)
+        return output
+    except Exception:
+        return '3.0.0'
