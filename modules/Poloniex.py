@@ -115,7 +115,7 @@ class Poloniex(ExchangeApi):
             try:
                 data = json.loads(raw_polo_response)
                 polo_error_msg = data['error']
-            except Exception as ex:
+            except:
                 if hasattr(ex, 'code') and (ex.code == 502 or ex.code in range(520, 527, 1)):
                     # 502 and 520-526 Bad Gateway so response is likely HTML from Cloudflare
                     polo_error_msg = 'API Error ' + str(ex.code) + \
