@@ -19,9 +19,9 @@ class Bitfinex(ExchangeApi):
         self.cfg = cfg
         self.log = log
         self.lock = threading.RLock()
-        self.req_per_min = 90
-        self.req_period = 15 # seconds
-        self.req_per_period = int(self.req_per_min / ( 60.0 / self.req_period))
+        self.req_per_period = 1
+        self.default_req_period = 1000  # milliseconds, 1000 = 60/min
+        self.req_period = self.default_req_period
         self.req_time_log = RingBuffer(self.req_per_period)
         self.url = 'https://api.bitfinex.com'
         self.key = self.cfg.get("API", "apikey", None)
@@ -32,6 +32,7 @@ class Bitfinex(ExchangeApi):
         self.tickerTime = 0
         self.usedCurrencies = []
         self.timeout = int(self.cfg.get("BOT", "timeout", 30, 1, 180))
+        self.api_debug_log = self.cfg.getboolean("BOT", "api_debug_log")
         # Initialize usedCurrencies
         _ = self.return_available_account_balances("lending")
 
@@ -44,27 +45,16 @@ class Bitfinex(ExchangeApi):
         return str(int(time.time() * 100000))
 
     def limit_request_rate(self):
-        now = time.time()
-        # start checking only when request time log is full
-        if len(self.req_time_log) == self.req_per_period:
-            time_since_oldest_req = now - self.req_time_log[0]
-            # check if oldest request is more than self.req_period ago
-            if time_since_oldest_req < self.req_period:
-                # print self.req_time_log.get()
-                # uncomment to debug
-                # print("Waiting {0} sec, {1} to keep api request rate".format(self.req_period - time_since_oldest_req,
-                #       threading.current_thread()))
-                # print("Req:{0} Oldest req:{1} Diff:{2} sec".format(now, self.req_time_log[0], time_since_oldest_req))
-                self.req_time_log.append(now + self.req_period - time_since_oldest_req)
-                time.sleep(self.req_period - time_since_oldest_req)
-                return
-            # uncomment to debug
-            # else:
-            #     print self.req_time_log.get()
-            #     print("Not Waiting {0}".format(threading.current_thread()))
-            #     print("Req:{0} Oldest req:{1}  Diff:{2} sec".format(now, self.req_time_log[0], time_since_oldest_req))
-        # append current request time to the log, pushing out the 60th request time before it
-        self.req_time_log.append(now)
+        super(Bitfinex, self).limit_request_rate()
+
+    def increase_request_timer(self):
+        super(Bitfinex, self).increase_request_timer()
+
+    def decrease_request_timer(self):
+        super(Bitfinex, self).decrease_request_timer()
+
+    def reset_request_timer(self):
+        super(Bitfinex, self).reset_request_timer()
 
     def _sign_payload(self, payload):
         j = json.dumps(payload)
@@ -80,13 +70,12 @@ class Bitfinex(ExchangeApi):
         }
 
     def _request(self, method, request, payload=None, verify=True):
-        now = time.time()
         try:
 
             r = {}
             url = '{}{}'.format(self.url, request)
             if method == 'get':
-                r = requests.get(url, timeout=self.timeout, headers={'Connection':'close'})
+                r = requests.get(url, timeout=self.timeout, headers={'Connection': 'close'})
             else:
                 r = requests.post(url, headers=payload, verify=verify, timeout=self.timeout)
 
@@ -94,9 +83,12 @@ class Bitfinex(ExchangeApi):
                 if r.status_code == 502 or r.status_code in range(520, 527, 1):
                     raise ApiError('API Error ' + str(r.status_code) +
                                    ': The web server reported a bad gateway or gateway timeout error.')
-                else:
-                    raise ApiError('API Error ' + str(r.status_code) + ': ' + r.text)
+                elif r.status_code == 429:
+                    self.increase_request_timer()
+                raise ApiError('API Error ' + str(r.status_code) + ': ' + r.text)
 
+            # Check in case something has gone wrong and the timer is too big
+            self.reset_request_timer()
             return r.json()
 
         except Exception as ex:
@@ -263,7 +255,7 @@ class Bitfinex(ExchangeApi):
         payload = {
             "currency": currency,
             "amount": str(amount),
-            "rate": str(round(float(lending_rate),10) * 36500), 
+            "rate": str(round(float(lending_rate), 10) * 36500),
             "period": int(duration),
             "direction": "lend"
         }
@@ -352,7 +344,7 @@ class Bitfinex(ExchangeApi):
                         "amount": "0.0",
                         "duration": "0.0",
                         "interest": str(amount / 0.85),
-                        "fee": str(amount-amount / 0.85),
+                        "fee": str(amount - amount / 0.85),
                         "earned": str(amount),
                         "open": Bitfinex2Poloniex.convertTimestamp(entry['timestamp']),
                         "close": Bitfinex2Poloniex.convertTimestamp(entry['timestamp'])

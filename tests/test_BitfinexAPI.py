@@ -38,6 +38,7 @@ def call_get_open_loan_offers(i):
     api.return_open_loan_offers()
     print 'API Call ' + str(i) + ' sec:' + str(time.time() - start_time)
 
+
 # def api_rate_limit(n, start):
 #     api.limit_request_rate()
 #     # verify that the (N % 6) th request is delayed by (N / 6) sec from the start time

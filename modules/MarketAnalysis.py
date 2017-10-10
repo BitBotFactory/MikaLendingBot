@@ -7,6 +7,7 @@ import datetime
 import pandas as pd
 import sqlite3 as sqlite
 from sqlite3 import Error
+from modules.ExchangeApi import ApiError
 
 # Bot libs
 import modules.Configuration as Config
@@ -73,6 +74,7 @@ class MarketAnalysis(object):
                                                     self.keep_history_seconds / 2,
                                                     60,
                                                     60 * 60 * 2))
+        self.exchange = config.get_exchange()
 
         if len(self.currencies_to_analyse) != 0:
             for currency in self.currencies_to_analyse:
@@ -158,6 +160,12 @@ class MarketAnalysis(object):
         while True:
             try:
                 raw_data = self.api.return_loan_orders(cur, levels)['offers']
+            except ApiError as ex:
+                if '429' in str(ex):
+                    if self.ma_debug_log:
+                        print("Caught ERR_RATE_LIMIT, sleeping capture and increasing request delay. Current"
+                              " {0}ms".format(self.api.req_period))
+                    time.sleep(130)
             except Exception as ex:
                 if self.ma_debug_log:
                     self.print_traceback(ex, "Error in returning data from exchange")
@@ -296,15 +304,15 @@ class MarketAnalysis(object):
                 if self.ma_debug_log:
                     print("DEBUG:get_analysis_seconds: cur: {0} method:{1} rates:{2}".format(cur, method, rates))
                 return 0
-            if self.ma_debug_log:
-                print("Cur:{0}, MACD:{1:.6f}, Perc:{2:.6f}, Best:{3:.6f}"
-                      .format(cur, truncate(self.get_MACD_rate(cur, rates), 6),
-                              self.get_percentile(rates.rate0.values.tolist(), self.lending_style),
-                              rates.rate0.iloc[-1]))
             if method == 'percentile':
                 return self.get_percentile(rates.rate0.values.tolist(), self.lending_style)
             if method == 'MACD':
-                return truncate(self.get_MACD_rate(cur, rates), 6)
+                macd_rate = truncate(self.get_MACD_rate(cur, rates), 6)
+                if self.ma_debug_log:
+                    print("Cur:{0}, MACD:{1:.6f}, Perc:{2:.6f}, Best:{3:.6f}"
+                          .format(cur, macd_rate, self.get_percentile(rates.rate0.values.tolist(), self.lending_style),
+                                  rates.rate0.iloc[-1]))
+                return macd_rate
         except MarketDataException:
             if method != 'percentile':
                 print("Caught exception during {0} analysis, using percentile for now".format(method))

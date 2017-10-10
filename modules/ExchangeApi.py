@@ -37,6 +37,35 @@ class ExchangeApi(object):
         """
 
     @abc.abstractmethod
+    def limit_request_rate(self):
+        now = time.time() * 1000  # milliseconds
+        # Start throttling only when the queue is full
+        if len(self.req_time_log) == self.req_per_period:
+            time_since_oldest_req = now - self.req_time_log[0]
+            if time_since_oldest_req < self.req_period:
+                sleep = (self.req_period - time_since_oldest_req) / 1000
+                self.req_time_log.append(now + self.req_period - time_since_oldest_req)
+                time.sleep(sleep)
+                return
+
+        self.req_time_log.append(now)
+
+    @abc.abstractmethod
+    def increase_request_timer(self):
+        if self.req_period <= self.default_req_period * 1.5:
+            self.req_period += 3
+
+    @abc.abstractmethod
+    def decrease_request_timer(self):
+        if self.req_period > self.default_req_period:
+            self.req_period -= 1
+
+    @abc.abstractmethod
+    def reset_request_timer(self):
+        if self.req_period >= self.default_req_period * 1.5:
+            self.req_period = self.default_req_period
+
+    @abc.abstractmethod
     def return_ticker(self):
         """
         Returns the ticker for all markets.
