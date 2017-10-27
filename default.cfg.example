@@ -8,11 +8,11 @@ secret = YourSecret
 
 [POLONIEX]
 # Full list of supported currencies
-all_currencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT
+all_currencies = STR,BTC,BTS,CLAM,DOGE,DASH,LTC,MAID,XMR,XRP,ETH,FCT,#BTG
 
 [BITFINEX]
 # Full list of supported currencies
-all_currencies = USD,BTC,BCH,ETH,XRP,IOT,XMR,LTC,OMG,ETC,EOS,DSH,ZEC
+all_currencies = USD,BTC,BCH,ETH,XRP,IOT,XMR,LTC,OMG,ETC,EOS,DSH,ZEC,#BTG
 
 [BOT]
 #Custom name of the bot, that will be displayed in html page

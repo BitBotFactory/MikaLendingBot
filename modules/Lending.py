@@ -58,7 +58,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom_default, gap_top_default, xday_threshold, xday_spread, xdays, min_loan_size, end_date, coin_cfg, \
         min_loan_sizes, dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, \
-        exchange, analysis_method, currencies_to_analyse 
+        exchange, analysis_method, currencies_to_analyse, all_currencies
 
     exchange = Config.get_exchange()
 
@@ -81,6 +81,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     min_loan_sizes = Config.get_min_loan_sizes()
     dry_run = dry_run1
     transferable_currencies = Config.get_currencies_list('transferableCurrencies')
+    all_currencies = Config.get_all_currencies()
     currencies_to_analyse = Config.get_currencies_list('analyseCurrencies', 'MarketAnalysis')
     keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
     hide_coins = Config.getboolean('BOT', 'hideCoins', True)
@@ -242,7 +243,8 @@ def lend_all():
             break
     try:
         for cur in lending_balances:
-            usable_currencies += lend_cur(cur, total_lent, lending_balances, ticker)
+            if cur in all_currencies:
+                usable_currencies += lend_cur(cur, total_lent, lending_balances, ticker)
     except StopIteration:  # Restart lending if we stop to raise the request limit.
         lend_all()
     set_sleep_time(usable_currencies)
