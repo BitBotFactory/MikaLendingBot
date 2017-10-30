@@ -215,9 +215,11 @@ def get_notification_config():
         notify_conf['email_to_addresses'] = notify_conf['email_to_addresses'].split(',')
 
     if notify_conf['slack']:
-        for conf in ['slack_token', 'slack_channels']:
+        for conf in ['slack_token', 'slack_channels', 'slack_username']:
             notify_conf[conf] = get('notifications', conf)
         notify_conf['slack_channels'] = notify_conf['slack_channels'].split(',')
+        if not notify_conf['slack_username']:
+            notify_conf['slack_username'] = 'Slack API Tester'
 
     if notify_conf['telegram']:
         for conf in ['telegram_bot_id', 'telegram_chat_ids']:
@@ -242,5 +244,3 @@ def get_plugins_config():
     if config.has_option("BOT", "plugins"):
         active_plugins = map(str.strip, config.get("BOT", "plugins").split(','))
     return active_plugins
-
-

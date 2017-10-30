@@ -171,6 +171,7 @@ email_to_addresses = me@gmail.com,you@gmail.com
 slack = False
 slack_token = 1234567890abcdef
 slack_channels = #cryptocurrency,@someUser
+slack_username = Poloniex Bot
 
 telegram = False
 telegram_bot_id = 1234567890abcdef

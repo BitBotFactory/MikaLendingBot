@@ -38,9 +38,9 @@ def check_urlib_response(response, platform):
         raise NotificationException(msg)
 
 
-def post_to_slack(msg, channels, token):
+def post_to_slack(msg, channels, token, username):
     for channel in channels:
-        post_data = {'text': msg, 'channel': channel, 'token': token}
+        post_data = {'text': msg, 'channel': channel, 'token': token, 'username': username}
         enc_post_data = urllib.urlencode(encoded_dict(post_data))
         url = 'https://{}/api/{}'.format('slack.com', 'chat.postMessage')
         response = urllib2.urlopen(url, enc_post_data)
@@ -121,7 +121,7 @@ def send_notification(_msg, notify_conf):
         send_email(msg, nc['email_login_address'], nc['email_login_password'], nc['email_smtp_server'],
                    nc['email_smtp_port'], nc['email_to_addresses'], nc['email_smtp_starttls'])
     if nc['slack']:
-        post_to_slack(msg, nc['slack_channels'], nc['slack_token'])
+        post_to_slack(msg, nc['slack_channels'], nc['slack_token'], nc['slack_username'])
     if nc['telegram']:
         post_to_telegram(msg, nc['telegram_chat_ids'], nc['telegram_bot_id'])
     if nc['pushbullet']:
