@@ -110,7 +110,8 @@ def post_to_irc(msg, host, port, nick, ident, realname, target):
     IRC_SERVER.connect(host, port, nick)
     if client.is_channel(target):
         IRC_SERVER.join(target)
-    IRC_SERVER.privmsg(target, msg)
+    for line in msg.splitlines():
+        IRC_SERVER.privmsg(target, line)
 
 
 def send_notification(_msg, notify_conf):
