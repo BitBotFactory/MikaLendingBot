@@ -58,8 +58,9 @@ if web_server_enabled:
         json_output_enabled = True
         jsonfile = Config.get('BOT', 'jsonfile', 'www/botlog.json')
 
-    import modules.WebServer as WebServer
-    WebServer.initialize_web_server(Config)
+    from modules.FlaskServer import FlaskServer
+    WebServer = FlaskServer(Config)
+    WebServer.run_web_server()
 
 # Configure logging
 log = Logger(jsonfile, Decimal(Config.get('BOT', 'jsonlogsize', 200)), exchange)
