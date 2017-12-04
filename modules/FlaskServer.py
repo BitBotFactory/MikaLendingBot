@@ -1,8 +1,12 @@
-from flask import Flask, send_file
-import pandas as pd
+from flask import Flask, send_file, render_template
 import threading
+from ConfigForm import BotConfig
 
-app = Flask(__name__, static_url_path='', static_folder="../www")
+app = Flask(__name__, static_url_path='', static_folder="../www", template_folder="../templates")
+app.config.update(
+        WTF_CSRF_ENABLED = True,
+        SECRET_KEY='SecretPassword!'
+)
 
 
 class FlaskServer(object):
@@ -48,11 +52,14 @@ class FlaskServer(object):
         return send_file('../www/lendingbot.html')
 
     def config(self):
-        df = pd.DataFrame(data=self.botConf.config.items('BOT'))
-        df = df.fillna(' ').T
-        df = df.transpose()
-        df.columns = ['Option', 'Value']
-        return df.to_html()
+        form = BotConfig()
+        for key, value in self.botConf.config.items('BOT'):
+            entry = getattr(form, key)
+            entry.process_data(value)
+
+        return render_template('config.html',
+                               title='Bot config',
+                               form=form)
 
     def main(self, stop_event):
         while not stop_event.is_set():
