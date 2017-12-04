@@ -1,4 +1,4 @@
-from flask import Flask, send_file, render_template
+from flask import Flask, send_file, render_template, request
 import threading
 from ConfigForm import BotConfig
 
@@ -36,7 +36,7 @@ class FlaskServer(object):
         print('Starting WebServer at {0} on port {1} with template {2}'
               .format(self.web_server_ip, self.web_server_port, self.web_server_template))
 
-        app.add_url_rule('/config', 'config', self.config)
+        app.add_url_rule('/config', 'config', self.config, methods=['GET', 'POST'])
 
     def run_web_server(self):
         self.thread_stop = threading.Event()
@@ -52,14 +52,19 @@ class FlaskServer(object):
         return send_file('../www/lendingbot.html')
 
     def config(self):
-        form = BotConfig()
-        for key, value in self.botConf.bot.items():
-            entry = getattr(form, key)
-            entry.process_data(value)
+        if request.method == 'POST':
+            for key, _ in self.botConf.bot.items():
+                self.botConf.bot[key] = request.values.get(key)
+            return send_file('../www/lendingbot.html')
+        else:
+            form = BotConfig()
+            for key, value in self.botConf.bot.items():
+                entry = getattr(form, key)
+                entry.process_data(value)
 
-        return render_template('config.html',
-                               title='Bot config',
-                               form=form)
+            return render_template('config.html',
+                                   title='Bot config',
+                                   form=form)
 
     def main(self, stop_event):
         while not stop_event.is_set():
