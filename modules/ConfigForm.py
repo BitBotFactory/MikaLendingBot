@@ -16,20 +16,37 @@ class BotConfig(Form):
     gaptop = IntegerField('gaptop', validators=[DataRequired()])
     xdaythreshold = IntegerField('xdaythreshold', validators=[DataRequired()])
     xdays = IntegerField('xdays', validators=[DataRequired()])
-    xdayspread = IntegerField('xdayspread', validators=[DataRequired()])
+    xday_spread = IntegerField('xday_spread', validators=[DataRequired()])
     transferableCurrencies = StringField('transferableCurrencies')
     minloansize = IntegerField('minloansize', validators=[DataRequired()])
     keepstuckorders = BooleanField('keepstuckorders')
-    hidecoins = BooleanField('hidecoins')
-    endDate = DateField(format='%Y,%m,%d', validators=[DataRequired()])
+    hideCoins = BooleanField('hideCoins')
+    end_date = DateField(format='%Y,%m,%d', validators=[DataRequired()])
     maxtolend = IntegerField('maxtolend', validators=[DataRequired()])
     maxpercenttolend = IntegerField('maxpercenttolend', validators=[DataRequired()])
     maxtolendrate = IntegerField('maxtolendrate', validators=[DataRequired()])
+    web_server_enabled = BooleanField('web_server_enabled')
     jsonfile = StringField('jsonfile')
     jsonlogsize = IntegerField('jsonlogsize', validators=[DataRequired()])
+    json_output_enabled = BooleanField('json_output_enabled')
     startwebserver = BooleanField('startWebServer')
     customwebserveraddress = StringField('customWebServerAddress')
     customwebserverport = IntegerField('customWebServerPort', validators=[DataRequired()])
     customwebservertemplate = StringField('customWebServerTemplate')
-    outputcurrency = StringField('outputCurrency')
+    outputCurrency = StringField('outputCurrency')
     plugins = StringField('plugins')
+
+
+class ApiConfig(Form):
+    exchange = StringField('exchange', validators=[DataRequired()])
+    apikey = StringField('apikey', validators=[DataRequired()])
+    secret = StringField('secret', validators=[DataRequired()])
+
+
+class MarketAnalysisConfig(Form):
+    ma_debug_log = BooleanField('ma_debug_log')
+    analyseCurrencies = StringField('analyseCurrencies')
+
+
+class NotificationsConfig(Form):
+    notify_conf = StringField('plugins')

@@ -53,7 +53,7 @@ class FlaskServer(object):
 
     def config(self):
         form = BotConfig()
-        for key, value in self.botConf.config.items('BOT'):
+        for key, value in self.botConf.bot.items():
             entry = getattr(form, key)
             entry.process_data(value)
 

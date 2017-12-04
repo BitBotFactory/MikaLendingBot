@@ -8,7 +8,7 @@ from decimal import Decimal
 from httplib import BadStatusLine
 from urllib2 import URLError
 
-import modules.Configuration as Config
+from modules.Configuration import Config
 import modules.Data as Data
 import modules.Lending as Lending
 import modules.MaxToLend as MaxToLend
@@ -41,61 +41,52 @@ else:
 # Do not use lower or upper limit on any config options which are not numbers.
 # Define the variable from the option in the module where you use it.
 
-Config.init(config_location)
-
-output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
-end_date = Config.get('BOT', 'endDate')
-exchange = Config.get_exchange()
-
-json_output_enabled = Config.has_option('BOT', 'jsonfile') and Config.has_option('BOT', 'jsonlogsize')
-jsonfile = Config.get('BOT', 'jsonfile', '')
+config = Config(config_location)
 
 # Configure web server
-web_server_enabled = Config.getboolean('BOT', 'startWebServer')
-if web_server_enabled:
-    if json_output_enabled is False:
+if config.bot['web_server_enabled']:
+    if config.bot['json_output_enabled'] is False:
         # User wants webserver enabled. Must have JSON enabled. Force logging with defaults.
-        json_output_enabled = True
-        jsonfile = Config.get('BOT', 'jsonfile', 'www/botlog.json')
+        config.bot['json_output_enabled'] = True
 
     from modules.FlaskServer import FlaskServer
-    WebServer = FlaskServer(Config)
+    WebServer = FlaskServer(config)
     WebServer.run_web_server()
 
 # Configure logging
-log = Logger(jsonfile, Decimal(Config.get('BOT', 'jsonlogsize', 200)), exchange)
+log = Logger(config.bot['jsonfile'], Decimal(config.bot['jsonlogsize'], config.bot['exchange']))
 
 # initialize the remaining stuff
-api = ExchangeApiFactory.createApi(exchange, Config, log)
-MaxToLend.init(Config, log)
+api = ExchangeApiFactory.createApi(config.bot['exchange'], config, log)  # TODO Does factory need the whole cfg?
+MaxToLend.init(config, log)
 Data.init(api, log)
-Config.init(config_location, Data)
-notify_conf = Config.get_notification_config()
-if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
+config = Config(config_location, Data)
+# config.init(config_location, Data)
+if config.bot['analyseCurrencies']:
     from modules.MarketAnalysis import MarketAnalysis
-    # Analysis.init(Config, api, Data)
-    analysis = MarketAnalysis(Config, api)
+    # Analysis.init(config, api, Data)
+    analysis = MarketAnalysis(config, api)
     analysis.run()
 else:
     analysis = None
-Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
+Lending.init(config, api, log, Data, MaxToLend, dry_run, analysis, config.bot['notify_conf'])
 
 # load plugins
-PluginsManager.init(Config, api, log, notify_conf)
+PluginsManager.init(config, api, log, config.bot['notify_conf'])
 
-print 'Welcome to ' + Config.get("BOT", "label", "Lending Bot") + ' on ' + exchange
+print 'Welcome to ' + config.bot['label'] + ' on ' + config.bot['exchange']
 
 try:
     while True:
         try:
-            Data.update_conversion_rates(output_currency, json_output_enabled)
+            Data.update_conversion_rates(config.bot['output_currency'], config.bot['json_output_enabled'])
             PluginsManager.before_lending()
             Lending.transfer_balances()
             Lending.cancel_all()
             Lending.lend_all()
             PluginsManager.after_lending()
             log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()),
-                              Data.get_max_duration(end_date, "status"))
+                              Data.get_max_duration(config.bot['end_date'], "status"))
             log.persistStatus()
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
@@ -125,10 +116,10 @@ try:
                 additional_sleep = max(130.0-Lending.get_sleep_time(), 0)
                 sum_sleep = additional_sleep + Lending.get_sleep_time()
                 log.log_error('IP has been banned due to many requests. Sleeping for {} seconds'.format(sum_sleep))
-                if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
+                if config.bot['analyseCurrencies']:
                     if api.req_period <= api.default_req_period * 1.5:
                         api.req_period += 3
-                    if Config.getboolean('MarketAnalysis', 'ma_debug_log'):
+                    if config.bot['ma_debug_log']:
                         print("Caught ERR_RATE_LIMIT, sleeping capture and increasing request delay. Current"
                               " {0}ms".format(api.req_period))
                         log.log_error('Expect this 130s ban periodically when using MarketAnalysis, it will fix itself')
@@ -141,8 +132,8 @@ try:
             else:
                 print traceback.format_exc()
                 print "v{0} Unhandled error, please open a Github issue so we can fix it!".format(Data.get_bot_version())
-                if notify_conf['notify_caught_exception']:
-                    log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), notify_conf)
+                if config.bot['notify_conf']['notify_caught_exception']:
+                    log.notify("{0}\n-------\n{1}".format(ex, traceback.format_exc()), config.bot['notify_conf'])
             sys.stdout.flush()
             time.sleep(Lending.get_sleep_time())
 

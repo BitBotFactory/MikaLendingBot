@@ -40,7 +40,7 @@ class Poloniex(ExchangeApi):
         self.req_period = self.default_req_period
         self.req_time_log = RingBuffer(self.req_per_period)
         self.lock = threading.RLock()
-        socket.setdefaulttimeout(int(Config.get("BOT", "timeout", 30, 1, 180)))
+        socket.setdefaulttimeout(int(cfg.get("BOT", "timeout", 30, 1, 180)))
         self.api_debug_log = self.cfg.getboolean("BOT", "api_debug_log")
 
     def limit_request_rate(self):
