@@ -130,6 +130,7 @@ hideCoins = True
 
 #[ACCOUNTSTATS]
 #ReportInterval = 86400
+#database_name = loan_history
 
 #[CHARTS]
 #DumpInterval = 21600

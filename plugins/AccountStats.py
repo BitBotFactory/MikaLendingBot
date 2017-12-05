@@ -33,6 +33,7 @@ class AccountStats(Plugin):
         self.init_db()
         self.check_upgrade()
         self.report_interval = int(self.config.get("ACCOUNTSTATS", "ReportInterval", 86400))
+        self.database_name = self.config.get("ACCOUNTSTATS", "database_name", "loan_history")
 
     def before_lending(self):
         for coin in self.earnings:
@@ -49,7 +50,7 @@ class AccountStats(Plugin):
 
     # noinspection PyAttributeOutsideInit
     def init_db(self):
-        self.db = sqlite3.connect('market_data/loan_history.sqlite3')
+        self.db = sqlite3.connect('market_data/{0}.sqlite3'.format(self.database_name))
         self.db.execute(DB_CREATE)
         self.db.commit()
 
