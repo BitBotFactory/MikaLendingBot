@@ -33,7 +33,7 @@ class AccountStats(Plugin):
         self.init_db()
         self.check_upgrade()
         self.report_interval = int(self.config.get("ACCOUNTSTATS", "ReportInterval", 86400))
-        self.database_name = self.config.get("ACCOUNTSTATS", "database_name", "loan_history")
+        self.database_name = self.config.get("ACCOUNTSTATS", "DatabaseName", "loan_history")
 
     def before_lending(self):
         for coin in self.earnings:

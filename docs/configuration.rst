@@ -384,6 +384,10 @@ There is an optional setting to change how frequently this plugin reports. By de
     [ACCOUNTSTATS]
     ReportInterval = 1800
 
+The name of the database file can also be configured in the same section::
+
+    DatabaseName = loan_history
+
 Be aware that first initialization might take longer as the bot will fetch all the history.
 
 Profit Charts Plugin
