@@ -277,6 +277,8 @@ class Bitfinex(ExchangeApi):
                     usd_min = 50
                     cur_min = usd_min
                     if currency != 'USD':
+			if currency == 'EUR':
+                            cur_min = usd_min / float(self.return_ticker()['USD_' + 'BTC']['lowestAsk']) * float(self.return_ticker()['EUR_' + 'BTC']['lowestAsk'])
                         cur_min = usd_min / float(self.return_ticker()['USD_' + currency]['lowestAsk'])
 
                     raise Exception("Error create_loan_offer: Amount must be at least " + str(cur_min) + " " + currency)
