@@ -91,6 +91,13 @@ hideCoins = True
 #If set to 0 or commented: the bot will use the maxtolend or maxpercenttolend all the time. (0.0031-5)
 #maxtolendrate = 0
 
+#FRR as min, tells the bot whether or not to use the flash return rate (https://support.bitfinex.com/hc/en-us/articles/213919009-What-is-the-Flash-Return-Rate-)
+#instead of mindailyrate. This only works on bitfinex.
+#frrasmin = False
+
+# The Flash Return Rate Delta (frrdelta) is a dynamic funding rate option that allows you to specify an offset from the Flash Return Rate. This only works on bitfinex and ffrasmin = TRUE
+frrdelta = 0.0000
+
 #Syntax: ["COIN:mindailyrate:maxactiveamount:maxtolend:maxpercenttolend:maxtolendrate",...]
 #If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lent.
 #If maxtolend is 0: check for maxpercenttolend.
@@ -143,6 +150,11 @@ hideCoins = True
 #maxtolend = 0
 #maxpercenttolend = 0
 #maxtolendrate = 0
+#gapmode = RawBTC
+#gapbottom = 20
+#gaptop = 400
+#frrasmin = False
+#frrdelta = 0.0000
 
 #[CLAM]
 #minloansize = 1
@@ -151,6 +163,11 @@ hideCoins = True
 #maxtolend = 0
 #maxpercenttolend = 0
 #maxtolendrate = 0
+#gapmode = raw
+#gapbottom = 10
+#gaptop = 20
+#frrasmin = False
+#frrdelta = 0.0000
 
 [notifications]
 notify_new_loans = False

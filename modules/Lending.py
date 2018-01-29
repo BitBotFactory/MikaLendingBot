@@ -39,6 +39,8 @@ loans_provided = {}
 gap_mode_default = ""
 scheduler = None
 exchange = None
+frrasmin = False
+frrdelta = 0.0
 
 # limit of orders to request
 loanOrdersRequestLimit = {}
@@ -58,7 +60,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     global sleep_time, sleep_time_active, sleep_time_inactive, min_daily_rate, max_daily_rate, spread_lend, \
         gap_bottom_default, gap_top_default, xday_threshold, xday_spread, xdays, min_loan_size, end_date, coin_cfg, \
         min_loan_sizes, dry_run, transferable_currencies, keep_stuck_orders, hide_coins, scheduler, gap_mode_default, \
-        exchange, analysis_method, currencies_to_analyse, all_currencies
+        exchange, analysis_method, currencies_to_analyse, all_currencies, frrasmin, frrdelta
 
     exchange = Config.get_exchange()
 
@@ -85,6 +87,8 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     currencies_to_analyse = Config.get_currencies_list('analyseCurrencies', 'MarketAnalysis')
     keep_stuck_orders = Config.getboolean('BOT', "keepstuckorders", True)
     hide_coins = Config.getboolean('BOT', 'hideCoins', True)
+    frrasmin = Config.getboolean('BOT', 'frrasmin', False)
+    frrdelta = Decimal(Config.get('BOT', 'frrdelta', 0.0000))
     analysis_method = Config.get('Daily_min', 'method', 'percentile')
     if analysis_method not in ['percentile', 'MACD']:
         raise ValueError("analysis_method: \"{0}\" is not valid, must be percentile or MACD".format(analysis_method))
@@ -131,13 +135,14 @@ def notify_new_loans(sleep_time):
         if loans_provided:
             # function to return a set of ids from the api result
             # get_id_set = lambda loans: set([x['id'] for x in loans])
-            def get_id_set(loans): return set([x['id'] for x in loans])
+            def get_id_set(loans):
+                return set([x['id'] for x in loans])
             loans_amount = {}
             loans_info = {}
             for loan_id in get_id_set(new_provided) - get_id_set(loans_provided):
                 loan = [x for x in new_provided if x['id'] == loan_id][0]
                 # combine loans with the same rate
-                k = 'c'+loan['currency']+'r'+loan['rate']+'d'+str(loan['duration'])
+                k = 'c' + loan['currency'] + 'r' + loan['rate'] + 'd' + str(loan['duration'])
                 loans_amount[k] = float(loan['amount']) + (loans_amount[k] if k in loans_amount else 0)
                 loans_info[k] = loan
             # send notifications with the grouped info
@@ -250,21 +255,47 @@ def lend_all():
     set_sleep_time(usable_currencies)
 
 
+def get_frr_or_min_daily_rate(cur):
+    """
+    Checks the Flash Return Rate of cur against the min daily rate and returns the better of the two. If not using
+    bitfinex then it will always return the min daily rate for the currency.
+
+    :param cur: The currency which to check
+    :return: The better of the two rates (FRR and min daily rate)
+    """
+    if cur in coin_cfg:
+        min_daily_rate = Decimal(coin_cfg[cur]['minrate'])
+        frrasmin = coin_cfg[cur]['frrasmin']
+        frrdelta = Decimal(coin_cfg[cur]['frrdelta']) / 100
+    else:
+        min_daily_rate = Decimal(Config.get("BOT", "mindailyrate", None, 0.003, 5)) / 100
+        frrasmin = Config.getboolean('BOT', 'frrasmin', False)
+        frrdelta = Decimal(Config.get('BOT', 'frrdelta', 0.0000))
+
+    if exchange == 'BITFINEX' and frrasmin:
+        frr_rate = Decimal(api.get_frr(cur)) + frrdelta
+        if frr_rate > min_daily_rate:
+            log.log("Using FRR as mindailyrate {0}% for {1}".format(frr_rate * 100, cur))
+            return frr_rate
+
+    return min_daily_rate
+
+
 def get_min_daily_rate(cur):
-    cur_min_daily_rate = min_daily_rate
+    cur_min_daily_rate = get_frr_or_min_daily_rate(cur)
     if cur in coin_cfg:
         if coin_cfg[cur]['maxactive'] == 0:
             if cur not in max_active_alerted:  # Only alert once per coin.
                 max_active_alerted[cur] = True
                 log.log('maxactive amount for ' + cur + ' set to 0, won\'t lend.')
             return False
-        cur_min_daily_rate = Decimal(coin_cfg[cur]['minrate'])
         if cur not in coin_cfg_alerted:  # Only alert once per coin.
             coin_cfg_alerted[cur] = True
-            log.log('Using custom mindailyrate ' + str(coin_cfg[cur]['minrate'] * 100) + '% for ' + cur)
+            log.log('Using custom mindailyrate ' + str(cur_min_daily_rate * 100) + '% for ' + cur)
     if Analysis and cur in currencies_to_analyse:
         recommended_min = Analysis.get_rate_suggestion(cur, method=analysis_method)
         if cur_min_daily_rate < recommended_min:
+            log.log("Using {0} as mindailyrate {1}% for {2}".format(analysis_method, recommended_min * 100, cur))
             cur_min_daily_rate = recommended_min
     return Decimal(cur_min_daily_rate)
 

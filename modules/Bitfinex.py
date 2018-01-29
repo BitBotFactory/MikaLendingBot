@@ -110,11 +110,13 @@ class Bitfinex(ExchangeApi):
         return self._request('post', payload['request'], signed_payload, verify)
 
     @ExchangeApi.synchronized
-    def _get(self, command):
+    def _get(self, command, apiVersion=None):
         # keep the request per minute limit
         self.limit_request_rate()
 
-        request = '/{}/{}'.format(self.apiVersion, command)
+        if apiVersion is None:
+            apiVersion = self.apiVersion
+        request = '/{}/{}'.format(apiVersion, command)
         return self._request('get', request)
 
     def _get_symbols(self):
@@ -354,3 +356,12 @@ class Bitfinex(ExchangeApi):
                     })
 
         return history
+
+    def get_frr(self, currency):
+        """
+        Retrieves the flash return rate for the given currency
+        https://bitfinex.readme.io/v2/reference#rest-public-platform-status
+        """
+        command = 'tickers?symbols=f' + currency
+        resp = self._get(command, 'v2')
+        return float(resp[0][1])
