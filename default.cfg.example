@@ -98,15 +98,6 @@ hideCoins = True
 # The Flash Return Rate Delta (frrdelta) is a dynamic funding rate option that allows you to specify an offset from the Flash Return Rate. This only works on bitfinex and ffrasmin = TRUE
 frrdelta = 0.0000
 
-#Syntax: ["COIN:mindailyrate:maxactiveamount:maxtolend:maxpercenttolend:maxtolendrate",...]
-#If maxactive amount is 0: stop lending this coin. in the future you'll be able to limit amount to be lent.
-#If maxtolend is 0: check for maxpercenttolend.
-#If maxpercenttolend is 0: 100% is going to be lent.
-#If maxtolendrate is set to more than 0: the maxtolend or maxpercenttolend will be used when then rate is less or equal to the maxtolendrate. if set to 0 the bot will use the maxtolend or maxpercenttolend all the time.
-# Please configure via the coinconfig line below OR individual coins in the [BTC], [CLAM], etc section. NOT both.
-# coinconfig takes precedence
-#coinconfig = ["BTC:0.18:1:0:0:0","CLAM:0.6:1:0:0:0"]
-
 #This option creates a json log file instead of console output which includes the most recent status.
 #Uncomment both jsonfile and jsonlogsize to enable.
 #Keep this in the default location if you want to use the webserver.
@@ -142,7 +133,7 @@ frrdelta = 0.0000
 #DumpInterval = 21600
 #HistoryFile = www/history.json
 
-# Currencies can be configured here, or in the coinconfig. Coinconfig takes precedence.
+# Currencies can be configured here.
 #[BTC]
 #minloansize = 0.01
 #mindailyrate = 0.18

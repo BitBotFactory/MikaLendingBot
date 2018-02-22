@@ -280,15 +280,7 @@ This can be configured in one of two ways.
 
 **Coincfg dictionary**
 
-- ``coincfg`` is in the form of a dictionary and allows for advanced, per-coin options.
-
-    - Default value: Commented out, uncomment to enable.
-    - Format: ``["COINTICKER:MINLENDRATE:ENABLED?:MAXTOLEND:MAXPERCENTTOLEND:MAXTOLENDRATE","CLAM:0.6:1:0:.75:.1",...]``
-    - COINTICKER refers to the ticker of the coin, ex. BTC, CLAM, MAID, DOGE.
-    - MINLENDRATE is that coins minimum lending rate, overrides the global setting. Follows the limits of ``minlendrate``
-    - ENABLED? refers to a value of ``0`` if the coin is disabled and will no longer lend. Any positive integer will enable lending for the coin.
-    - MAXTOLEND, MAXPERCENTTOLEND, and MAXTOLENDRATE refer to their respective settings above, but are unique to the specified coin specifically.
-    - There can be as many different coins as you want in coincfg, but each coin may only appear once.
+- ``coinconfig`` is now REMOVED, please switch to using separate coin sections as described below.
 
 **Separate coin sections**
 

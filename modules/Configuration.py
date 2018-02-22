@@ -27,6 +27,10 @@ def init(file_location, data=None):
             ex.message = ex.message if ex.message else str(ex)
             print("Failed to automatically copy config. Please do so manually. Error: {0}".format(ex.message))
             exit(1)
+    if config.has_option("BOT", "coinconfig"):
+        print('\'coinconfig\' has been removed, please use section coin config instead.\n'
+              'See: http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html#config-per-coin')
+        exit(1)
     return config
 
 
@@ -89,39 +93,27 @@ def get_exchange():
 
 def get_coin_cfg():
     coin_cfg = {}
-    if config.has_option("BOT", "coinconfig"):
-        try:
-            coin_config = (json.loads(config.get("BOT", "coinconfig")))
-            for cur in coin_config:
-                cur = cur.split(':')
-                coin_cfg[cur[0]] = dict(minrate=(Decimal(cur[1])) / 100, maxactive=Decimal(cur[2]),
-                                        maxtolend=Decimal(cur[3]), maxpercenttolend=(Decimal(cur[4])) / 100,
-                                        maxtolendrate=(Decimal(cur[5])) / 100)
-        except Exception as ex:
-            ex.message = ex.message if ex.message else str(ex)
-            print("Coinconfig parsed incorrectly, please refer to the documentation. Error: {0}".format(ex.message))
-    else:
-        for cur in get_all_currencies():
-            if config.has_section(cur):
-                try:
-                    coin_cfg[cur] = {}
-                    coin_cfg[cur]['minrate'] = (Decimal(config.get(cur, 'mindailyrate'))) / 100
-                    coin_cfg[cur]['maxactive'] = Decimal(config.get(cur, 'maxactiveamount'))
-                    coin_cfg[cur]['maxtolend'] = Decimal(config.get(cur, 'maxtolend'))
-                    coin_cfg[cur]['maxpercenttolend'] = (Decimal(config.get(cur, 'maxpercenttolend'))) / 100
-                    coin_cfg[cur]['maxtolendrate'] = (Decimal(config.get(cur, 'maxtolendrate'))) / 100
-                    coin_cfg[cur]['gapmode'] = get_gap_mode(cur, 'gapmode')
-                    coin_cfg[cur]['gapbottom'] = Decimal(get(cur, 'gapbottom', False, 0))
-                    coin_cfg[cur]['gaptop'] = Decimal(get(cur, 'gaptop', False, coin_cfg[cur]['gapbottom']))
-                    coin_cfg[cur]['frrasmin'] = getboolean(cur, 'frrasmin', getboolean('BOT', 'frrasmin'))
-                    coin_cfg[cur]['frrdelta'] = Decimal(get(cur, 'frrdelta', 0.0000))
+    for cur in get_all_currencies():
+        if config.has_section(cur):
+            try:
+                coin_cfg[cur] = {}
+                coin_cfg[cur]['minrate'] = (Decimal(config.get(cur, 'mindailyrate'))) / 100
+                coin_cfg[cur]['maxactive'] = Decimal(config.get(cur, 'maxactiveamount'))
+                coin_cfg[cur]['maxtolend'] = Decimal(config.get(cur, 'maxtolend'))
+                coin_cfg[cur]['maxpercenttolend'] = (Decimal(config.get(cur, 'maxpercenttolend'))) / 100
+                coin_cfg[cur]['maxtolendrate'] = (Decimal(config.get(cur, 'maxtolendrate'))) / 100
+                coin_cfg[cur]['gapmode'] = get_gap_mode(cur, 'gapmode')
+                coin_cfg[cur]['gapbottom'] = Decimal(get(cur, 'gapbottom', False, 0))
+                coin_cfg[cur]['gaptop'] = Decimal(get(cur, 'gaptop', False, coin_cfg[cur]['gapbottom']))
+                coin_cfg[cur]['frrasmin'] = getboolean(cur, 'frrasmin', getboolean('BOT', 'frrasmin'))
+                coin_cfg[cur]['frrdelta'] = Decimal(get(cur, 'frrdelta', 0.0000))
 
-                except Exception as ex:
-                    ex.message = ex.message if ex.message else str(ex)
-                    print("Coinconfig for " + cur + " parsed incorrectly, please refer to the documentation. "
-                          "Error: {0}".format(ex.message))
-                    # Need to raise this exception otherwise the bot will continue if you configured one cur correctly
-                    raise
+            except Exception as ex:
+                ex.message = ex.message if ex.message else str(ex)
+                print("Coin Config for " + cur + " parsed incorrectly, please refer to the documentation. "
+                      "Error: {0}".format(ex.message))
+                # Need to raise this exception otherwise the bot will continue if you configured one cur correctly
+                raise
     return coin_cfg
 
 
