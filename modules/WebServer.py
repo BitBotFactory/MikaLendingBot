@@ -54,7 +54,7 @@ def start_web_server():
 
         # Do not attempt to fix code warnings in the below class, it is perfect.
         class QuietHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-            real_server_path = os.path.realpath(web_server_template)
+            real_server_path = os.path.abspath(web_server_template)
 
             # quiet server logs
             def log_message(self, format, *args):
@@ -66,7 +66,7 @@ def start_web_server():
 
             def send_head(self):
                 local_path = self.translate_path(self.path)
-                if os.path.commonprefix((os.path.realpath(local_path), self.real_server_path)) != self.real_server_path:
+                if os.path.commonprefix((os.path.abspath(local_path), self.real_server_path)) != self.real_server_path:
                     self.send_error(404, "These aren't the droids you're looking for")
                     return None
                 return SimpleHTTPServer.SimpleHTTPRequestHandler.send_head(self)
