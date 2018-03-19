@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import traceback
+import socket
 from decimal import Decimal
 from httplib import BadStatusLine
 from urllib2 import URLError
@@ -81,12 +82,31 @@ Lending.init(Config, api, log, Data, MaxToLend, dry_run, analysis, notify_conf)
 
 # load plugins
 PluginsManager.init(Config, api, log, notify_conf)
+# Start dns cache managing
+prv_getaddrinfo = socket.getaddrinfo
+dns_cache = {}  # or a weakref.WeakValueDictionary()
+
+
+def new_getaddrinfo(*urlargs):
+    """Overloads the default socket dns resolution to have a cache,
+    resets at the beginning of each loop.
+    https://stackoverflow.com/questions/2236498/tell-urllib2-to-use-custom-dns"""
+    try:
+        return dns_cache[urlargs]
+    except KeyError:
+        res = prv_getaddrinfo(*urlargs)
+        dns_cache[urlargs] = res
+        return res
+
+
+socket.getaddrinfo = new_getaddrinfo
 
 print 'Welcome to ' + Config.get("BOT", "label", "Lending Bot") + ' on ' + exchange
 
 try:
     while True:
         try:
+            dns_cache = {}  # Flush DNS Cache
             Data.update_conversion_rates(output_currency, json_output_enabled)
             PluginsManager.before_lending()
             Lending.transfer_balances()
