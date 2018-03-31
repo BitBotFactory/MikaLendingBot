@@ -22,6 +22,7 @@ class Charts(Plugin):
         self.last_dump = 0
         self.dump_interval = int(self.config.get("CHARTS", "DumpInterval", 21600))
         self.history_file = self.config.get("CHARTS", "HistoryFile", "www/history.json")
+        self.activeCurrencies = self.config.get_all_currencies()
 
 
     def before_lending(self):
@@ -43,9 +44,12 @@ class Charts(Plugin):
         cursor = self.db.cursor()
 
         data = { }
+        placeholder = '?'
+        placeholders = ', '.join(placeholder for unused in self.activeCurrencies)
 
         # Get distinct coins
-        cursor.execute("SELECT DISTINCT currency FROM history ORDER BY currency DESC")
+        query = "SELECT DISTINCT currency FROM history WHERE currency IN (%s) ORDER BY currency DESC" % placeholders
+        cursor.execute(query, self.activeCurrencies)
         for i in cursor:
             data[i[0]] = []
 
