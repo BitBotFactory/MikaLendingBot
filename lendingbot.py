@@ -40,6 +40,7 @@ if update:
     try:
         up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
     except:
+        print "Looks like you need to use sudo..."
         up_cmd.insert(0, "sudo")
         up_cmd.insert(1, "--non-interactive")
         up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
