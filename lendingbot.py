@@ -27,10 +27,50 @@ except IOError:
 parser = argparse.ArgumentParser()  # Start args.
 parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
 parser.add_argument("-dry", "--dryrun", help="Make pretend orders", action="store_true")
+parser.add_argument("-up", "--update", help="Do a git pull, then start. (Needs git install)", action="store_true")
 args = parser.parse_args()  # End args.
 
 # Start handling args.
 dry_run = bool(args.dryrun)
+update = bool(args.update)
+if update:
+    print "Autoupdating..."
+    import subprocess
+    up_cmd = ["git", "pull"]
+    try:
+        up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
+    except:
+        up_cmd.insert(0, "sudo")
+        up_cmd.insert(1, "--non-interactive")
+        up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
+    if "Already" in up_out:
+        print "No update available."
+    elif "Updating" in up_out:
+        print "Update downloaded."
+    elif "tracking" in up_out:
+        print "There is something wrong with your git branch settings.\n" \
+              "Do (sudo) git checkout master!\n" \
+              "Error:\n" + up_out
+    elif "command not found" in up_out:
+        print "You do not have git installed!"
+    elif "a git repository" in up_out:
+        print "You did not install the bot using git!\n" \
+              "Reinstall using git using:\n" \
+              "(sudo) git clone http://github.com/BitBotFactory/poloniexlendingbot.git"
+    elif "Permission denied" in up_out:
+        print "Your sudo is not configured for non-interactive usage, this is necessary."
+    else:
+        print up_out
+    cmd = ["python", "lendingbot.py"]
+    if args.config:
+        cmd.append("--config")
+        cmd.append(args.config)
+    if args.dryrun:
+        cmd.append("--dryrun")
+    print "Done, starting bot...\n"
+    subprocess.call(cmd)
+    exit(0)
+
 if args.config:
     config_location = args.config
 else:
