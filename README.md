@@ -15,6 +15,8 @@ Join the discussion at:
 
 [<img src='https://www.redditstatic.com/spreddit1.gif'>Subreddit](https://www.reddit.com/r/poloniexlendingbot/) **- Recommended for focused discussion**
 
+We also have a public [FAQ on the Github Wiki](https://github.com/BitBotFactory/MikaLendingBot/wiki/FAQ-(Troubleshooting)), feel free to add your questions or check there for support! 
+
 Workflow management with Waffle.io
 
 [![Throughput Graph](https://graphs.waffle.io/Mikadily/poloniexlendingbot/throughput.svg)](https://waffle.io/Mikadily/poloniexlendingbot/)
