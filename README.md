@@ -1,6 +1,6 @@
-# Crypto Coin Lending Bot (aka Poloniex Lending Bot) <img src="https://nevet.me/public/icon.png" width="50">
+# Mika Lending Bot <img src="https://nevet.me/public/icon.png" width="50">
 
-The Crypto Coin Lending Bot is written in Python and features automatic lending on exchanges Poloniex and Bitfinex.
+Mika Lending Bot is written in Python and features automatic lending on exchanges Poloniex and Bitfinex.
 It will automatically lend all cryptocurrencies found in your lending account.
 
 It uses an advanced lending strategy which will spread offers across the lend book to take advantage of possible spikes in lending rates. Inspired by [MarginBot](https://github.com/HFenter/MarginBot) and [BitfinexLendingBot](https://github.com/eAndrius/BitfinexLendingBot).
