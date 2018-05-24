@@ -173,7 +173,7 @@ class MarketAnalysis(object):
                     print("Error in returning data from exchange, ignoring")
 
             market_data = []
-            for i in xrange(levels):
+            for i in range(levels):
                 try:
                     market_data.append(str(raw_data[i]['rate']))
                     market_data.append(str(raw_data[i]['amount']))
@@ -187,7 +187,7 @@ class MarketAnalysis(object):
             if levels is None:
                 levels = self.recorded_levels
             insert_sql = "INSERT INTO loans ("
-            for level in xrange(levels):
+            for level in range(levels):
                 insert_sql += "rate{0}, amnt{0}, ".format(level)
             insert_sql += "percentile) VALUES ({0});".format(','.join(market_data))  # percentile = 0
             with db_con:
@@ -421,7 +421,7 @@ class MarketAnalysis(object):
             cursor = db_con.cursor()
             create_table_sql = "CREATE TABLE IF NOT EXISTS loans (id INTEGER PRIMARY KEY AUTOINCREMENT," + \
                                "unixtime integer(4) not null default (strftime('%s','now')),"
-            for level in xrange(levels):
+            for level in range(levels):
                 create_table_sql += "rate{0} FLOAT, ".format(level)
                 create_table_sql += "amnt{0} FLOAT, ".format(level)
             create_table_sql += "percentile FLOAT);"

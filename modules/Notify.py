@@ -1,8 +1,10 @@
 # coding=utf-8
-import urllib
-import urllib2
 import json
 import smtplib
+from urllib.parse import urlencode
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
+
 try:
     from irc import client
     IRC_LOADED = True

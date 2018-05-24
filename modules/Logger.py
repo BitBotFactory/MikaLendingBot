@@ -6,10 +6,11 @@ import json
 import sys
 import time
 
-import ConsoleUtils
 import modules.Configuration as Config
-from RingBuffer import RingBuffer
-from Notify import send_notification
+from . import ConsoleUtils
+from .Notify import send_notification
+from .RingBuffer import RingBuffer
+
 
 
 class ConsoleOutput(object):
@@ -110,7 +111,7 @@ class Logger(object):
         log_message = "{0} Error {1}".format(self.timestamp(), msg)
         self.output.printline(log_message)
         if isinstance(self.output, JsonOutput):
-            print log_message
+            print(log_message)
         self.refreshStatus()
 
     def offer(self, amt, cur, rate, days, msg):

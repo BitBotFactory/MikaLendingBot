@@ -1,7 +1,7 @@
 # coding=utf-8
 import json
 import os
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from decimal import Decimal
 
 config = SafeConfigParser()
@@ -19,9 +19,9 @@ def init(file_location, data=None):
         # Copy default config file if not found
         try:
             shutil.copy('default.cfg.example', file_location)
-            print '\ndefault.cfg.example has been copied to ' + file_location + '\n' \
-                  'Edit it with your API key and custom settings.\n'
-            raw_input("Press Enter to acknowledge and exit...")
+            print(f"\ndefault.cfg.example has been copied to {file_location}\n" \
+                  "Edit it with your API key and custom settings.\n")
+            input("Press Enter to acknowledge and exit...")
             exit(1)
         except Exception as ex:
             ex.message = ex.message if ex.message else str(ex)
@@ -59,22 +59,22 @@ def get(category, option, default_value=False, lower_limit=False, upper_limit=Fa
             value = config.get(category, option)
         try:
             if lower_limit and float(value) < float(lower_limit):
-                print "WARN: [%s]-%s's value: '%s' is below the minimum limit: %s, which will be used instead." % \
-                      (category, option, value, lower_limit)
+                print(f"WARN: [{category}]-{option}'s value:'{value}' is below the minimum limit: {lower_limit}, which \
+                      will be used instead.")
                 value = lower_limit
             if upper_limit and float(value) > float(upper_limit):
-                print "WARN: [%s]-%s's value: '%s' is above the maximum limit: %s, which will be used instead." % \
-                      (category, option, value, upper_limit)
+                print(f"WARN: [{category}]-{option}'s value:'{value}' is above the maximum limit: {upper_limit}, which \
+                      will be used instead.")
                 value = upper_limit
             return value
         except ValueError:
             if default_value is None:
-                print "ERROR: [%s]-%s is not allowed to be left empty. Please check your config." % (category, option)
+                print(f"ERROR: [{category}]-{option} is not allowed to be left empty. Please check your config.")
                 exit(1)
             return default_value
     else:
         if default_value is None:
-            print "ERROR: [%s]-%s is not allowed to be left unset. Please check your config." % (category, option)
+            print(f"ERROR: [{category}]-{option} is not allowed to be left unset. Please check your config.")
             exit(1)
         return default_value
 
@@ -156,8 +156,8 @@ def get_gap_mode(category, option):
         full_list = ['raw', 'rawbtc', 'relative']
         value = get(category, 'gapmode', False).lower().strip(" ")
         if value not in full_list:
-            print "ERROR: Invalid entry '%s' for [%s]-gapMode. Please check your config. Allowed values are: %s" % \
-                  (value, category, ", ".join(full_list))
+            print(f"ERROR: Invalid entry '{value}' for [{category}]-gapMode. Please check your config. Allowed values \
+                  are: {', '.join(full_list)}")
             exit(1)
         return value.lower()
     else:

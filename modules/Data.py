@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from urllib import urlopen
+from urllib.request import urlopen
 import json
 
 api = None

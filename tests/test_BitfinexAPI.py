@@ -21,7 +21,7 @@ start_time = time.time()
 
 def multiple_api_queries(n):
     try:
-        for i in xrange(n):
+        for i in range(n):
             print 'Thread ' + str(i + 1)
             thread1 = threading.Thread(target=call_get_open_loan_offers, args=[(i+1)])
             thread1.start()
@@ -50,6 +50,6 @@ def call_get_open_loan_offers(i):
 # # Test rate limiter
 # def test_rate_limiter():
 #     start = time.time()
-#     for i in xrange(20):
+#     for i in range(20):
 #         thread1 = threading.Thread(target=api_rate_limit, args=(i, start))
 #         thread1.start()

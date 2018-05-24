@@ -19,7 +19,7 @@ api = Poloniex(Config, Logger())
 
 # def multiple_api_queries(n):
 #     try:
-#         for i in xrange(n):
+#         for i in range(n):
 #             print 'api_query ' + str(i + 1) + '\n'
 #             thread1 = threading.Thread(target=api.return_open_loan_offers)
 #             thread1.start()
@@ -43,6 +43,6 @@ def api_rate_limit(n, start):
 # Test rate limiter
 def test_rate_limiter():
     start = time.time()
-    for i in xrange(20):
+    for i in range(20):
         thread1 = threading.Thread(target=api_rate_limit, args=(i, start))
         thread1.start()

@@ -180,7 +180,7 @@ def create_lend_offer(currency, amt, rate):
     if Config.has_option('BOT', 'endDate'):
         days_remaining = int(Data.get_max_duration(end_date, "order"))
         if int(days_remaining) <= 2:
-            print "endDate reached. Bot can no longer lend.\nExiting..."
+            print("endDate reached. Bot can no longer lend.\nExiting...")
             log.log("The end date has almost been reached and the bot can no longer lend. Exiting.")
             log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()), Data.get_max_duration(
                 end_date, "status"))
@@ -223,7 +223,7 @@ def cancel_all():
                         ex.message = ex.message if ex.message else str(ex)
                         log.log("Error canceling loan offer: {0}".format(ex.message))
         else:
-            print "Not enough " + CUR + " to lend if bot canceled open orders. Not cancelling."
+            print(f"Not enough {CUR} to lend if bot canceled open orders. Not cancelling.")
 
 
 def lend_all():
@@ -410,12 +410,12 @@ def get_gap_mode_rates(cur, cur_active_bal, cur_total_balance, ticker):
         top_rate = get_gap_rate(cur, gap_top, order_book, cur_total_balance)
     else:
         if use_gap_cfg:
-            print "WARN: Invalid setting for gapMode for [%s], using defaults..." % cur
+            print(f"WARN: Invalid setting for gapMode for [{cur}], using defaults...")
             coin_cfg[cur]['gapmode'] = "rawbtc"
             coin_cfg[cur]['gapbottom'] = 10
             coin_cfg[cur]['gaptop'] = 100
         else:
-            print "WARN: Invalid setting for gapMode, using defaults..."
+            print("WARN: Invalid setting for gapMode, using defaults...")
             gap_mode_default = "relative"
             gap_bottom_default = 10
             gap_top_default = 200
@@ -489,5 +489,5 @@ def transfer_balances():
                 log.log(log.digestApiMsg(msg))
                 log.notify(log.digestApiMsg(msg), notify_conf)
             if coin not in exchange_balances:
-                print "WARN: Incorrect coin entered for transferCurrencies: " + coin
+                print(f"WARN: Incorrect coin entered for transferCurrencies: {coin}")
                 transferable_currencies.remove(coin)
