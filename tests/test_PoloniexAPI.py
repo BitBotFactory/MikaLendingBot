@@ -20,7 +20,7 @@ api = Poloniex(Config, Logger())
 # def multiple_api_queries(n):
 #     try:
 #         for i in range(n):
-#             print 'api_query ' + str(i + 1) + '\n'
+#             print(f"api_query {i + 1} \n")
 #             thread1 = threading.Thread(target=api.return_open_loan_offers)
 #             thread1.start()
 #     except Exception as e:
@@ -36,7 +36,7 @@ def api_rate_limit(n, start):
     api.limit_request_rate()
     # verify that the (N % 6) th request is delayed by (N / 6) sec from the start time
     if n != 0 and n % 6 == 0:
-        print 'limit request ' + str(n) + ' ' + str(start) + ' ' + str(time.time()) + '\n'
+        print(f"limit request {n} {start} {time.time()} \n")
         assert time.time() - start >= int(n / 6), "rate limit failed"
 
 
