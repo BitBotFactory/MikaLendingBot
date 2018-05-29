@@ -124,6 +124,8 @@ def get_min_loan_sizes():
     for cur in get_all_currencies():
         if config.has_section(cur):
             try:
+                # TODO - Found in testing, need to add a 'default_value' here. It currently returns False, which
+                # evaluates to 0. For example use minloansize = A
                 min_loan_sizes[cur] = Decimal(get(cur, 'minloansize', lower_limit=0.01))
             except Exception as ex:
                 ex.message = ex.message if ex.message else str(ex)
