@@ -1,5 +1,6 @@
 import pytest
 import tempfile
+import collections
 from six import iteritems
 from decimal import Decimal
 
@@ -9,6 +10,11 @@ import os, sys, inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
+
+
+# Check two unsorted lists are equal without removing duplicates (like set would)
+def compare_lists(x, y):
+    return collections.Counter(x) == collections.Counter(y)
 
 
 def add_to_env(category, option, value):
@@ -27,10 +33,11 @@ def write_to_cfg(filename, category, val_dict):
             out_file.write('{0} = {1}\n'.format(option, value))
 
 
-def write_skeleton_exchange(filename, exchange):
+def write_skeleton_exchange(filename, exchange, all_currencies=['AAA', 'BBB', 'CCC', 'DDD', 'EEE']):
+    all_currencies = f"{', '.join(all_currencies)}"
     write_to_cfg(filename, 'API', {'exchange': exchange})
     # Test 'coins' we can use later in testing
-    write_to_cfg(filename, exchange.upper(), {'all_currencies': 'AAA, BBB, CCC, DDD, EEE'})
+    write_to_cfg(filename, exchange.upper(), {'all_currencies': all_currencies})
 
 
 def write_coin_cfg(filename,
@@ -146,7 +153,14 @@ class TestClass(object):
         assert config.get_min_loan_sizes()['AAA'] == 1
         assert config.get_min_loan_sizes()['BBB'] == 0.01
         assert config.get_min_loan_sizes()['CCC'] == 0.01
+        # This test will need update when the 'default value' fix in Configuration.py is done
         assert config.get_min_loan_sizes()['DDD'] == 0
 
     def test_get_currencies_list(self, config):
-        assert True
+        alpha = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
+        write_skeleton_exchange(config.filename, 'Bitfinex', all_currencies=alpha)
+        write_to_cfg(config.filename, 'BOT', {'transferableCurrencies': ', '.join(alpha[0:2])})
+        write_to_cfg(config.filename, 'MarketAnalysis', {'analyseCurrencies': ', '.join(alpha[2:4])})
+        config.init(config.filename)
+        assert compare_lists(config.get_currencies_list('all_currencies', section='BITFINEX'), alpha)
+        assert compare_lists(config.get_currencies_list('analyseCurrencies', 'MarketAnalysis'), alpha[2:4])

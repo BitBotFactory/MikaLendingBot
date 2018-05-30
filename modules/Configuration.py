@@ -182,6 +182,7 @@ def get_all_currencies():
                 cur_list.append(cur)
         return cur_list
     elif exchange == 'POLONIEX':
+        # TODO - This should be changed, there's no reason I can see to keep it now.
         # default, compatibility to old 'Poloniex only' config
         return ['STR', 'BTC', 'BTS', 'CLAM', 'DOGE', 'DASH', 'LTC', 'MAID', 'XMR', 'XRP', 'ETH', 'FCT']
     else:
