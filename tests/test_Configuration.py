@@ -47,13 +47,15 @@ def write_coin_cfg(filename,
                    maxactiveamount=1,
                    maxtolend=0,
                    maxpercenttolend=0,
-                   maxtolendrate=0,):
+                   maxtolendrate=0,
+                   gapmode='rawBTC'):
     cfg = {'minloansize': minloansize,
            'mindailyrate': mindailyrate,
            'maxactiveamount': maxactiveamount,
            'maxtolend': maxtolend,
            'maxpercenttolend': maxpercenttolend,
-           'maxtolendrate': maxtolendrate}
+           'maxtolendrate': maxtolendrate,
+           'gapmode': gapmode}
     write_to_cfg(filename, coin, cfg)
 
 
@@ -131,20 +133,20 @@ class TestClass(object):
         config.init(config.filename)
         result = {'AAA': {'minrate': Decimal('0.0018'), 'maxactive': Decimal('1'), 'maxtolend': Decimal('0'),
                           'maxpercenttolend': Decimal('0'), 'maxtolendrate': Decimal('0'), 'gapmode': False,
-                          'gapbottom': Decimal('0'), 'gaptop': Decimal('0'), 'frrasmin': False, 'frrdelta': Decimal('0')}}
+                          'gapbottom': Decimal('0'), 'gaptop': Decimal('0'), 'frrasmin': False,
+                          'frrdelta': Decimal('0'), 'gapmode': 'rawbtc'}}
         assert(config.get_coin_cfg() == result)
 
-    # This breaks the tests following it, I'm not sure why, looks like it messes up the config object and it can't
-    # recover - laxdog
-    # def test_get_coin_cfg_old(self, config):
-    #     write_to_cfg(config.filename, 'BOT', {'coinconfig':  '["BTC:0.18:1:0:0:0","DASH:0.6:1:0:0:0"]'})
-    #     with pytest.raises(SystemExit) as pytest_wrapped_e:
-    #         config.init(config.filename)
-    #     assert pytest_wrapped_e.type == SystemExit
-    #     assert pytest_wrapped_e.value.code == 1
+    def test_get_coin_cfg_old(self, config):
+        write_to_cfg(config.filename, 'BOT', {'coinconfig':  '["BTC:0.18:1:0:0:0","DASH:0.6:1:0:0:0"]'})
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            config.init(config.filename)
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 1
+        config.config.remove_section('BOT') # Clear up before the next test as sys exit messes up teardown
+
 
     def test_get_min_loan_sizes(self, config):
-        write_skeleton_exchange(config.filename, 'Bitfinex')
         write_coin_cfg(config.filename, coin='AAA', minloansize=1)
         write_coin_cfg(config.filename, coin='BBB', minloansize=0)
         write_coin_cfg(config.filename, coin='CCC', minloansize=-9)
@@ -164,3 +166,14 @@ class TestClass(object):
         config.init(config.filename)
         assert compare_lists(config.get_currencies_list('all_currencies', section='BITFINEX'), alpha)
         assert compare_lists(config.get_currencies_list('analyseCurrencies', 'MarketAnalysis'), alpha[2:4])
+
+    def test_get_gap_mode(self, config):
+        write_to_cfg(config.filename, 'BOT', {'gapMode':  'raw'})
+        write_coin_cfg(config.filename, coin='AAA', gapmode='RAW')
+        write_coin_cfg(config.filename, coin='BBB', gapmode='RaWbTc')
+        write_coin_cfg(config.filename, coin='CCC', gapmode='relative')
+        config.init(config.filename)
+        assert config.get_gap_mode('BOT') == 'raw'
+        assert config.get_gap_mode('AAA') == 'raw'
+        assert config.get_gap_mode('BBB') == 'rawbtc'
+        assert config.get_gap_mode('CCC') == 'relative'

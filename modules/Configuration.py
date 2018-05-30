@@ -155,7 +155,8 @@ def get_currencies_list(option, section='BOT'):
         return []
 
 
-def get_gap_mode(category, option):
+# TODO - It should maybe just return the default gap mode if it can't find a coin one
+def get_gap_mode(category, option='gapmode'):
     if config.has_option(category, option):
         full_list = ['raw', 'rawbtc', 'relative']
         value = get(category, 'gapmode', False).lower().strip(" ")
