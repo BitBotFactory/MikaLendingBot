@@ -136,6 +136,9 @@ def get_min_loan_sizes():
     return min_loan_sizes
 
 
+# TODO - This can return the 'all_currencies' from another exchange config to the one you give in section. This is
+# because get_all_currencies uses 'get_exchange'. Not a problem now, but will be if we support multiple exchanges in
+# one instance / config
 def get_currencies_list(option, section='BOT'):
     if config.has_option(section, option):
         full_list = get_all_currencies()

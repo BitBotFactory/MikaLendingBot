@@ -132,7 +132,7 @@ class TestClass(object):
         write_coin_cfg(config.filename)
         config.init(config.filename)
         result = {'AAA': {'minrate': Decimal('0.0018'), 'maxactive': Decimal('1'), 'maxtolend': Decimal('0'),
-                          'maxpercenttolend': Decimal('0'), 'maxtolendrate': Decimal('0'), 'gapmode': False,
+                          'maxpercenttolend': Decimal('0'), 'maxtolendrate': Decimal('0'),
                           'gapbottom': Decimal('0'), 'gaptop': Decimal('0'), 'frrasmin': False,
                           'frrdelta': Decimal('0'), 'gapmode': 'rawbtc'}}
         assert(config.get_coin_cfg() == result)
@@ -143,8 +143,7 @@ class TestClass(object):
             config.init(config.filename)
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
-        config.config.remove_section('BOT') # Clear up before the next test as sys exit messes up teardown
-
+        config.config.remove_section('BOT')  # Clear up before the next test as sys exit messes up teardown
 
     def test_get_min_loan_sizes(self, config):
         write_coin_cfg(config.filename, coin='AAA', minloansize=1)
@@ -161,10 +160,11 @@ class TestClass(object):
     def test_get_currencies_list(self, config):
         alpha = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
         write_skeleton_exchange(config.filename, 'Bitfinex', all_currencies=alpha)
-        write_to_cfg(config.filename, 'BOT', {'transferableCurrencies': ', '.join(alpha[0:2])})
+        write_to_cfg(config.filename, 'BOT', {'transferableCurrencies': 'ALL'})
         write_to_cfg(config.filename, 'MarketAnalysis', {'analyseCurrencies': ', '.join(alpha[2:4])})
         config.init(config.filename)
         assert compare_lists(config.get_currencies_list('all_currencies', section='BITFINEX'), alpha)
+        assert compare_lists(config.get_currencies_list('transferableCurrencies'), alpha)
         assert compare_lists(config.get_currencies_list('analyseCurrencies', 'MarketAnalysis'), alpha[2:4])
 
     def test_get_gap_mode(self, config):
@@ -177,3 +177,9 @@ class TestClass(object):
         assert config.get_gap_mode('AAA') == 'raw'
         assert config.get_gap_mode('BBB') == 'rawbtc'
         assert config.get_gap_mode('CCC') == 'relative'
+
+    def test_get_all_currencies(self, config):
+        alpha = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
+        write_skeleton_exchange(config.filename, 'poloniex', all_currencies=alpha)
+        config.init(config.filename)
+        assert compare_lists(config.get_all_currencies(), alpha)
