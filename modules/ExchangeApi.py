@@ -52,8 +52,8 @@ class ExchangeApi(object):
 
     @abc.abstractmethod
     def increase_request_timer(self):
-        if self.req_period <= self.default_req_period * 1.5:
-            self.req_period += 3
+        if self.req_period <= self.default_req_period * 3.0:
+            self.req_period += 500
 
     @abc.abstractmethod
     def decrease_request_timer(self):

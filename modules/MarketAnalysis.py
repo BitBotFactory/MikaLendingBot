@@ -83,6 +83,7 @@ class MarketAnalysis(object):
                 except Exception as cur_ex:
                     raise Exception("ERROR: You entered an incorrect currency: '{0}' to analyse the market of, please "
                                     "check your settings. Error message: {1}".format(currency, cur_ex))
+                time.sleep(2)
 
     def run(self):
         """
@@ -182,6 +183,7 @@ class MarketAnalysis(object):
                     market_data.append("0.1")
             market_data.append('0')  # Percentile field not being filled yet.
             self.insert_into_db(db_con, market_data)
+            time.sleep(5)
 
     def insert_into_db(self, db_con, market_data, levels=None):
             if levels is None:

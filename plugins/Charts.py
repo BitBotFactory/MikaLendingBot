@@ -31,6 +31,7 @@ class Charts(Plugin):
 
     def after_lending(self):
         if self.get_db_version() > 0 and self.last_dump + self.dump_interval < sqlite3.time.time():
+            self.log.log("Dumping Charts Data")
             self.dump_history()
             self.last_dump = sqlite3.time.time()
 

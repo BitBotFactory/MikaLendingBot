@@ -146,7 +146,7 @@ try:
                 log.log_error('IP has been banned due to many requests. Sleeping for {} seconds'.format(sum_sleep))
                 if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
                     if api.req_period <= api.default_req_period * 1.5:
-                        api.req_period += 3
+                        api.req_period += 1000
                     if Config.getboolean('MarketAnalysis', 'ma_debug_log'):
                         print("Caught ERR_RATE_LIMIT, sleeping capture and increasing request delay. Current"
                               " {0}ms".format(api.req_period))
