@@ -1,13 +1,11 @@
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis.strategies import floats, lists, integers
 from hypothesis.extra.datetime import datetimes
 
-import csv
 import datetime
 import time
 import pytest
 import sqlite3 as sqlite
-from random import randint
 import pandas as pd
 
 # Hack to get relative imports - probably need to fix the dir structure instead but we need this at the minute for
@@ -18,10 +16,9 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from modules.MarketAnalysis import MarketAnalysis
-from modules.Configuration import get_all_currencies
 from modules.Poloniex import Poloniex
 import modules.Configuration as Config
-import modules.Data as Data
+import libs.Data as Data
 
 Config.init('default.cfg', Data)
 api = Poloniex(Config, None)

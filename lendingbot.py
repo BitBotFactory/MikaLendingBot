@@ -10,7 +10,7 @@ from http.client import BadStatusLine
 from urllib.error import URLError
 
 import modules.Configuration as Config
-import modules.Data as Data
+import libs.Data as Data
 import modules.Lending as Lending
 import modules.MaxToLend as MaxToLend
 from modules.Logger import Logger
@@ -34,41 +34,43 @@ args = parser.parse_args()  # End args.
 dry_run = bool(args.dryrun)
 update = bool(args.update)
 if update:
-    print "Autoupdating..."
+    print("Autoupdating...")
     import subprocess
     up_cmd = ["git", "pull"]
     try:
         up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
-    except:
-        print "Looks like you need to use sudo..."
+    except FileNotFoundError:
+        up_out = "command not found"
+    except Exception:
+        print("Looks like you need to use sudo...")
         up_cmd.insert(0, "sudo")
         up_cmd.insert(1, "--non-interactive")
         up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
     if "Already" in up_out:
-        print "No update available."
+        print("No update available.")
     elif "Updating" in up_out:
-        print "Update downloaded."
+        print("Update downloaded.")
     elif "tracking" in up_out:
-        print "There is something wrong with your git branch settings.\n" \
-              "Do (sudo) git checkout master!\n" \
-              "Error:\n" + up_out
+        print("There is something wrong with your git branch settings.\n"
+              "Do (sudo) git checkout master!\n"
+              "Error:\n" + up_out)
     elif "command not found" in up_out:
-        print "You do not have git installed!"
+        print("You do not have git installed!")
     elif "a git repository" in up_out:
-        print "You did not install the bot using git!\n" \
-              "Reinstall using git using:\n" \
-              "(sudo) git clone http://github.com/BitBotFactory/poloniexlendingbot.git"
+        print("You did not install the bot using git!\n"
+              "Reinstall using git using:\n"
+              "(sudo) git clone http://github.com/BitBotFactory/poloniexlendingbot.git")
     elif "Permission denied" in up_out:
-        print "Your sudo is not configured for non-interactive usage, this is necessary."
+        print("Your sudo is not configured for non-interactive usage, this is necessary.")
     else:
-        print up_out
+        print(up_out)
     cmd = ["python", "lendingbot.py"]
     if args.config:
         cmd.append("--config")
         cmd.append(args.config)
     if args.dryrun:
         cmd.append("--dryrun")
-    print "Done, starting bot...\n"
+    print("Done, starting bot...\n")
     subprocess.call(cmd)
     exit(0)
 
@@ -83,6 +85,14 @@ else:
 # Do not use lower or upper limit on any config options which are not numbers.
 # Define the variable from the option in the module where you use it.
 
+mypath = os.curdir + "/settings"
+worker_settings = ["/settings/" + f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+if '/settings/master.cfg' in worker_settings:
+    worker_settings.remove('/settings/master.cfg')
+    pass
+else:
+    print("Cannot find master config.")
+    exit(1)
 Config.init(config_location)
 
 output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
@@ -109,8 +119,7 @@ log = Logger(jsonfile, Decimal(Config.get('BOT', 'jsonlogsize', 200)), exchange)
 # initialize the remaining stuff
 api = ExchangeApiFactory.createApi(exchange, Config, log)
 MaxToLend.init(Config, log)
-Data.init(api, log)
-Config.init(config_location, Data)
+Config.init(config_location)
 notify_conf = Config.get_notification_config()
 if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
     from modules.MarketAnalysis import MarketAnalysis
@@ -142,76 +151,6 @@ def new_getaddrinfo(*urlargs):
 
 socket.getaddrinfo = new_getaddrinfo
 
-print(f"Welcome to {Config.get('BOT', 'label', 'Lending Bot')} on {exchange}")
+# TODO: build workers
 
-try:
-    while True:
-        try:
-            dns_cache = {}  # Flush DNS Cache
-            Data.update_conversion_rates(output_currency, json_output_enabled)
-            PluginsManager.before_lending()
-            Lending.transfer_balances()
-            Lending.cancel_all()
-            Lending.lend_all()
-            PluginsManager.after_lending()
-            log.refreshStatus(Data.stringify_total_lent(*Data.get_total_lent()),
-                              Data.get_max_duration(end_date, "status"))
-            log.persistStatus()
-            sys.stdout.flush()
-            time.sleep(Lending.get_sleep_time())
-        except KeyboardInterrupt:
-            # allow existing the main bot loop
-            raise
-        except Exception as ex:
-            if not hasattr(ex, 'message'):
-                ex.message = str(ex)
-            log.log_error(ex.message)
-            log.persistStatus()
-            if 'Invalid API key' in ex.message:
-                print("!!! Troubleshooting !!!")
-                print("Are your API keys correct? No quotation. Just plain keys.")
-                exit(1)
-            elif 'Nonce must be greater' in ex.message:
-                print("!!! Troubleshooting !!!")
-                print("Are you reusing the API key in multiple applications? Use a unique key for every application.")
-                exit(1)
-            elif 'Permission denied' in ex.message:
-                print("!!! Troubleshooting !!!")
-                print("Are you using IP filter on the key? Maybe your IP changed?")
-                exit(1)
-            elif 'timed out' in ex.message:
-                print(f"Timed out, will retry in {Lending.get_sleep_time()} sec")
-            elif isinstance(ex, BadStatusLine):
-                print("Caught BadStatusLine exception from Poloniex, ignoring.")
-            elif 'Error 429' in ex.message:
-                additional_sleep = max(130.0-Lending.get_sleep_time(), 0)
-                sum_sleep = additional_sleep + Lending.get_sleep_time()
-                log.log_error('IP has been banned due to many requests. Sleeping for {} seconds'.format(sum_sleep))
-                if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
-                    if api.req_period <= api.default_req_period * 1.5:
-                        api.req_period += 3
-                    if Config.getboolean('MarketAnalysis', 'ma_debug_log'):
-                        print(f"Caught ERR_RATE_LIMIT, sleep capture & increase request wait. Current {api.req_period}")
-                        log.log_error('Expect this 130s ban periodically when using MarketAnalysis, it will fix itself')
-                time.sleep(additional_sleep)
-            # Ignore all 5xx errors (server error) as we can't do anything about it (https://httpstatuses.com/)
-            elif isinstance(ex, URLError):
-                print(f"Caught {ex.message} from exchange, ignoring.")
-            elif isinstance(ex, ApiError):
-                print(f"Caught {ex.message} reading from exchange API, ignoring.")
-            else:
-                print(traceback.format_exc())
-                print(f"v{Data.get_bot_version()} Unhandled error, please open a Github issue so we can fix it!")
-                if notify_conf['notify_caught_exception']:
-                    log.notify(f"{ex}\n-------\n{traceback.format_exc()}", notify_conf)
-            sys.stdout.flush()
-            time.sleep(Lending.get_sleep_time())
-
-
-except KeyboardInterrupt:
-    if web_server_enabled:
-        WebServer.stop_web_server()
-    PluginsManager.on_bot_exit()
-    log.log("bye")
-    print("bye")
-    os._exit(0)  # Ad-hoc solution in place of 'exit(0)' TODO: Find out why non-daemon thread(s) are hanging on exit
+print(worker_settings)

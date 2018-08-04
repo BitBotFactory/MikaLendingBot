@@ -11,7 +11,7 @@ from modules.ExchangeApi import ApiError
 
 # Bot libs
 import modules.Configuration as Config
-from modules.Data import truncate
+from libs.Data import truncate
 try:
     import numpy
     use_numpy = True

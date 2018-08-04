@@ -1,25 +1,23 @@
 # coding=utf-8
 import json
 import os
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 from decimal import Decimal
+import libs.Data as Data
 
-config = SafeConfigParser()
-Data = None
-# This module is the middleman between the bot and a SafeConfigParser object, so that we can add extra functionality
+config = ConfigParser()
+# This module is the middleman between the bot and a ConfigParser object, so that we can add extra functionality
 # without clogging up lendingbot.py with all the config logic. For example, added a default value to get().
 
 
-def init(file_location, data=None):
-    global Data
-    Data = data
+def init(file_location):
     loaded_files = config.read(file_location)
     if len(loaded_files) != 1:
         import shutil
         # Copy default config file if not found
         try:
             shutil.copy('default.cfg.example', file_location)
-            print(f"\ndefault.cfg.example has been copied to {file_location}\n" \
+            print(f"\ndefault.cfg.example has been copied to {file_location}\n"
                   "Edit it with your API key and custom settings.\n")
             input("Press Enter to acknowledge and exit...")
             exit(1)
@@ -36,8 +34,8 @@ def init(file_location, data=None):
 
 def has_option(category, option):
     try:
-        return True if os.environ["{0}_{1}".format(category, option)] else _
-    except (KeyError, NameError): # KeyError for no env var, NameError for _ (empty var) and then to continue
+        return True if os.environ["{0}_{1}".format(category, option)] else _  # IGNORE THIS ERROR
+    except (KeyError, NameError):  # KeyError for no env var, NameError for _ (empty var) and then to continue
         return config.has_option(category, option)
 
 

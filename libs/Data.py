@@ -3,17 +3,8 @@ from decimal import Decimal
 from urllib.request import urlopen
 import json
 
-api = None
-log = None
 
-
-def init(api1, log1):
-    global api, log
-    api = api1
-    log = log1
-
-
-def get_on_order_balances():
+def get_on_order_balances(api):
     loan_offers = api.return_open_loan_offers()
     on_order_balances = {}
     for CUR in loan_offers:
@@ -40,7 +31,7 @@ def get_max_duration(end_date, context):
         exit(1)
 
 
-def get_total_lent():
+def get_total_lent(api):
     crypto_lent = api.return_active_loans()
     total_lent = {}
     rate_lent = {}
@@ -69,7 +60,7 @@ def timestamp():
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def stringify_total_lent(total_lent, rate_lent):
+def stringify_total_lent(total_lent, rate_lent, log):
     result = 'Lent: '
     for key in sorted(total_lent):
         average_lending_rate = Decimal(rate_lent[key] * 100 / total_lent[key])
@@ -79,9 +70,9 @@ def stringify_total_lent(total_lent, rate_lent):
     return result
 
 
-def update_conversion_rates(output_currency, json_output_enabled):
+def update_conversion_rates(output_currency, json_output_enabled, api, log):
     if json_output_enabled:
-        total_lent = get_total_lent()[0]
+        total_lent = get_total_lent(api)[0]
         ticker_response = api.return_ticker()
         output_currency_found = False
         # Set this up now in case we get an exception later and don't have a currency to use
@@ -122,9 +113,9 @@ def update_conversion_rates(output_currency, json_output_enabled):
                 log.log_error("Can't connect to {0} using BTC as the output currency".format(url))
 
 
-def get_lending_currencies():
+def get_lending_currencies(api):
     currencies = []
-    total_lent = get_total_lent()[0]
+    total_lent = get_total_lent(api)[0]
     for cur in total_lent:
         currencies.append(cur)
     lending_balances = api.return_available_account_balances("lending")['lending']
@@ -147,7 +138,7 @@ def truncate(f, n):
 def get_bot_version():
     import subprocess
     try:
-        output = subprocess.check_output(["git", "rev-list","--count", "HEAD"])
+        output = subprocess.check_output(["git", "rev-list", "--count", "HEAD"])
         int(output)
         return output
     except Exception:
