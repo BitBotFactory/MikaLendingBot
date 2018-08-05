@@ -77,7 +77,7 @@ def env_vars():
 
 @pytest.fixture()
 def config():
-    import modules.Configuration as Config
+    import modules.BotConfiguration as Config
     # The CFG section isn't actually used for the bot in real life, it's just to make it easier to test
     cfg = {"BOOL_T": "true",
            "BOOL_F": "false",
@@ -154,7 +154,7 @@ class TestClass(object):
         assert config.get_min_loan_sizes()['AAA'] == 1
         assert config.get_min_loan_sizes()['BBB'] == 0.01
         assert config.get_min_loan_sizes()['CCC'] == 0.01
-        # This test will need update when the 'default value' fix in Configuration.py is done
+        # This test will need update when the 'default value' fix in BotConfiguration.py is done
         assert config.get_min_loan_sizes()['DDD'] == 0
 
     def test_get_currencies_list(self, config):

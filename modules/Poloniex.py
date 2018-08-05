@@ -8,7 +8,7 @@ import threading
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
-import modules.Configuration as Config
+import modules.BotConfiguration as Config
 
 from modules.RingBuffer import RingBuffer
 from modules.ExchangeApi import ExchangeApi

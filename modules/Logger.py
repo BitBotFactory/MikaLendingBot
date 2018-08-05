@@ -6,7 +6,7 @@ import json
 import sys
 import time
 
-import modules.Configuration as Config
+import modules.BotConfiguration as Config
 from . import ConsoleUtils
 from .Notify import send_notification
 from .RingBuffer import RingBuffer

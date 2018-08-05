@@ -3,7 +3,7 @@
 
 class Plugin(object):
     """
-    @type cfg1: modules.Configuration
+    @type cfg1: modules.BotConfiguration
     @type api1: modules.Poloniex.Poloniex
     @type log1: modules.Logger.Logger
     """

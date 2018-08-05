@@ -17,7 +17,7 @@ sys.path.insert(0, parentdir)
 
 from modules.MarketAnalysis import MarketAnalysis
 from modules.Poloniex import Poloniex
-import modules.Configuration as Config
+import modules.BotConfiguration as Config
 import libs.Data as Data
 
 Config.init('default.cfg', Data)

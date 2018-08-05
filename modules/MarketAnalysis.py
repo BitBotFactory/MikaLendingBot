@@ -10,7 +10,7 @@ from sqlite3 import Error
 from modules.ExchangeApi import ApiError
 
 # Bot libs
-import modules.Configuration as Config
+import modules.BotConfiguration as Config
 from libs.Data import truncate
 try:
     import numpy

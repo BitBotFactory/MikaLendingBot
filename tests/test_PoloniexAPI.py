@@ -8,7 +8,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from modules.Poloniex import Poloniex
-import modules.Configuration as Config
+import modules.BotConfiguration as Config
 import libs.Data as Data
 from modules.Logger import Logger
 import threading

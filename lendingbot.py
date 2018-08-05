@@ -9,7 +9,7 @@ from decimal import Decimal
 from http.client import BadStatusLine
 from urllib.error import URLError
 
-import modules.Configuration as Config
+import modules.BotConfiguration
 import libs.Data as Data
 import modules.Lending as Lending
 import modules.MaxToLend as MaxToLend
@@ -25,7 +25,7 @@ except IOError:
     os.chdir(os.path.dirname(sys.argv[0]))  # Allow relative paths
 
 parser = argparse.ArgumentParser()  # Start args.
-parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
+#parser.add_argument("-cfg", "--config", help="Location of custom configuration file, overrides settings below")
 parser.add_argument("-dry", "--dryrun", help="Make pretend orders", action="store_true")
 parser.add_argument("-up", "--update", help="Do a git pull, then start. (Needs git install)", action="store_true")
 args = parser.parse_args()  # End args.
@@ -39,8 +39,8 @@ if update:
     up_cmd = ["git", "pull"]
     try:
         up_out = subprocess.check_output(up_cmd).decode(sys.stdout.encoding)
-    except FileNotFoundError:
-        up_out = "command not found"
+    # except FileNotFoundError:
+    #    up_out = "command not found"
     except Exception:
         print("Looks like you need to use sudo...")
         up_cmd.insert(0, "sudo")
@@ -74,10 +74,10 @@ if update:
     subprocess.call(cmd)
     exit(0)
 
-if args.config:
-    config_location = args.config
-else:
-    config_location = 'default.cfg'
+# if args.config:
+#    config_location = args.config
+# else:
+#    config_location = '/settings/default.cfg'
 # End handling args.
 
 # Config format: Config.get(category, option, default_value=False, lower_limit=False, upper_limit=False)
@@ -93,8 +93,8 @@ if '/settings/master.cfg' in worker_settings:
 else:
     print("Cannot find master config.")
     exit(1)
-Config.init(config_location)
-
+config_location = worker_settings[0]
+Config = modules.BotConfiguration.BotConfig(config_location)
 output_currency = Config.get('BOT', 'outputCurrency', 'BTC')
 end_date = Config.get('BOT', 'endDate')
 exchange = Config.get_exchange()
@@ -119,7 +119,6 @@ log = Logger(jsonfile, Decimal(Config.get('BOT', 'jsonlogsize', 200)), exchange)
 # initialize the remaining stuff
 api = ExchangeApiFactory.createApi(exchange, Config, log)
 MaxToLend.init(Config, log)
-Config.init(config_location)
 notify_conf = Config.get_notification_config()
 if Config.has_option('MarketAnalysis', 'analyseCurrencies'):
     from modules.MarketAnalysis import MarketAnalysis
