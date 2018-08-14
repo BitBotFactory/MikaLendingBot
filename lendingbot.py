@@ -14,6 +14,7 @@ import libs.Data as Data
 import modules.Lending as Lending
 import modules.MaxToLend as MaxToLend
 from modules.Logger import Logger
+from modules.Manager import Manager
 import modules.PluginsManager as PluginsManager
 from modules.ExchangeApiFactory import ExchangeApiFactory
 from modules.ExchangeApi import ApiError
@@ -85,10 +86,10 @@ if update:
 # Do not use lower or upper limit on any config options which are not numbers.
 # Define the variable from the option in the module where you use it.
 
-mypath = os.curdir + "/settings"
-worker_settings = ["/settings/" + f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-if '/settings/master.cfg' in worker_settings:
-    worker_settings.remove('/settings/master.cfg')
+settingspath = os.curdir + "/settings"
+worker_settings = [f for f in os.listdir(settingspath) if os.path.isfile(os.path.join(settingspath, f))]
+if 'master.cfg' in worker_settings:
+    worker_settings.remove('master.cfg')
     pass
 else:
     print("Cannot find master config.")
@@ -151,5 +152,8 @@ def new_getaddrinfo(*urlargs):
 socket.getaddrinfo = new_getaddrinfo
 
 # TODO: build workers
+manager = Manager()
+manager.addlist(worker_settings)
+manager.runall()
 
 print(worker_settings)
