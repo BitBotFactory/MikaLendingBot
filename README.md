@@ -1,5 +1,7 @@
 # Mika Lending Bot <img src="https://nevet.me/public/icon.png" width="50">
 
+## Devs are Out of Office - Community Pull Requests will be considered
+
 Mika Lending Bot is written in Python and features automatic lending on exchanges Poloniex and Bitfinex.
 It will automatically lend all cryptocurrencies found in your lending account.
 
