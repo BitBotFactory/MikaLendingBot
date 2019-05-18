@@ -122,7 +122,7 @@ def get_min_loan_sizes():
     for cur in get_all_currencies():
         if config.has_section(cur):
             try:
-                min_loan_sizes[cur] = Decimal(get(cur, 'minloansize', lower_limit=0.01))
+                min_loan_sizes[cur] = Decimal(get(cur, 'minloansize', lower_limit=0.005))
             except Exception as ex:
                 ex.message = ex.message if ex.message else str(ex)
                 print("minloansize for " + cur + " parsed incorrectly, please refer to the documentation. "
