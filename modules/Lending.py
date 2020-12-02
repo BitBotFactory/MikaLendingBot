@@ -75,7 +75,7 @@ def init(cfg, api1, log1, data, maxtolend, dry_run1, analysis, notify_conf1):
     gap_top_default = Decimal(Config.get("BOT", "gaptop", None, gap_bottom_default))
     xday_threshold = float(Config.get("BOT", "xdaythreshold", None, 0.003, 5)) / 100
     xday_spread = float(Config.get('BOT', 'xdayspread', 0, 0, 10))
-    maxPeriod = 30 if exchange == 'BITFINEX' else 60
+    maxPeriod = 120 if exchange == 'BITFINEX' else 60
     xdays = str(Config.get("BOT", "xdays", None, 2, maxPeriod))
     min_loan_size = Decimal(Config.get("BOT", 'minloansize', None, 0.01))
     end_date = Config.get('BOT', 'endDate')

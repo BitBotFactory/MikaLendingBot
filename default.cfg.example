@@ -50,7 +50,7 @@ gaptop = 200
 #Daily lend rate threshold after which we offer lends for x days as opposed to 2.
 #If set to 0 all offers will be placed for a 2 day period (0.003-5)
 # Poloniex max lending period: 60 days
-# Bitfinex max lending period: 30 days
+# Bitfinex max lending period: 120 days
 xdaythreshold = 0.2
 xdays = 60
 #When xdayspread is set, lending days will be incremented linear from 2 days at (xdaythreshold/xdayspread) lent rate
